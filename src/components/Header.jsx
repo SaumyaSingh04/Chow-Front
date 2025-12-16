@@ -22,7 +22,7 @@ const Header = () => {
             <img
               src="/src/assets/logo.png"
               alt="Chowdhry Sweet House"
-              className="h-16 object-contain"
+              className="h-20 object-contain"
             />
           </Link>
 
