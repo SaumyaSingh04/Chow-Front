@@ -18,9 +18,9 @@ const Footer = () => {
           {/* Logo & Description */}
           <div>
             <img
-              src="/logo.png" // replace with your logo path
+              src="/src/assets/logo.png"
               alt="Chowdhry"
-              className="w-36 mb-4"
+              className="w-48 mb-4"
             />
             <p className="text-sm leading-relaxed max-w-xs">
               Experience the delightful fusion of tradition and taste at

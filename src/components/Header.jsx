@@ -4,7 +4,7 @@ import { ShoppingCart, User, Search } from "lucide-react";
 
 const Header = () => {
   return (
-    <header className="w-full bg-white">
+    <header className="w-full bg-white sticky top-0 z-50 shadow-sm">
       {/* Top Announcement Bar */}
       <div className="bg-[#d80a4e] text-white text-sm h-10 flex items-center">
         <div className="max-w-7xl mx-auto w-full px-4 flex justify-between">
@@ -20,9 +20,9 @@ const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <img
-              src="/logo.png"   // put exact logo here
+              src="/src/assets/logo.png"
               alt="Chowdhry Sweet House"
-              className="h-12 object-contain"
+              className="h-16 object-contain"
             />
           </Link>
 
