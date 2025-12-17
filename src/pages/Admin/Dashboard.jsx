@@ -43,87 +43,47 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-8">Dashboard Overview</h2>
-      
+    <div>
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-gray-700">Total Orders</h3>
-          <p className="text-3xl font-bold text-[#d80a4e]">{stats.totalOrders || 0}</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        {/* New Orders Card */}
+        <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 rounded-xl text-white relative overflow-hidden">
+          <div className="relative z-10">
+            <h3 className="text-lg font-medium mb-2">New Orders</h3>
+            <p className="text-4xl font-bold">3,243</p>
+          </div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white bg-opacity-10 rounded-full transform translate-x-8 -translate-y-8"></div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-gray-700">Products</h3>
-          <p className="text-3xl font-bold text-[#d80a4e]">{stats.totalProducts || items.length}</p>
+
+        {/* Customers Card */}
+        <div className="bg-gradient-to-r from-blue-600 to-blue-400 p-6 rounded-xl text-white relative overflow-hidden">
+          <div className="relative z-10">
+            <h3 className="text-lg font-medium mb-2">Customers</h3>
+            <p className="text-4xl font-bold">15.07k</p>
+          </div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white bg-opacity-10 rounded-full transform translate-x-8 -translate-y-8"></div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-gray-700">Categories</h3>
-          <p className="text-3xl font-bold text-[#d80a4e]">{stats.totalCategories || categories.length}</p>
+
+        {/* Ticket Resolved Card */}
+        <div className="bg-gradient-to-r from-green-500 to-emerald-400 p-6 rounded-xl text-white relative overflow-hidden">
+          <div className="relative z-10">
+            <h3 className="text-lg font-medium mb-2">Ticket Resolved</h3>
+            <p className="text-4xl font-bold">578</p>
+          </div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white bg-opacity-10 rounded-full transform translate-x-8 -translate-y-8"></div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-gray-700">Revenue</h3>
-          <p className="text-3xl font-bold text-[#d80a4e]">₹{stats.totalRevenue || 0}</p>
+
+        {/* Revenue Today Card */}
+        <div className="bg-gradient-to-r from-orange-500 to-yellow-400 p-6 rounded-xl text-white relative overflow-hidden">
+          <div className="relative z-10">
+            <h3 className="text-lg font-medium mb-2">Revenue Today</h3>
+            <p className="text-4xl font-bold">INR 11.61k</p>
+          </div>
+          <div className="absolute top-4 right-4 text-6xl opacity-20">₹</div>
         </div>
       </div>
 
-      {/* Additional Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-gray-700">Total Users</h3>
-          <p className="text-3xl font-bold text-[#d80a4e]">{stats.totalUsers || 0}</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-gray-700">Subcategories</h3>
-          <p className="text-3xl font-bold text-[#d80a4e]">{stats.totalSubcategories || 0}</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-gray-700">Support Tickets</h3>
-          <p className="text-3xl font-bold text-[#d80a4e]">{tickets.length || 0}</p>
-        </div>
-      </div>
 
-      {/* Recent Activity & Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
-          <div className="space-y-3">
-            {tickets.slice(0, 5).map((ticket, index) => (
-              <div key={ticket._id || index} className="border-l-4 border-[#d80a4e] pl-3">
-                <p className="text-sm text-gray-600">{ticket.subject || 'New ticket'}</p>
-                <p className="text-xs text-gray-400">{ticket.createdAt ? new Date(ticket.createdAt).toLocaleDateString() : 'Recently'}</p>
-              </div>
-            ))}
-            {tickets.length === 0 && (
-              <div className="border-l-4 border-[#d80a4e] pl-3">
-                <p className="text-sm text-gray-600">No recent activity</p>
-                <p className="text-xs text-gray-400">System is running smoothly</p>
-              </div>
-            )}
-          </div>
-        </div>
-        
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">System Status</h2>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Server Status</span>
-              <span className="text-green-600 font-semibold">Online</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Database</span>
-              <span className="text-green-600 font-semibold">Connected</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">API Status</span>
-              <span className="text-green-600 font-semibold">Active</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Last Backup</span>
-              <span className="text-gray-600">Today</span>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

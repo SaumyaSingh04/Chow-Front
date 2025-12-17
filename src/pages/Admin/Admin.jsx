@@ -8,10 +8,10 @@ const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
 
   const tabs = [
-    { id: 'dashboard', label: 'Dashboard' },
-    { id: 'products', label: 'Products' },
-    { id: 'categories', label: 'Categories' },
-    { id: 'subcategories', label: 'Subcategories' }
+    { id: 'dashboard', label: 'Dashboard', icon: '🏠' },
+    { id: 'categories', label: 'Category', icon: '📂' },
+    { id: 'subcategories', label: 'Subcategory', icon: '📁' },
+    { id: 'products', label: 'Product', icon: '📦' }
   ];
 
   const renderContent = () => {
@@ -25,43 +25,60 @@ const Admin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Breadcrumb */}
-      <div className="bg-gray-100 py-8 relative">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center text-sm mb-4">
-          </div>
-          <h1 className="text-4xl font-bold text-gray-800">Admin Panel</h1>
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <div className="w-64 bg-white shadow-lg">
+        {/* Logo */}
+        <div className="p-6 border-b">
+          <img src="/src/assets/logo.png" alt="Chowdhry" className="h-16 mx-auto" />
         </div>
-        <div className="absolute top-8 right-16 hidden lg:block">
-          <div >
-          <img src="/src/assets/logo.png" alt="Chowdhry Sweet House" className="h-20 md:h-40 absolute right-2 md:right-6 top-1/2 transform -translate-y-1/2" />
-          </div>
-        </div>
+        
+        {/* Navigation */}
+        <nav className="mt-6">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`w-full flex items-center px-6 py-3 text-left hover:bg-gray-50 ${
+                activeTab === tab.id
+                  ? 'bg-red-500 text-white border-r-4 border-red-600'
+                  : 'text-gray-700'
+              }`}
+            >
+              <span className="mr-3">{tab.icon}</span>
+              {tab.label}
+            </button>
+          ))}
+        </nav>
       </div>
-      
-      <div className="max-w-7xl mx-auto px-6">
-        {/* Navigation Tabs */}
-        <div className="border-b border-gray-200 mb-6">
-          <nav className="-mb-px flex space-x-8">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab.id
-                    ? 'border-[#d80a4e] text-[#d80a4e]'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                {tab.label}
+
+      {/* Main Content */}
+      <div className="flex-1">
+        {/* Header */}
+        <div className="bg-white shadow-sm border-b px-6 py-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              <button className="mr-4">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
               </button>
-            ))}
-          </nav>
+            </div>
+            <div className="flex items-center">
+              <span className="mr-2 text-gray-700">Admin</span>
+              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                <svg className="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Content */}
-        {renderContent()}
+        <div className="p-6">
+          {renderContent()}
+        </div>
       </div>
     </div>
   );
