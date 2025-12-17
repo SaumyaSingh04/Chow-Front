@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApi } from '../../context/ApiContext.jsx';
 
 const Login = () => {
-  const { login } = useApi();
+  const { login, isAdmin } = useApi();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
@@ -12,6 +12,8 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [loginSuccess, setLoginSuccess] = useState(false);
+  const [user, setUser] = useState(null);
 
   const handleChange = (e) => {
     setFormData({
@@ -36,11 +38,10 @@ const Login = () => {
         localStorage.setItem('token', response.token);
         if (response.user) {
           localStorage.setItem('user', JSON.stringify(response.user));
+          setUser(response.user);
         }
         setSuccess('Login successful! Redirecting...');
-        setTimeout(() => {
-          navigate('/');
-        }, 1500);
+        setLoginSuccess(true);
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -49,6 +50,16 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (loginSuccess && user) {
+      if (user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
+    }
+  }, [loginSuccess, user, navigate]);
 
   return (
     <div className="min-h-screen bg-gray-100">

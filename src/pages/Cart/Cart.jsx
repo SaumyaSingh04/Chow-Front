@@ -4,11 +4,11 @@ import Breadcrumb from '../../components/Breadcrumb.jsx';
 
 const Cart = () => {
   return (
-    <div className="min-h-screen bg-white">
-      <Breadcrumb currentPage="Product Cart" />
+<div className="min-h-screen overflow-x-hidden bg-white flex flex-col">
+<Breadcrumb currentPage="Product Cart" />
 
       {/* Empty Cart Content */}
-      <div className="max-w-7xl mx-auto px-6 py-16">
+      <div className="flex-1 flex items-center justify-center px-6 overflow-x-hidden">
         <div className="text-center max-w-2xl mx-auto">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">
             Your Cart is Empty! 🍬
