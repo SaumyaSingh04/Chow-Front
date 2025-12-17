@@ -60,10 +60,111 @@ const Subcategories = () => {
     }
   };
 
-  const getCategoryName = (categoryId) => {
-    const category = categories.find(cat => cat._id === categoryId);
+  const getCategoryName = (categoryRef) => {
+    if (typeof categoryRef === 'object' && categoryRef?.name) {
+      return categoryRef.name;
+    }
+    const category = categories.find(cat => cat._id === categoryRef);
     return category ? category.name : 'Unknown';
   };
+
+  if (showModal) {
+    return (
+      <div className="bg-gray-50 min-h-screen">
+        {/* Header */}
+        <div className="bg-white border-b px-6 py-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-semibold text-gray-900 underline">
+              {editingSubcategory ? 'Edit Subcategory' : 'Add Subcategory'}
+            </h1>
+            <button 
+              onClick={() => {
+                setShowModal(false);
+                setEditingSubcategory(null);
+                setFormData({ name: '', description: '', category: '' });
+              }}
+              className="bg-orange-400 text-white px-4 py-2 rounded-md hover:bg-orange-500 flex items-center gap-2"
+            >
+              ← Go Back
+            </button>
+          </div>
+        </div>
+
+        {/* Form Content */}
+        <div className="p-6">
+          <div className="bg-white rounded-lg border p-6">
+            <div className="mb-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Basic Information :</h3>
+            </div>
+            
+            <form onSubmit={handleSubmit}>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                {/* Name Field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Subcategory Name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                {/* Category Field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Category <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({...formData, category: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    required
+                  >
+                    <option value="">Select Category</option>
+                    {categories.map((cat) => (
+                      <option key={cat._id} value={cat._id}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Empty third column for layout */}
+                <div></div>
+              </div>
+
+              {/* Description Field */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description
+                </label>
+                <textarea
+                  placeholder="Description (optional)"
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  rows="4"
+                />
+              </div>
+
+              {/* Submit Button */}
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  className="bg-[#d80a4e] text-white px-8 py-3 rounded-md hover:bg-[#b8083e] font-medium"
+                >
+                  {editingSubcategory ? 'Update Subcategory' : 'Add Subcategory'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
@@ -117,64 +218,6 @@ const Subcategories = () => {
       {subcategories.length === 0 && !loading && (
         <div className="text-center py-12">
           <p className="text-gray-500">No subcategories found. Add your first subcategory!</p>
-        </div>
-      )}
-
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md">
-            <h3 className="text-lg font-semibold mb-4">
-              {editingSubcategory ? 'Edit Subcategory' : 'Add Subcategory'}
-            </h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                placeholder="Subcategory Name"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                className="w-full p-2 border rounded"
-                required
-              />
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData({...formData, category: e.target.value})}
-                className="w-full p-2 border rounded"
-                required
-              >
-                <option value="">Select Category</option>
-                {categories.map((cat) => (
-                  <option key={cat._id} value={cat._id}>{cat.name}</option>
-                ))}
-              </select>
-              <textarea
-                placeholder="Description (optional)"
-                value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
-                className="w-full p-2 border rounded"
-                rows="3"
-              />
-              <div className="flex space-x-2">
-                <button
-                  type="submit"
-                  className="bg-[#d80a4e] text-white px-4 py-2 rounded hover:bg-[#b8083e]"
-                >
-                  {editingSubcategory ? 'Update' : 'Add'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowModal(false);
-                    setEditingSubcategory(null);
-                    setFormData({ name: '', description: '', category: '' });
-                  }}
-                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
         </div>
       )}
     </div>

@@ -51,6 +51,87 @@ const Categories = () => {
     }
   };
 
+  if (showModal) {
+    return (
+      <div className="bg-gray-50 min-h-screen">
+        {/* Header */}
+        <div className="bg-white border-b px-6 py-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-semibold text-gray-900 underline">
+              {editingCategory ? 'Edit Category' : 'Add Category'}
+            </h1>
+            <button 
+              onClick={() => {
+                setShowModal(false);
+                setEditingCategory(null);
+                setFormData({ name: '', description: '' });
+              }}
+              className="bg-orange-400 text-white px-4 py-2 rounded-md hover:bg-orange-500 flex items-center gap-2"
+            >
+              ← Go Back
+            </button>
+          </div>
+        </div>
+
+        {/* Form Content */}
+        <div className="p-6">
+          <div className="bg-white rounded-lg border p-6">
+            <div className="mb-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Basic Information :</h3>
+            </div>
+            
+            <form onSubmit={handleSubmit}>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                {/* Name Field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Category Name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                {/* Empty columns for layout */}
+                <div></div>
+                <div></div>
+              </div>
+
+              {/* Description Field */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description
+                </label>
+                <textarea
+                  placeholder="Description (optional)"
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  rows="4"
+                />
+              </div>
+
+              {/* Submit Button */}
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  className="bg-[#d80a4e] text-white px-8 py-3 rounded-md hover:bg-[#b8083e] font-medium"
+                >
+                  {editingCategory ? 'Update Category' : 'Add Category'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -90,53 +171,6 @@ const Categories = () => {
       {categories.length === 0 && !loading && (
         <div className="text-center py-12">
           <p className="text-gray-500">No categories found. Add your first category!</p>
-        </div>
-      )}
-
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md">
-            <h3 className="text-lg font-semibold mb-4">
-              {editingCategory ? 'Edit Category' : 'Add Category'}
-            </h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                placeholder="Category Name"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                className="w-full p-2 border rounded"
-                required
-              />
-              <textarea
-                placeholder="Description (optional)"
-                value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
-                className="w-full p-2 border rounded"
-                rows="3"
-              />
-              <div className="flex space-x-2">
-                <button
-                  type="submit"
-                  className="bg-[#d80a4e] text-white px-4 py-2 rounded hover:bg-[#b8083e]"
-                >
-                  {editingCategory ? 'Update' : 'Add'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowModal(false);
-                    setEditingCategory(null);
-                    setFormData({ name: '', description: '' });
-                  }}
-                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
         </div>
       )}
     </div>

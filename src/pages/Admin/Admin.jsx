@@ -6,6 +6,7 @@ import Subcategories from './Subcategories.jsx';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: '🏠' },
@@ -26,11 +27,31 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      
       {/* Sidebar */}
-      <div className="w-64 bg-white shadow-lg">
+      <div className={`w-64 bg-white shadow-lg fixed lg:static inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out lg:transform-none ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      } lg:translate-x-0`}>
         {/* Logo */}
         <div className="p-6 border-b">
-          <img src="/src/assets/logo.png" alt="Chowdhry" className="h-16 mx-auto" />
+          <div className="flex items-center justify-between">
+            <img src="/src/assets/logo.png" alt="Chowdhry" className="h-16 mx-auto" />
+            <button 
+              className="lg:hidden p-2"
+              onClick={() => setSidebarOpen(false)}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
         
         {/* Navigation */}
@@ -53,12 +74,15 @@ const Admin = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1">
+      <div className="flex-1 lg:ml-0">
         {/* Header */}
-        <div className="bg-white shadow-sm border-b px-6 py-4">
+        <div className="bg-white shadow-sm border-b px-4 sm:px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
-              <button className="mr-4">
+              <button 
+                className="mr-4 lg:hidden"
+                onClick={() => setSidebarOpen(true)}
+              >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
@@ -76,7 +100,7 @@ const Admin = () => {
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {renderContent()}
         </div>
       </div>
