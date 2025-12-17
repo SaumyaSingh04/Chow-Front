@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const Breadcrumb = ({ currentPage }) => {
   return (
-    <div className="bg-gray-100 py-4 md:py-8 min-h-[80px] md:min-h-[100px] relative overflow-hidden">
+    <div className=" py-4 md:py-8 min-h-[80px] md:min-h-[100px] relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
         <div className="flex items-start justify-between mb-2 md:mb-4">
           <div className="flex items-center text-xs md:text-sm">

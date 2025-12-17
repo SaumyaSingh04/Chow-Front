@@ -7,17 +7,17 @@ const About = () => {
     <div className="bg-white">
        <Breadcrumb currentPage="About" />
       {/* Top Images */}
-      <div className="max-w-7xl mx-auto px-6 pt-12">
+      <div className="max-w-7xl mx-auto px-6 pt-1">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           <img
-            src="/assets/img/product/home-one/product-1.jpg"
+            src="/src/assets/Amavat Barfi (1).jpg"
             alt="Sweet"
-            className="w-full h-72 object-cover"
+            className="w-full h-90 object-cover"
           />
           <img
-            src="/assets/img/product/home-one/product-2.jpg"
+            src="/src/assets/Chocolate Fruits Barfi (1).jpg"
             alt="Sweet"
-            className="w-full h-72 object-cover"
+            className="w-full h-90 object-cover"
           />
         </div>
       </div>
@@ -85,10 +85,38 @@ const About = () => {
 
         {/* Visit */}
         <div className="mt-12 text-center">
-          <div className="flex items-center justify-center gap-2 text-[#d80a4e] font-semibold mb-4">
-            <span className="text-lg">📍</span>
-            <span>Visit Us:</span>
+          <div className=" p-6 rounded-lg mb-6">
+            <div className="space-y-4 text-gray-700">
+              <div>
+                <div className="flex items-center justify-center gap-2 text-[#d80a4e] font-semibold mb-2">
+                  <span className="text-lg">📍</span>
+                  <span>Visit Us:</span>
+                </div>
+                <p>Vijay Chowk, in front of Vijay Talkies, Golghar, Gorakhpur</p>
+              </div>
+              
+              <div>
+                <div className="flex items-center justify-center gap-2 text-[#d80a4e] font-semibold mb-2">
+                  <span className="text-lg">📞</span>
+                  <span>Call Now:</span>
+                </div>
+                <p>075250 25100</p>
+              </div>
+              
+              <div>
+                <div className="flex items-center justify-center gap-2 text-[#d80a4e] font-semibold mb-2">
+                  <span className="text-lg">📲</span>
+                  <span>Order Online:</span>
+                </div>
+                <p>Swiggy | Zomato</p>
+              </div>
+              
+              <p className="text-[#d80a4e] font-semibold mt-4">
+                Taste the tradition, indulge in excellence! 🍬✨
+              </p>
+            </div>
           </div>
+          
           <div className="space-x-4">
             <Link to="/contact" className="bg-[#d80a4e] text-white px-6 py-3 rounded hover:bg-[#b8083e] transition-colors">
               Contact Us

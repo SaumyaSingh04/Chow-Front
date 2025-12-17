@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApi } from '../../context/ApiContext.jsx';
 
 const Products = () => {
-  const { fetchItems, addItem, updateItem, deleteItem, fetchCategories, getAllSubcategories, items, categories, loading } = useApi();
+  const { fetchItems, addItem, updateItem, deleteItem, fetchCategories, getAllSubcategories, searchItems, items, categories, loading } = useApi();
   const [subcategories, setSubcategories] = useState([]);
   const [filteredSubcategories, setFilteredSubcategories] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -27,12 +27,27 @@ const Products = () => {
   });
   const [selectedImages, setSelectedImages] = useState([]);
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredItems, setFilteredItems] = useState([]);
 
   useEffect(() => {
     fetchItems();
     fetchCategories();
     loadSubcategories();
   }, []);
+
+  useEffect(() => {
+    setFilteredItems(items);
+  }, [items]);
+
+  const handleSearch = async () => {
+    if (searchQuery.trim()) {
+      const results = await searchItems(searchQuery);
+      setFilteredItems(results);
+    } else {
+      setFilteredItems(items);
+    }
+  };
 
   const loadSubcategories = async () => {
     const subcats = await getAllSubcategories();
@@ -415,6 +430,26 @@ const Products = () => {
         </button>
       </div>
 
+      {/* Search Bar */}
+      <div className="mb-6">
+        <div className="relative max-w-md">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            placeholder="Search products..."
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d80a4e]"
+          />
+          <button
+            onClick={handleSearch}
+            className="absolute right-2 top-2 text-gray-400 hover:text-[#d80a4e]"
+          >
+            🔍
+          </button>
+        </div>
+      </div>
+
       {/* Products Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full">
@@ -428,7 +463,7 @@ const Products = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {items.map((product) => (
+            {filteredItems.map((product) => (
               <tr key={product._id}>
                 <td className="px-6 py-4">
                   <img src={product.images?.[0]} alt={product.name} className="w-12 h-12 object-cover rounded" />

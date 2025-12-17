@@ -156,10 +156,10 @@ const Home = () => {
           Gift
         </Link>
         <Link
-          to="/shop?category=test-cat"
+          to="/shop?category=Festival"
           className="text-black hover:text-[#d80a4e]"
         >
-          Test Cat
+          Festival
         </Link>
         <Link
           to="/specials"

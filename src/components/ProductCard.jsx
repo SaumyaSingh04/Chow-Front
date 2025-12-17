@@ -1,15 +1,22 @@
 import React from 'react';
 
-const ProductCard = ({ product, onAddToCart }) => {
+const ProductCard = ({ product, onAddToCart, showSpecialTag = false }) => {
   return (
     <div className="group">
       {/* Image */}
-      <div className="overflow-hidden rounded-md">
+      <div className="overflow-hidden rounded-md relative">
         <img
           src={product.images?.[0]}
           alt={product.name}
           className="h-[230px] w-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
+        {showSpecialTag && (
+          <div className="absolute top-2 left-2">
+            <div className="bg-[#d80a4e] text-white px-2 py-1 rounded text-xs font-semibold">
+              Special
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Content */}
