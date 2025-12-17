@@ -42,9 +42,9 @@ const Subcategories = () => {
   const handleEdit = (subcategory) => {
     setEditingSubcategory(subcategory);
     setFormData({
-      name: subcategory.name,
+      name: subcategory.name || '',
       description: subcategory.description || '',
-      category: subcategory.category
+      category: typeof subcategory.category === 'object' ? subcategory.category._id : subcategory.category || ''
     });
     setShowModal(true);
   };

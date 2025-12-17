@@ -34,7 +34,7 @@ const Categories = () => {
   const handleEdit = (category) => {
     setEditingCategory(category);
     setFormData({
-      name: category.name,
+      name: category.name || '',
       description: category.description || ''
     });
     setShowModal(true);

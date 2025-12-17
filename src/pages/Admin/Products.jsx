@@ -81,12 +81,34 @@ const Products = () => {
   const handleEdit = (product) => {
     setEditingProduct(product);
     setFormData({
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      category: product.category,
-      images: product.images || []
+      name: product.name || '',
+      description: product.description || '',
+      price: product.price || '',
+      discountPrice: product.discountPrice || '',
+      stockQty: product.stockQty || '',
+      shortDesc: product.shortDesc || '',
+      longDesc: product.longDesc || '',
+      category: typeof product.category === 'object' ? product.category._id : product.category || '',
+      subcategory: typeof product.subcategory === 'object' ? product.subcategory._id : product.subcategory || '',
+      images: product.images || [],
+      video: product.video || null,
+      isBestRated: product.isBestRated || false,
+      isBestSeller: product.isBestSeller || false,
+      isOnSale: product.isOnSale || false,
+      isPopular: product.isPopular || false,
+      status: product.status || 'active'
     });
+    
+    // Set filtered subcategories if category exists
+    if (product.category) {
+      const categoryId = typeof product.category === 'object' ? product.category._id : product.category;
+      const filtered = subcategories.filter(subcat => {
+        const subcatCategoryId = typeof subcat.category === 'object' ? subcat.category._id : subcat.category;
+        return subcatCategoryId === categoryId;
+      });
+      setFilteredSubcategories(filtered);
+    }
+    
     setShowModal(true);
   };
 

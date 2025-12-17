@@ -40,9 +40,9 @@ const Admin = () => {
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       } lg:translate-x-0`}>
         {/* Logo */}
-        <div className="p-6 border-b">
+        <div className="p-1">
           <div className="flex items-center justify-between">
-            <img src="/src/assets/logo.png" alt="Chowdhry" className="h-16 mx-auto" />
+            <img src="/src/assets/logo.png" alt="Chowdhry" className="h-30 mx-auto" />
             <button 
               className="lg:hidden p-2"
               onClick={() => setSidebarOpen(false)}
@@ -55,12 +55,12 @@ const Admin = () => {
         </div>
         
         {/* Navigation */}
-        <nav className="mt-6">
+        <nav className="mt-1">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`w-full flex items-center px-6 py-3 text-left hover:bg-gray-50 ${
+              className={`w-full flex items-center px-6 py-3 text-left hover:bg-red-300 ${
                 activeTab === tab.id
                   ? 'bg-red-500 text-white border-r-4 border-red-600'
                   : 'text-gray-700'
