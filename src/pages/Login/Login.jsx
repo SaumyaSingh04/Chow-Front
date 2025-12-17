@@ -11,6 +11,7 @@ const Login = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const handleChange = (e) => {
     setFormData({
@@ -23,13 +24,26 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccess('');
+    
+    console.log('Login form submitted:', formData);
+    
     try {
       const response = await login(formData);
+      console.log('Login response:', response);
+      
       if (response.token) {
         localStorage.setItem('token', response.token);
-        navigate('/');
+        if (response.user) {
+          localStorage.setItem('user', JSON.stringify(response.user));
+        }
+        setSuccess('Login successful! Redirecting...');
+        setTimeout(() => {
+          navigate('/');
+        }, 1500);
       }
     } catch (error) {
+      console.error('Login error:', error);
       setError(error.message || 'Login failed');
     } finally {
       setLoading(false);
@@ -101,7 +115,17 @@ const Login = () => {
                 </div>
 
                 {error && (
-                  <div className="text-red-600 text-sm">{error}</div>
+                  <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
+                    <i className="fas fa-exclamation-circle mr-2"></i>
+                    {error}
+                  </div>
+                )}
+                
+                {success && (
+                  <div className="text-green-600 text-sm bg-green-50 p-3 rounded-lg border border-green-200">
+                    <i className="fas fa-check-circle mr-2"></i>
+                    {success}
+                  </div>
                 )}
 
                 <div className="text-sm">

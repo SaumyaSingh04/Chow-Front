@@ -9,7 +9,9 @@ import About from './pages/About/About';
 import Contact from './pages/Contact/Contact';
 import Specials from './pages/Specials/Specials';
 import Signup from './pages/Signup/Signup';
+import Login from './pages/Login/Login';
 import Account from './pages/Account/Account';
+import Profile from './pages/Profile/Profile';
 import Cart from './pages/Cart/Cart';
 import Admin from './pages/Admin/Admin';
 
@@ -26,7 +28,9 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/account" element={<Account />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/admin" element={<Admin />} />
           </Routes>

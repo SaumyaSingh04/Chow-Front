@@ -6,12 +6,14 @@ const Signup = () => {
   const { register } = useApi();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
     phone: '',
     password: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const handleChange = (e) => {
     setFormData({
@@ -24,10 +26,22 @@ const Signup = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccess('');
+    
+    console.log('Form submitted:', formData);
+    
     try {
-      await register(formData);
-      navigate('/login');
+      const response = await register(formData);
+      console.log('Registration response:', response);
+      
+      if (response.success || response.message) {
+        setSuccess('Registration successful! Redirecting to login...');
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
+      }
     } catch (error) {
+      console.error('Registration error:', error);
       setError(error.message || 'Registration failed');
     } finally {
       setLoading(false);
@@ -85,6 +99,21 @@ const Signup = () => {
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                       <div className="relative">
+                        <i className="fas fa-user absolute left-3 top-3 text-gray-400"></i>
+                        <input
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          placeholder="Full Name"
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d80a4e] focus:border-transparent"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="relative">
                         <i className="fas fa-envelope absolute left-3 top-3 text-gray-400"></i>
                         <input
                           type="email"
@@ -128,12 +157,30 @@ const Signup = () => {
                     </div>
 
                     {error && (
-                      <div className="text-red-600 text-sm">{error}</div>
+                      <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
+                        <i className="fas fa-exclamation-circle mr-2"></i>
+                        {error}
+                      </div>
+                    )}
+                    
+                    {success && (
+                      <div className="text-green-600 text-sm bg-green-50 p-3 rounded-lg border border-green-200">
+                        <i className="fas fa-check-circle mr-2"></i>
+                        {success}
+                      </div>
                     )}
 
                     <div className="text-sm">
-                      <span className="text-gray-600">Already Have Account? </span>
-                      <Link to="/login" className="text-[#d80a4e] hover:underline">Login</Link>
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          console.log('Login button clicked');
+                          window.location.href = '/login';
+                        }} 
+                        className="text-gray-600 hover:text-[#d80a4e] cursor-pointer bg-transparent border-none p-0"
+                      >
+                        Already Have Account? <span className="text-[#d80a4e] font-medium">Login</span>
+                      </button>
                     </div>
 
                     <button

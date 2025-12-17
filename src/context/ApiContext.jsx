@@ -15,9 +15,11 @@ export const useApi = () => {
 class ApiService {
   async request(endpoint, options = {}) {
     const url = `${BASE_URL}${endpoint}`;
+    const token = localStorage.getItem('token');
     const config = {
       headers: {
         'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
         ...options.headers,
       },
       ...options,
@@ -27,7 +29,8 @@ class ApiService {
       const response = await fetch(url, config);
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
       
       return await response.json();
@@ -202,6 +205,24 @@ export const ApiProvider = ({ children }) => {
         return await apiService.get('/api/auth/me');
       } catch (error) {
         console.error('Error getting current user:', error);
+        throw error;
+      }
+    },
+    
+    getProfile: async (id) => {
+      try {
+        return await apiService.get(`/api/auth/profile/${id}`);
+      } catch (error) {
+        console.error('Error getting profile:', error);
+        throw error;
+      }
+    },
+    
+    updateProfile: async (id, profileData) => {
+      try {
+        return await apiService.put(`/api/auth/profile/${id}`, profileData);
+      } catch (error) {
+        console.error('Error updating profile:', error);
         throw error;
       }
     },
