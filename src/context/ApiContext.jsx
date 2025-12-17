@@ -230,7 +230,7 @@ export const ApiProvider = ({ children }) => {
     // Categories CRUD
     addCategory: async (categoryData) => {
       try {
-        return await apiService.post('/api/categories', categoryData);
+        return await apiService.post('/api/categories/add', categoryData);
       } catch (error) {
         console.error('Error adding category:', error);
         throw error;
@@ -239,7 +239,7 @@ export const ApiProvider = ({ children }) => {
     
     updateCategory: async (id, categoryData) => {
       try {
-        return await apiService.put(`/api/categories/${id}`, categoryData);
+        return await apiService.put(`/api/categories/update/${id}`, categoryData);
       } catch (error) {
         console.error('Error updating category:', error);
         throw error;
@@ -248,7 +248,7 @@ export const ApiProvider = ({ children }) => {
     
     deleteCategory: async (id) => {
       try {
-        return await apiService.delete(`/api/categories/${id}`);
+        return await apiService.delete(`/api/categories/delete/${id}`);
       } catch (error) {
         console.error('Error deleting category:', error);
         throw error;
@@ -257,7 +257,7 @@ export const ApiProvider = ({ children }) => {
     
     getAllCategories: async () => {
       try {
-        return await apiService.get('/api/categories');
+        return await apiService.get('/api/categories/all');
       } catch (error) {
         console.error('Error fetching categories:', error);
         return [];
@@ -267,7 +267,7 @@ export const ApiProvider = ({ children }) => {
     // Subcategories CRUD
     getAllSubcategories: async () => {
       try {
-        return await apiService.get('/api/subcategories');
+        return await apiService.get('/api/subcategories/all');
       } catch (error) {
         console.error('Error fetching subcategories:', error);
         return [];
@@ -285,7 +285,7 @@ export const ApiProvider = ({ children }) => {
     
     addSubcategory: async (subcategoryData) => {
       try {
-        return await apiService.post('/api/subcategories', subcategoryData);
+        return await apiService.post('/api/subcategories/add', subcategoryData);
       } catch (error) {
         console.error('Error adding subcategory:', error);
         throw error;
@@ -294,7 +294,7 @@ export const ApiProvider = ({ children }) => {
     
     updateSubcategory: async (id, subcategoryData) => {
       try {
-        return await apiService.put(`/api/subcategories/${id}`, subcategoryData);
+        return await apiService.put(`/api/subcategories/update/${id}`, subcategoryData);
       } catch (error) {
         console.error('Error updating subcategory:', error);
         throw error;
@@ -303,7 +303,7 @@ export const ApiProvider = ({ children }) => {
     
     deleteSubcategory: async (id) => {
       try {
-        return await apiService.delete(`/api/subcategories/${id}`);
+        return await apiService.delete(`/api/subcategories/delete/${id}`);
       } catch (error) {
         console.error('Error deleting subcategory:', error);
         throw error;
@@ -313,7 +313,7 @@ export const ApiProvider = ({ children }) => {
     // Items CRUD
     getAllItems: async () => {
       try {
-        return await apiService.get('/api/items');
+        return await apiService.get('/api/items/all');
       } catch (error) {
         console.error('Error fetching items:', error);
         return [];
@@ -332,7 +332,7 @@ export const ApiProvider = ({ children }) => {
     
     addItem: async (itemData) => {
       try {
-        return await apiService.post('/api/items', itemData);
+        return await apiService.post('/api/items/add', itemData);
       } catch (error) {
         console.error('Error adding item:', error);
         throw error;
@@ -341,7 +341,7 @@ export const ApiProvider = ({ children }) => {
     
     updateItem: async (id, itemData) => {
       try {
-        return await apiService.put(`/api/items/${id}`, itemData);
+        return await apiService.put(`/api/items/update/${id}`, itemData);
       } catch (error) {
         console.error('Error updating item:', error);
         throw error;
@@ -350,7 +350,7 @@ export const ApiProvider = ({ children }) => {
     
     deleteItem: async (id) => {
       try {
-        return await apiService.delete(`/api/items/${id}`);
+        return await apiService.delete(`/api/items/delete/${id}`);
       } catch (error) {
         console.error('Error deleting item:', error);
         throw error;
@@ -364,6 +364,16 @@ export const ApiProvider = ({ children }) => {
         return data;
       } catch (error) {
         console.error('Error searching:', error);
+        return [];
+      }
+    },
+    
+    searchItems: async (query) => {
+      try {
+        const data = await apiService.get(`/api/search/items?q=${encodeURIComponent(query)}`);
+        return data.items || data;
+      } catch (error) {
+        console.error('Error searching items:', error);
         return [];
       }
     },
@@ -435,16 +445,7 @@ export const ApiProvider = ({ children }) => {
       }
     },
     
-    // Dashboard
-    getDashboard: async () => {
-      try {
-        return await apiService.get('/api/dashboard');
-      } catch (error) {
-        console.error('Error fetching dashboard:', error);
-        return null;
-      }
-    },
-    
+    // Admin Dashboard APIs
     getDashboardStats: async () => {
       try {
         return await apiService.get('/api/dashboard/stats');
@@ -454,7 +455,6 @@ export const ApiProvider = ({ children }) => {
       }
     },
     
-    // Admin
     getAdminDashboard: async () => {
       try {
         return await apiService.get('/admin');
@@ -462,6 +462,11 @@ export const ApiProvider = ({ children }) => {
         console.error('Error fetching admin dashboard:', error);
         return null;
       }
+    },
+    
+    // Check if user is admin
+    isAdmin: (user) => {
+      return user && user.role === 'admin';
     },
     
     // Basic API info

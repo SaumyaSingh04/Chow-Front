@@ -47,14 +47,12 @@ const Admin = () => {
       <div className="bg-gray-100 py-8 relative">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center text-sm mb-4">
-            <span className="text-gray-800">Admin Dashboard</span>
           </div>
           <h1 className="text-4xl font-bold text-gray-800">Admin Panel</h1>
         </div>
         <div className="absolute top-8 right-16 hidden lg:block">
-          <div className="bg-[#d80a4e] text-white px-8 py-4 rounded-full">
-            <span className="text-2xl font-bold">Chowdhry</span>
-            <div className="text-xs">Admin</div>
+          <div >
+          <img src="/src/assets/logo.png" alt="Chowdhry Sweet House" className="h-20 md:h-40 absolute right-2 md:right-6 top-1/2 transform -translate-y-1/2" />
           </div>
         </div>
       </div>

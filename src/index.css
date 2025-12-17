@@ -59,3 +59,53 @@ body {
 .animate-fade-in-delay-3 {
   animation: fadeIn 1s ease-out 0.9s both;
 }
+
+/* Page Transition Styles */
+.page-transition {
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.page-transition-enter {
+  opacity: 0;
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.page-transition-exit {
+  opacity: 1;
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Smooth page loading */
+.App {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Prevent flash of unstyled content */
+body {
+  background-color: #f3f4f6;
+}
+
+/* Smooth route transitions */
+.route-container {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
