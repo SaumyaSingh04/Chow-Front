@@ -85,9 +85,17 @@ const About = () => {
 
         {/* Visit */}
         <div className="mt-12 text-center">
-          <div className="flex items-center justify-center gap-2 text-[#d80a4e] font-semibold">
+          <div className="flex items-center justify-center gap-2 text-[#d80a4e] font-semibold mb-4">
             <span className="text-lg">📍</span>
             <span>Visit Us:</span>
+          </div>
+          <div className="space-x-4">
+            <Link to="/contact" className="bg-[#d80a4e] text-white px-6 py-3 rounded hover:bg-[#b8083e] transition-colors">
+              Contact Us
+            </Link>
+            <Link to="/shop" className="bg-gray-800 text-white px-6 py-3 rounded hover:bg-gray-700 transition-colors">
+              Shop Now
+            </Link>
           </div>
         </div>
       </div>

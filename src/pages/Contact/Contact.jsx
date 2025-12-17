@@ -76,12 +76,12 @@ const Contact = () => {
             </div>
 
             <div className="mt-8 space-y-3">
-              <button className="bg-[#d80a4e] text-white px-6 py-3 rounded w-fit">
+              <a href="tel:+917525025100" className="bg-[#d80a4e] text-white px-6 py-3 rounded w-fit inline-block hover:bg-[#b8083e] transition-colors">
                 Get Support On Call
-              </button>
-              <button className="bg-[#d80a4e] text-white px-6 py-3 rounded w-fit">
+              </a>
+              <a href="https://maps.google.com/?q=Chowdhry+Sweet+House+Vijay+Chowk+Gorakhpur" target="_blank" rel="noopener noreferrer" className="bg-[#d80a4e] text-white px-6 py-3 rounded w-fit inline-block hover:bg-[#b8083e] transition-colors ml-4">
                 Get Direction
-              </button>
+              </a>
             </div>
           </div>
 

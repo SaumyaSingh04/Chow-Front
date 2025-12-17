@@ -45,7 +45,7 @@ const Home = () => {
             ].map((c, i) => (
               <Link 
                 key={i} 
-                to={`/shop?category=${c[1].toLowerCase().replace(' ', '-')}`}
+                to={c[1] === 'Our Specials' ? '/specials' : `/shop?category=${c[1].toLowerCase().replace(' ', '-')}`}
                 className="flex items-center gap-2 text-sm py-2 px-2 hover:bg-pink-50 hover:text-[#d80a4e] transition-colors cursor-pointer rounded"
               >
                 <span className="text-[#d80a4e] text-sm">{c[0]}</span>
@@ -55,13 +55,13 @@ const Home = () => {
             
             <div className="mt-4 pt-3 border-t border-gray-200">
               <div className="space-y-1 text-sm text-black font-bold">
-                <Link to="/shop?filter=value-of-day" className="flex items-center gap-2 py-1 hover:text-[#d80a4e] cursor-pointer">
+                <Link to="/specials?filter=value-of-day" className="flex items-center gap-2 py-1 hover:text-[#d80a4e] cursor-pointer">
                   <FaTags className="text-[#d80a4e] text-xs" />Value of the Day
                 </Link>
-                <Link to="/shop?filter=top-100" className="flex items-center gap-2 py-1 hover:text-[#d80a4e] cursor-pointer">
+                <Link to="/specials?filter=top-100" className="flex items-center gap-2 py-1 hover:text-[#d80a4e] cursor-pointer">
                   <FaCrown className="text-[#d80a4e] text-xs" />Top 100 Offers
                 </Link>
-                <Link to="/shop?filter=new-arrival" className="flex items-center gap-2 py-1 hover:text-[#d80a4e] cursor-pointer">
+                <Link to="/specials?filter=new-arrival" className="flex items-center gap-2 py-1 hover:text-[#d80a4e] cursor-pointer">
                   <FaMagic className="text-[#d80a4e] text-xs" />New Arrival
                 </Link>
               </div>
@@ -136,10 +136,10 @@ const Home = () => {
               Popular <span className="text-pink-600">Sweets</span>
             </h2>
             <div className="flex gap-6 text-sm">
-              <span className="text-pink-600 font-semibold">All</span>
-              <span>Gift</span>
-              <span>Test Cat</span>
-              <span>Popular</span>
+              <Link to="/shop" className="text-pink-600 font-semibold hover:underline">All</Link>
+              <Link to="/shop?category=gift" className="hover:text-pink-600 cursor-pointer">Gift</Link>
+              <Link to="/shop?category=test-cat" className="hover:text-pink-600 cursor-pointer">Test Cat</Link>
+              <Link to="/specials" className="hover:text-pink-600 cursor-pointer">Popular</Link>
             </div>
           </div>
 
@@ -154,9 +154,9 @@ const Home = () => {
                   <h4 className="text-sm font-semibold">{p.name}</h4>
                   <div className="flex justify-between items-center mt-2">
                     <span className="font-bold">₹{p.price}</span>
-                    <button className="text-pink-600 text-sm font-medium">
+                    <Link to="/cart" className="text-pink-600 text-sm font-medium hover:underline">
                       Add To Cart
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>

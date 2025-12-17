@@ -135,9 +135,17 @@ const Account = () => {
                         <i className="fas fa-home text-gray-400 w-5"></i>
                         <span className="ml-3">Go to Home</span>
                       </Link>
-                      <Link to="/menu" className="flex items-center text-gray-700 hover:text-[#d80a4e] transition-colors">
+                      <Link to="/shop" className="flex items-center text-gray-700 hover:text-[#d80a4e] transition-colors">
                         <i className="fas fa-utensils text-gray-400 w-5"></i>
                         <span className="ml-3">Browse Menu</span>
+                      </Link>
+                      <Link to="/profile" className="flex items-center text-gray-700 hover:text-[#d80a4e] transition-colors">
+                        <i className="fas fa-user text-gray-400 w-5"></i>
+                        <span className="ml-3">Edit Profile</span>
+                      </Link>
+                      <Link to="/contact" className="flex items-center text-gray-700 hover:text-[#d80a4e] transition-colors">
+                        <i className="fas fa-phone text-gray-400 w-5"></i>
+                        <span className="ml-3">Contact Us</span>
                       </Link>
                     </div>
                   </div>

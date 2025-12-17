@@ -103,9 +103,9 @@ const Specials = () => {
                     <h3 className="font-semibold text-gray-800 mb-2">{product.name}</h3>
                     <div className="flex items-center justify-between">
                       <span className="text-lg font-bold text-gray-800">₹{product.price}</span>
-                      <button className="bg-[#d80a4e] text-white px-3 py-1 rounded text-sm hover:bg-[#b8083e] transition-colors">
+                      <Link to="/cart" className="bg-[#d80a4e] text-white px-3 py-1 rounded text-sm hover:bg-[#b8083e] transition-colors inline-block">
                         Add To Cart
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 </div>

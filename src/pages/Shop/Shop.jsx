@@ -154,9 +154,9 @@ const Shop = () => {
                       <span className="text-sm text-gray-500 line-through">₹{product.originalPrice}</span>
                     )}
                   </div>
-                  <button className="bg-[#d80a4e] text-white px-4 py-2 rounded hover:bg-[#b8083e] transition-colors">
+                  <Link to="/cart" className="bg-[#d80a4e] text-white px-4 py-2 rounded hover:bg-[#b8083e] transition-colors text-center">
                     Add To Cart
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
