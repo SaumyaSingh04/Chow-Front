@@ -1,45 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { useApi } from '../../context/ApiContext.jsx';
+import React, { useState } from 'react';
+import Dashboard from './Dashboard.jsx';
+import Products from './Products.jsx';
+import Categories from './Categories.jsx';
+import Subcategories from './Subcategories.jsx';
 
 const Admin = () => {
-  const { getDashboardStats, fetchItems, fetchCategories, getTickets, getAdminDashboard, items, categories, loading } = useApi();
-  const [stats, setStats] = useState({
-    totalOrders: 0,
-    totalProducts: 0,
-    totalUsers: 0,
-    totalRevenue: 0
-  });
-  const [tickets, setTickets] = useState([]);
+  const [activeTab, setActiveTab] = useState('dashboard');
 
-  useEffect(() => {
-    const loadDashboardData = async () => {
-      try {
-        const dashboardStats = await getDashboardStats();
-        if (dashboardStats) {
-          setStats(dashboardStats);
-        }
-        await fetchItems();
-        await fetchCategories();
-        const ticketData = await getTickets();
-        setTickets(ticketData || []);
-        await getAdminDashboard();
-      } catch (error) {
-        console.error('Error loading dashboard data:', error);
-      }
-    };
-    loadDashboardData();
-  }, []);
+  const tabs = [
+    { id: 'dashboard', label: 'Dashboard' },
+    { id: 'products', label: 'Products' },
+    { id: 'categories', label: 'Categories' },
+    { id: 'subcategories', label: 'Subcategories' }
+  ];
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading Dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'dashboard': return <Dashboard />;
+      case 'products': return <Products />;
+      case 'categories': return <Categories />;
+      case 'subcategories': return <Subcategories />;
+      default: return <Dashboard />;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -57,52 +40,28 @@ const Admin = () => {
         </div>
       </div>
       
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-8">Dashboard Overview</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-700">Total Orders</h3>
-            <p className="text-3xl font-bold text-[#d80a4e]">{stats.totalOrders || 0}</p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-700">Products</h3>
-            <p className="text-3xl font-bold text-[#d80a4e]">{stats.totalProducts || items.length}</p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-700">Categories</h3>
-            <p className="text-3xl font-bold text-[#d80a4e]">{stats.totalCategories || categories.length}</p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-700">Revenue</h3>
-            <p className="text-3xl font-bold text-[#d80a4e]">₹{stats.totalRevenue || 0}</p>
-          </div>
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Navigation Tabs */}
+        <div className="border-b border-gray-200 mb-6">
+          <nav className="-mb-px flex space-x-8">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === tab.id
+                    ? 'border-[#d80a4e] text-[#d80a4e]'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-            <div className="space-y-2">
-              <button className="w-full text-left p-3 bg-pink-50 hover:bg-pink-100 rounded text-[#d80a4e]">Add Product</button>
-              <button className="w-full text-left p-3 bg-pink-50 hover:bg-pink-100 rounded text-[#d80a4e]">View Orders</button>
-              <button className="w-full text-left p-3 bg-pink-50 hover:bg-pink-100 rounded text-[#d80a4e]">Manage Users</button>
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
-            <div className="space-y-3">
-              <div className="border-l-4 border-[#d80a4e] pl-3">
-                <p className="text-sm text-gray-600">New order #1234</p>
-                <p className="text-xs text-gray-400">2 minutes ago</p>
-              </div>
-              <div className="border-l-4 border-[#d80a4e] pl-3">
-                <p className="text-sm text-gray-600">Product added</p>
-                <p className="text-xs text-gray-400">1 hour ago</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Content */}
+        {renderContent()}
       </div>
     </div>
   );
