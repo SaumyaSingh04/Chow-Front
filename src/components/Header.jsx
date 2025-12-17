@@ -1,8 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart, User, Search } from "lucide-react";
+import { useCart } from '../context/CartContext.jsx';
 
 const Header = () => {
+  const { getCartItemsCount } = useCart();
+  
   return (
     <header className="w-full bg-white fixed top-0 left-0 right-0 z-[100] shadow-sm">
       {/* Top Announcement Bar */}
@@ -42,7 +45,7 @@ const Header = () => {
             <Link to="/cart" className="relative flex-shrink-0 z-20 p-2">
               <ShoppingCart className="w-6 h-6 text-gray-700" />
               <span className="absolute top-0 right-0 bg-[#d80a4e] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center z-30">
-                0
+                {getCartItemsCount()}
               </span>
             </Link>
 

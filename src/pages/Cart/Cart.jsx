@@ -1,31 +1,161 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import Breadcrumb from '../../components/Breadcrumb.jsx';
+import React from "react";
+import { Link } from "react-router-dom";
+import { useCart } from "../../context/CartContext";
+import Breadcrumb from "../../components/Breadcrumb.jsx";
 
 const Cart = () => {
+  const { cartItems, updateQuantity, removeFromCart, getCartTotal } = useCart();
+
   return (
-<div className="min-h-screen overflow-x-hidden bg-white flex flex-col">
-<Breadcrumb currentPage="Product Cart" />
+    <div className="min-h-screen bg-white">
+      <Breadcrumb currentPage="Product Cart" />
 
-      {/* Empty Cart Content */}
-      <div className="flex-1 flex items-center justify-center px-6 overflow-x-hidden">
-        <div className="text-center max-w-2xl mx-auto">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            Your Cart is Empty! 🍬
-          </h2>
-          <p className="text-gray-600 mb-8">
-            It looks like your cart is missing some sweetness! Explore our delightful collection of traditional Indian sweets, from melt-in-the-mouth Besan Laddoo to rich and creamy Rajbhog. Add your favorites now and indulge in the authentic taste of pure joy. 🎂 🍰 Start Shopping & Savor the Sweetness! 🍭 😋
-          </p>
-          <Link 
-            to="/shop" 
-            className="bg-[#d80a4e] text-white px-8 py-3 rounded-lg hover:bg-[#b8083e] transition-colors font-semibold"
-          >
-            Start Shopping
-          </Link>
+      {cartItems.length === 0 ? (
+        /* EMPTY CART */
+        <div className="flex items-center justify-center py-24 px-6">
+          <div className="text-center max-w-2xl">
+            <h2 className="text-2xl font-bold mb-4 text-gray-800">
+              Your Cart is Empty 🍬
+            </h2>
+            <p className="text-gray-600 mb-8">
+              It looks like your cart is missing some sweetness! Explore our
+              delightful collection of traditional Indian sweets and add your
+              favorites.
+            </p>
+            <Link
+              to="/shop"
+              className="bg-[#d80a4e] text-white px-8 py-3 font-semibold"
+            >
+              Start Shopping
+            </Link>
+          </div>
         </div>
-      </div>
+      ) : (
+        /* CART CONTENT */
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            
+            {/* LEFT – CART TABLE */}
+            <div className="lg:col-span-2">
+              <div className="border border-gray-200">
 
+                {/* HEADER */}
+                <div className="grid grid-cols-7 text-sm font-semibold text-gray-700 border-b px-4 py-3 bg-gray-50">
+                  <div>Images</div>
+                  <div>Name</div>
+                  <div>Unit Price</div>
+                  <div className="col-span-2 text-center">Quantity</div>
+                  <div>Total</div>
+                  <div className="text-center">Remove</div>
+                </div>
 
+                {/* ROWS */}
+                {cartItems.map((item) => (
+                  <div
+                    key={item._id}
+                    className="grid grid-cols-7 items-center text-sm px-4 py-5 border-b"
+                  >
+                    {/* IMAGE */}
+                    <div>
+                      <img
+                        src={item.images?.[0] || item.image || "/placeholder.jpg"}
+                        alt={item.name}
+                        className="w-20 h-20 object-cover border"
+                      />
+                    </div>
+
+                    {/* NAME */}
+                    <div className="font-medium text-gray-800">
+                      {item.name}
+                    </div>
+
+                    {/* UNIT PRICE */}
+                    <div>INR {item.price}</div>
+
+                    {/* QUANTITY */}
+                    <div className="col-span-2 flex justify-center">
+                      <div className="flex border">
+                        <button
+                          onClick={() =>
+                            updateQuantity(item._id, item.quantity - 1)
+                          }
+                          className="px-3 border-r hover:bg-gray-100"
+                        >
+                          -
+                        </button>
+                        <span className="px-4 py-1">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() =>
+                            updateQuantity(item._id, item.quantity + 1)
+                          }
+                          className="px-3 border-l hover:bg-gray-100"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* TOTAL */}
+                    <div>
+                      INR {(item.price * item.quantity).toFixed(2)}
+                    </div>
+
+                    {/* REMOVE */}
+                    <div className="text-center">
+                      <button
+                        onClick={() => removeFromCart(item._id)}
+                        className="text-xl text-gray-500 hover:text-red-600"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* RIGHT – CART TOTALS */}
+            <div className="border border-gray-200 p-6 h-fit">
+              <h3 className="text-lg font-semibold mb-6 text-gray-800">
+                Cart Totals
+              </h3>
+
+              <div className="space-y-4 text-sm">
+                <div className="flex justify-between border-b pb-2">
+                  <span>Subtotal</span>
+                  <span>
+                    INR {getCartTotal().toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="flex justify-between border-b pb-2">
+                  <span>Tax (9%)</span>
+                  <span>
+                    INR {(getCartTotal() * 0.09).toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="flex justify-between font-semibold">
+                  <span>Total</span>
+                  <span>
+                    INR {(getCartTotal() * 1.09).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              <Link 
+                to="/checkout"
+                className="block w-full mt-6 bg-[#d80a4e] text-white py-3 text-center font-semibold hover:bg-[#b8083e] transition"
+              >
+                Proceed to Checkout
+              </Link>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 };

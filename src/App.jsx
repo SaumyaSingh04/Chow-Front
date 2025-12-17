@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { ApiProvider } from './context/ApiContext.jsx';
+import { CartProvider } from './context/CartContext.jsx';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -14,6 +15,7 @@ import Login from './pages/Login/Login';
 import Account from './pages/Account/Account';
 import Profile from './pages/Profile/Profile';
 import Cart from './pages/Cart/Cart';
+import Checkout from './pages/Checkout/Checkout';
 import Admin from './pages/Admin/Admin';
 
 const AppContent = () => {
@@ -35,6 +37,7 @@ const AppContent = () => {
           <Route path="/account" element={<Account />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="/admin" element={
             <ProtectedRoute requireAdmin={true}>
               <Admin />
@@ -55,9 +58,11 @@ function App() {
 
   return (
     <ApiProvider>
-      <Router>
-        <AppContent />
-      </Router>
+      <CartProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </CartProvider>
     </ApiProvider>
   );
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useApi } from '../../context/ApiContext.jsx';
 import Breadcrumb from '../../components/Breadcrumb.jsx';
+import ProductCard from '../../components/ProductCard.jsx';
 
 const Shop = () => {
   const { fetchItems, fetchCategories, getItemsByCategory, searchItems, categories, items, loading } = useApi();
@@ -124,42 +125,7 @@ const Shop = () => {
         {/* Products Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
           {filteredItems.length > 0 ? filteredItems.map((product) => (
-            <div key={product._id} className="bg-white rounded-lg shadow-lg overflow-hidden">
-              <div className="relative">
-                <img 
-                  src={product.images?.[0] || '/assets/img/product/home-one/product-1.jpg'} 
-                  alt={product.name}
-                  className="w-full h-64 object-cover"
-                />
-                <div className="absolute top-4 left-4">
-                  <div className="bg-[#d80a4e] text-white px-3 py-1 rounded-full text-sm font-semibold">
-                    Chowdhry
-                  </div>
-                </div>
-                {product.discount && (
-                  <div className="absolute top-4 right-4">
-                    <div className="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold">
-                      {product.discount}% OFF
-                    </div>
-                  </div>
-                )}
-              </div>
-              <div className="p-4">
-                <h3 className="font-semibold text-gray-800 mb-2">{product.name}</h3>
-                <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-lg font-bold text-gray-800">₹{product.price}</span>
-                    {product.originalPrice && product.originalPrice > product.price && (
-                      <span className="text-sm text-gray-500 line-through">₹{product.originalPrice}</span>
-                    )}
-                  </div>
-                  <Link to="/cart" className="bg-[#d80a4e] text-white px-4 py-2 rounded hover:bg-[#b8083e] transition-colors text-center">
-                    Add To Cart
-                  </Link>
-                </div>
-              </div>
-            </div>
+            <ProductCard key={product._id} product={product} />
           )) : (
             <div className="col-span-full text-center py-12">
               <p className="text-gray-500 text-lg">No products found in this category.</p>

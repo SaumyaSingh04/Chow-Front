@@ -1,6 +1,12 @@
 import React from 'react';
+import { useCart } from '../context/CartContext.jsx';
 
-const ProductCard = ({ product, onAddToCart, showSpecialTag = false }) => {
+const ProductCard = ({ product, showSpecialTag = false }) => {
+  const { addToCart } = useCart();
+
+  const handleAddToCart = () => {
+    addToCart(product);
+  };
   return (
     <div className="group">
       {/* Image */}
@@ -34,7 +40,7 @@ const ProductCard = ({ product, onAddToCart, showSpecialTag = false }) => {
         {/* Hover Content */}
         <div className="absolute inset-0 flex items-center justify-center transition-all duration-700 ease-out transform translate-y-[80px] opacity-0 group-hover:translate-y-0 group-hover:opacity-100">
           <button 
-            onClick={() => onAddToCart && onAddToCart(product)}
+            onClick={handleAddToCart}
             className="text-[#d80a4e] font-semibold text-base hover:text-[#b8083e] transition-colors flex items-center gap-1 underline underline-offset-4"
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
