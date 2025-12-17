@@ -3,12 +3,27 @@ import { useApi } from '../../context/ApiContext.jsx';
 import Breadcrumb from '../../components/Breadcrumb.jsx';
 
 const Profile = () => {
-  const { getProfile, updateProfile } = useApi();
+  const { getProfile, updateProfile, getUserAddresses, addUserAddress, updateUserAddress } = useApi();
   const [user, setUser] = useState(null);
+  const [addresses, setAddresses] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: ''
+  });
+  const [addressData, setAddressData] = useState({
+    addressType: 'home',
+    firstName: '',
+    lastName: '',
+    street: '',
+    apartment: '',
+    city: '',
+    state: '',
+    postcode: '',
+    email: '',
+    phone: '',
+    orderNotes: '',
+    isDefault: true
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -25,8 +40,44 @@ const Profile = () => {
         email: parsedUser.email || '',
         phone: parsedUser.phone || ''
       });
+      
+      // Fetch user addresses
+      const fetchAddresses = async () => {
+        try {
+          const userAddresses = await getUserAddresses(parsedUser._id || parsedUser.id);
+          setAddresses(userAddresses.addresses || []);
+          if (userAddresses.addresses && userAddresses.addresses.length > 0) {
+            const addr = userAddresses.addresses[0];
+            setAddressData({
+              addressType: addr.addressType || 'home',
+              firstName: addr.firstName || '',
+              lastName: addr.lastName || '',
+              street: addr.street || '',
+              apartment: addr.apartment || '',
+              city: addr.city || '',
+              state: addr.state || '',
+              postcode: addr.postcode || '',
+              email: addr.email || parsedUser.email || '',
+              phone: addr.phone || parsedUser.phone || '',
+              orderNotes: addr.orderNotes || '',
+              isDefault: addr.isDefault || true
+            });
+          } else {
+            setAddressData(prev => ({
+              ...prev,
+              firstName: parsedUser.name?.split(' ')[0] || '',
+              lastName: parsedUser.name?.split(' ').slice(1).join(' ') || '',
+              email: parsedUser.email || '',
+              phone: parsedUser.phone || ''
+            }));
+          }
+        } catch (error) {
+          console.error('Error fetching addresses:', error);
+        }
+      };
+      fetchAddresses();
     }
-  }, []);
+  }, [getUserAddresses]);
 
   const handleChange = (e) => {
     setFormData({
@@ -42,15 +93,45 @@ const Profile = () => {
     setSuccess('');
     
     try {
-      const response = await updateProfile(user.id, formData);
+      // Update basic profile info (without address)
+      const profileData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone
+      };
+      
+      const response = await updateProfile(user._id || user.id, profileData);
+      
+      // Handle address separately if provided
+      console.log('Profile: Current addressData:', addressData);
+      console.log('Profile: Existing addresses:', addresses);
+      
+      if (addressData.street.trim() && addressData.city.trim()) {
+        console.log('Profile: Address validation passed, saving address...');
+        if (addresses.length > 0) {
+          // Update existing address
+          console.log('Profile: Updating existing address with ID:', addresses[0]._id);
+          const addressResponse = await updateUserAddress(user._id || user.id, addresses[0]._id, addressData);
+          console.log('Profile: Address update response:', addressResponse);
+        } else {
+          // Add new address
+          console.log('Profile: Adding new address');
+          const addressResponse = await addUserAddress(user._id || user.id, addressData);
+          console.log('Profile: Address add response:', addressResponse);
+        }
+      } else {
+        console.log('Profile: Address validation failed - missing street or city');
+      }
+      
       if (response.success || response.user) {
         setSuccess('Profile updated successfully!');
         setIsEditing(false);
-        const updatedUser = response.user || { ...user, ...formData };
+        const updatedUser = response.user || { ...user, ...profileData };
         setUser(updatedUser);
         localStorage.setItem('user', JSON.stringify(updatedUser));
       }
     } catch (error) {
+      console.error('Profile update error:', error);
       setError(error.message || 'Failed to update profile');
     } finally {
       setLoading(false);
@@ -142,6 +223,73 @@ const Profile = () => {
               </div>
             </div>
 
+            {/* Address Section */}
+            <div className="col-span-2">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Address Information</h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                  <input
+                    type="text"
+                    value={addressData.firstName}
+                    onChange={(e) => setAddressData({...addressData, firstName: e.target.value})}
+                    disabled={!isEditing}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d80a4e] focus:border-transparent disabled:bg-gray-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                  <input
+                    type="text"
+                    value={addressData.lastName}
+                    onChange={(e) => setAddressData({...addressData, lastName: e.target.value})}
+                    disabled={!isEditing}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d80a4e] focus:border-transparent disabled:bg-gray-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Street Address</label>
+                  <input
+                    type="text"
+                    value={addressData.street}
+                    onChange={(e) => setAddressData({...addressData, street: e.target.value})}
+                    disabled={!isEditing}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d80a4e] focus:border-transparent disabled:bg-gray-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+                  <input
+                    type="text"
+                    value={addressData.city}
+                    onChange={(e) => setAddressData({...addressData, city: e.target.value})}
+                    disabled={!isEditing}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d80a4e] focus:border-transparent disabled:bg-gray-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
+                  <input
+                    type="text"
+                    value={addressData.state}
+                    onChange={(e) => setAddressData({...addressData, state: e.target.value})}
+                    disabled={!isEditing}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d80a4e] focus:border-transparent disabled:bg-gray-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Postcode</label>
+                  <input
+                    type="text"
+                    value={addressData.postcode}
+                    onChange={(e) => setAddressData({...addressData, postcode: e.target.value})}
+                    disabled={!isEditing}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d80a4e] focus:border-transparent disabled:bg-gray-100"
+                  />
+                </div>
+              </div>
+            </div>
+
             {isEditing && (
               <div className="flex gap-4">
                 <button
@@ -150,6 +298,35 @@ const Profile = () => {
                   className="bg-[#d80a4e] text-white px-6 py-3 rounded-lg hover:bg-[#b8083e] transition-colors font-semibold disabled:opacity-50"
                 >
                   {loading ? 'Updating...' : 'Update Profile'}
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    console.log('Test button clicked');
+                    const testAddress = {
+                      addressType: 'home',
+                      firstName: 'Test',
+                      lastName: 'User',
+                      street: '123 Test St',
+                      city: 'Test City',
+                      state: 'Test State',
+                      postcode: '12345',
+                      email: user.email,
+                      phone: user.phone || '1234567890'
+                    };
+                    try {
+                      console.log('Testing address API with:', testAddress);
+                      const result = await addUserAddress(user._id || user.id, testAddress);
+                      console.log('Test result:', result);
+                      alert('Test address added! Check console.');
+                    } catch (error) {
+                      console.error('Test failed:', error);
+                      alert('Test failed: ' + error.message);
+                    }
+                  }}
+                  className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-semibold"
+                >
+                  Test Address API
                 </button>
               </div>
             )}

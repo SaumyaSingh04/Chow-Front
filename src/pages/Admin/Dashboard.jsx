@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { ShoppingCart, Users, CheckCircle, DollarSign, Package, FolderOpen, Layers } from "lucide-react";
+import { ShoppingCart, Users, CheckCircle, DollarSign, Package, FolderOpen, Layers, XCircle } from "lucide-react";
 import { useApi } from "../../context/ApiContext.jsx";
 
 const Dashboard = () => {
-  const { getDashboardStats, fetchItems, fetchCategories, getAllSubcategories, items, categories, loading } = useApi();
+  const { getDashboardStats, getFailedOrders, fetchItems, fetchCategories, getAllSubcategories, items, categories, loading } = useApi();
   const [stats, setStats] = useState({
     newOrders: 0,
     totalCustomers: 0,
     ticketsResolved: 0,
-    revenueToday: 0
+    revenueToday: 0,
+    failedOrders: 0
   });
 
   useEffect(() => {
@@ -17,16 +18,21 @@ const Dashboard = () => {
 
   const loadDashboardStats = async () => {
     try {
-      // Try to get stats from API first
+      // Get main stats from API
       const data = await getDashboardStats();
       console.log('Dashboard API response:', data);
+      
+      // Get failed orders from dedicated endpoint
+      const failedOrdersData = await getFailedOrders();
+      console.log('Failed orders response:', failedOrdersData);
       
       if (data && Object.keys(data).length > 0) {
         setStats({
           newOrders: data.newOrders || 0,
           totalCustomers: data.totalCustomers || 0,
           ticketsResolved: data.ticketsResolved || 0,
-          revenueToday: data.revenueToday || 0
+          revenueToday: data.revenueToday || 0,
+          failedOrders: failedOrdersData?.count || failedOrdersData?.failedOrders || 0
         });
       } else {
         // Fallback: Calculate from existing data
@@ -52,6 +58,7 @@ const Dashboard = () => {
         totalUsers: 89, // Placeholder since we don't have users data
         totalRevenue: 45000, // Placeholder since we don't have revenue data
         ticketsResolved: 23, // Placeholder since we don't have tickets data
+        failedOrders: 12, // Placeholder for failed orders
         totalProducts: items?.length || 0,
         totalCategories: categories?.length || 0,
         totalSubcategories: subcats?.length || 0
@@ -72,7 +79,7 @@ const Dashboard = () => {
   return (
     <div className="p-4 sm:p-6">
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 max-w-4xl">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl">
         
         {/* New Orders */}
         <div className="relative h-32 sm:h-36 rounded-xl bg-gradient-to-r from-purple-700 to-pink-600 text-white shadow-lg overflow-hidden">
@@ -116,6 +123,17 @@ const Dashboard = () => {
             </div>
           </div>
           <DollarSign className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-16 sm:w-20 lg:w-24 h-16 sm:h-20 lg:h-24 opacity-20" />
+        </div>
+
+        {/* Failed Orders */}
+        <div className="relative h-32 sm:h-36 rounded-xl bg-gradient-to-r from-red-700 to-red-500 text-white shadow-lg overflow-hidden">
+          <div className="relative z-10 h-full flex items-center justify-between px-4 sm:px-6">
+            <div>
+              <p className="text-xs sm:text-sm font-medium opacity-90">Failed Orders</p>
+              <h2 className="text-2xl sm:text-3xl font-bold mt-1 sm:mt-2">{stats.failedOrders?.toLocaleString() || '0'}</h2>
+            </div>
+          </div>
+          <XCircle className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-16 sm:w-20 lg:w-24 h-16 sm:h-20 lg:h-24 opacity-20" />
         </div>
 
       </div>

@@ -107,6 +107,17 @@ const Account = () => {
                   </div>
                 )}
 
+                {/* View Your Order Button */}
+                <div className="text-center mb-8">
+                  <Link 
+                    to="/orders" 
+                    className="inline-flex items-center bg-[#d80a4e] text-white px-8 py-4 rounded-lg hover:bg-[#b8083e] transition-colors font-semibold text-lg shadow-lg"
+                  >
+                    <i className="fas fa-shopping-bag mr-3 text-xl"></i>
+                    View Your Orders
+                  </Link>
+                </div>
+
                 <div className="grid md:grid-cols-2 gap-6 mb-8">
                   <div className="bg-gray-50 p-6 rounded-lg">
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Profile Information</h3>
@@ -138,6 +149,10 @@ const Account = () => {
                       <Link to="/shop" className="flex items-center text-gray-700 hover:text-[#d80a4e] transition-colors">
                         <i className="fas fa-utensils text-gray-400 w-5"></i>
                         <span className="ml-3">Browse Menu</span>
+                      </Link>
+                      <Link to="/orders" className="flex items-center text-gray-700 hover:text-[#d80a4e] transition-colors">
+                        <i className="fas fa-shopping-bag text-gray-400 w-5"></i>
+                        <span className="ml-3">My Orders</span>
                       </Link>
                       <Link to="/profile" className="flex items-center text-gray-700 hover:text-[#d80a4e] transition-colors">
                         <i className="fas fa-user text-gray-400 w-5"></i>

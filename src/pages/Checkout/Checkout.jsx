@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useCart } from '../../context/CartContext';
+import { useNavigate } from 'react-router-dom';
 import Breadcrumb from '../../components/Breadcrumb.jsx';
 
 const Checkout = () => {
   const { cartItems, getCartTotal } = useCart();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     addressType: '',
     firstName: '',
@@ -26,7 +28,6 @@ const Checkout = () => {
   };
 
   const handlePlaceOrder = () => {
-    // Basic validation for required fields
     const requiredFields = ['addressType', 'firstName', 'lastName', 'address', 'city', 'state', 'postcode', 'email', 'phone'];
     const missingFields = requiredFields.filter(field => !formData[field].trim());
     
@@ -35,7 +36,9 @@ const Checkout = () => {
       return;
     }
     
-    console.log('Order placed:', formData);
+    // Save billing details to localStorage for order creation
+    localStorage.setItem('billingDetails', JSON.stringify(formData));
+    navigate('/payment');
   };
 
   return (
@@ -243,12 +246,12 @@ const Checkout = () => {
                   <span>INR {getCartTotal().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Tax</span>
-                  <span>INR {(getCartTotal() * 0.09).toFixed(2)}</span>
+                  <span>GST (5%)</span>
+                  <span>INR {(getCartTotal() * 0.05).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between font-semibold text-lg border-t pt-3">
                   <span>Order Total</span>
-                  <span>INR {(getCartTotal() * 1.09).toFixed(2)}</span>
+                  <span>INR {(getCartTotal() * 1.05).toFixed(2)}</span>
                 </div>
               </div>
 

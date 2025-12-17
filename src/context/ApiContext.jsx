@@ -223,9 +223,61 @@ export const ApiProvider = ({ children }) => {
     
     updateProfile: async (id, profileData) => {
       try {
-        return await apiService.put(`/api/auth/profile/${id}`, profileData);
+        console.log('API: Updating profile for ID:', id, 'with data:', profileData);
+        const response = await apiService.put(`/api/auth/profile/${id}`, profileData);
+        console.log('API: Profile update response:', response);
+        return response;
       } catch (error) {
         console.error('Error updating profile:', error);
+        throw error;
+      }
+    },
+    
+    // Address APIs
+    getUserAddresses: async (userId) => {
+      try {
+        console.log('API: Fetching addresses for user:', userId);
+        const response = await apiService.get(`/api/auth/address/${userId}`);
+        console.log('API: Get addresses response:', response);
+        return response;
+      } catch (error) {
+        console.error('Error fetching addresses:', error);
+        return { addresses: [] };
+      }
+    },
+    
+    addUserAddress: async (userId, addressData) => {
+      try {
+        console.log('API: Adding address for user:', userId, 'Data:', addressData);
+        const response = await apiService.post(`/api/auth/address/${userId}`, addressData);
+        console.log('API: Add address response:', response);
+        return response;
+      } catch (error) {
+        console.error('Error adding address:', error);
+        throw error;
+      }
+    },
+    
+    updateUserAddress: async (userId, addressId, addressData) => {
+      try {
+        console.log('API: Updating address for user:', userId, 'Address ID:', addressId, 'Data:', addressData);
+        const response = await apiService.put(`/api/auth/address/${userId}/${addressId}`, addressData);
+        console.log('API: Update address response:', response);
+        return response;
+      } catch (error) {
+        console.error('Error updating address:', error);
+        throw error;
+      }
+    },
+    
+    deleteUserAddress: async (userId, addressId) => {
+      try {
+        console.log('API: Deleting address for user:', userId, 'Address ID:', addressId);
+        const response = await apiService.delete(`/api/auth/address/${userId}/${addressId}`);
+        console.log('API: Delete address response:', response);
+        return response;
+      } catch (error) {
+        console.error('Error deleting address:', error);
         throw error;
       }
     },
@@ -458,6 +510,15 @@ export const ApiProvider = ({ children }) => {
       }
     },
     
+    getFailedOrders: async () => {
+      try {
+        return await apiService.get('/api/dashboard/failed-orders');
+      } catch (error) {
+        console.error('Error fetching failed orders:', error);
+        return null;
+      }
+    },
+    
     getAdminDashboard: async () => {
       try {
         return await apiService.get('/admin');
@@ -470,6 +531,39 @@ export const ApiProvider = ({ children }) => {
     // Check if user is admin
     isAdmin: (user) => {
       return user && user.role === 'admin';
+    },
+    
+    // Orders
+    getAllOrders: async () => {
+      try {
+        const data = await apiService.get('/api/orders/all');
+        return data.orders || data;
+      } catch (error) {
+        console.error('Error fetching all orders:', error);
+        return [];
+      }
+    },
+    
+    getMyOrders: async (customerId) => {
+      try {
+        const data = await apiService.get(`/api/orders/my/${customerId}`);
+        return data.orders || data;
+      } catch (error) {
+        console.error('Error fetching customer orders:', error);
+        return [];
+      }
+    },
+    
+    createOrder: async (orderData) => {
+      try {
+        console.log('API: Creating order with data:', orderData);
+        const response = await apiService.post('/api/orders/add', orderData);
+        console.log('API: Order creation response:', response);
+        return response;
+      } catch (error) {
+        console.error('Error creating order:', error);
+        throw error;
+      }
     },
     
     // Basic API info
