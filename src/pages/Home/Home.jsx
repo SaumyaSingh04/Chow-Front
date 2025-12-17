@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useApi } from "../../context/ApiContext";
 import { FaTruck, FaShieldAlt, FaCreditCard, FaHeadset, FaGift, FaBox, FaStar, FaSmile, FaFire, FaTags, FaCrown, FaMagic, FaFolder } from "react-icons/fa";
+import ProductCard from "../../components/ProductCard.jsx";
 
 const Home = () => {
   const { fetchItems, getFeaturedItems, items, loading } = useApi();
@@ -128,42 +129,56 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ================= POPULAR SWEETS ================= */}
-      <section className="bg-white py-16">
-        <div className="max-w-[1400px] mx-auto px-6">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl font-bold">
-              Popular <span className="text-pink-600">Sweets</span>
-            </h2>
-            <div className="flex gap-6 text-sm">
-              <Link to="/shop" className="text-pink-600 font-semibold hover:underline">All</Link>
-              <Link to="/shop?category=gift" className="hover:text-pink-600 cursor-pointer">Gift</Link>
-              <Link to="/shop?category=test-cat" className="hover:text-pink-600 cursor-pointer">Test Cat</Link>
-              <Link to="/specials" className="hover:text-pink-600 cursor-pointer">Popular</Link>
-            </div>
-          </div>
+     {/* ================= POPULAR SWEETS ================= */}
+<section className="bg-white py-10">
+  <div className="max-w-[1400px] mx-auto px-6">
 
-          <div className="grid md:grid-cols-4 gap-6">
-            {(featured.length ? featured : items).slice(0, 4).map(p => (
-              <div key={p._id} className="border rounded-lg overflow-hidden">
-                <img
-                  src={p.images?.[0]}
-                  className="h-44 w-full object-cover"
-                />
-                <div className="p-4">
-                  <h4 className="text-sm font-semibold">{p.name}</h4>
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="font-bold">₹{p.price}</span>
-                    <Link to="/cart" className="text-pink-600 text-sm font-medium hover:underline">
-                      Add To Cart
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+    {/* Header */}
+    <div className="flex justify-between items-end mb-10">
+      <h2 className="text-4xl font-bold text-black">
+        Popular{" "}
+        <span className="text-[#d80a4e] underline underline-offset-4">
+          Sweets
+        </span>
+      </h2>
+
+      <div className="flex gap-10 text-[15px] font-medium">
+        <Link
+          to="/shop"
+          className="text-[#d80a4e] underline underline-offset-4"
+        >
+          All
+        </Link>
+        <Link
+          to="/shop?category=gift"
+          className="text-black hover:text-[#d80a4e]"
+        >
+          Gift
+        </Link>
+        <Link
+          to="/shop?category=test-cat"
+          className="text-black hover:text-[#d80a4e]"
+        >
+          Test Cat
+        </Link>
+        <Link
+          to="/specials"
+          className="text-black hover:text-[#d80a4e]"
+        >
+          Popular
+        </Link>
+      </div>
+    </div>
+
+    {/* Products Grid */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      {items.map(p => (
+        <ProductCard key={p._id} product={p} />
+      ))}
+    </div>
+
+  </div>
+</section>
       {/* ================= EXCLUSIVE SWEET DEALS ================= */}
 <section className="bg-[#f7efe9] ">
   <div className="max-w-[1400px] mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
