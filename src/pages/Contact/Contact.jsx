@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useApi } from '../../context/ApiContext.jsx';
 import Breadcrumb from '../../components/Breadcrumb.jsx';
@@ -14,6 +14,7 @@ const Contact = () => {
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -22,9 +23,12 @@ const Contact = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
+    setSuccess(false);
+    
     try {
       await createTicket({
-        name: formData.fullName,
+        fullName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
         subject: formData.subject,
@@ -38,8 +42,9 @@ const Contact = () => {
         subject: '',
         message: ''
       });
+      setTimeout(() => setSuccess(false), 3000);
     } catch (error) {
-      console.error(error);
+      setError('Failed to send message. Please try again or call us directly.');
     } finally {
       setLoading(false);
     }
@@ -153,6 +158,12 @@ const Contact = () => {
               {success && (
                 <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
                   Message sent successfully! We'll get back to you soon.
+                </div>
+              )}
+              
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                  {error}
                 </div>
               )}
 

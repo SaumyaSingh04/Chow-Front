@@ -6,6 +6,8 @@ const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingOrder, setUpdatingOrder] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     fetchOrders();
@@ -166,7 +168,14 @@ const AdminOrders = () => {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {orders.map((order, index) => (
-                  <tr key={order._id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <tr 
+                    key={order._id} 
+                    className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 cursor-pointer`}
+                    onClick={() => {
+                      setSelectedOrder(order);
+                      setShowModal(true);
+                    }}
+                  >
                     <td className="px-6 py-4 text-sm font-medium text-gray-900">
                       #{order._id?.slice(-8)}
                     </td>
@@ -201,7 +210,7 @@ const AdminOrders = () => {
                     <td className="px-6 py-4 text-sm text-gray-700">
                       {new Date(order.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4 text-sm">
+                    <td className="px-6 py-4 text-sm" onClick={(e) => e.stopPropagation()}>
                       <div className="flex flex-wrap gap-2">
                         {order.paymentStatus === 'pending' && (
                           <button
@@ -272,6 +281,101 @@ const AdminOrders = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+      
+      {/* Order Details Modal */}
+      {showModal && selectedOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Order Details</h3>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-gray-400 hover:text-gray-600 text-xl"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="font-medium text-gray-700">Order ID:</span>
+                  <div>#{selectedOrder._id}</div>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Date:</span>
+                  <div>{new Date(selectedOrder.createdAt).toLocaleString()}</div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="font-medium text-gray-700">Customer:</span>
+                  <div>{selectedOrder.userId?.name || selectedOrder.userName || 'N/A'}</div>
+                  <div className="text-sm text-gray-500">{selectedOrder.userId?.email || 'N/A'}</div>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Total Amount:</span>
+                  <div className="text-lg font-semibold text-green-600">₹{selectedOrder.totalAmount?.toFixed(2)}</div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="font-medium text-gray-700">Status:</span>
+                  <div>
+                    <span className={`px-3 py-1 rounded-full text-white text-sm font-medium ${getStatusColor(selectedOrder.status)}`}>
+                      {selectedOrder.status?.charAt(0).toUpperCase() + selectedOrder.status?.slice(1)}
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Payment Status:</span>
+                  <div>
+                    <span className={`px-3 py-1 rounded-full text-white text-sm font-medium ${
+                      selectedOrder.paymentStatus === 'paid' ? 'bg-green-500' : 
+                      selectedOrder.paymentStatus === 'failed' ? 'bg-red-500' : 'bg-yellow-500'
+                    }`}>
+                      {selectedOrder.paymentStatus?.charAt(0).toUpperCase() + selectedOrder.paymentStatus?.slice(1)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              {selectedOrder.deliveryAddress && (
+                <div>
+                  <span className="font-medium text-gray-700">Delivery Address:</span>
+                  <div className="mt-1 p-3 bg-gray-50 rounded">
+                    <div>{selectedOrder.deliveryAddress.street}</div>
+                    <div>{selectedOrder.deliveryAddress.city}, {selectedOrder.deliveryAddress.state} {selectedOrder.deliveryAddress.pincode}</div>
+                    {selectedOrder.deliveryAddress.phone && <div>Phone: {selectedOrder.deliveryAddress.phone}</div>}
+                  </div>
+                </div>
+              )}
+              
+              <div>
+                <span className="font-medium text-gray-700">Items Ordered:</span>
+                <div className="mt-2 space-y-2">
+                  {selectedOrder.items?.map((item, idx) => {
+                    const itemName = item.itemId?.name || item.name || item.productName || 'Unknown Item';
+                    return (
+                    <div key={idx} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                      <div>
+                        <div className="font-semibold">{itemName}</div>
+                        <div className="text-sm text-gray-600">Qty: {item.quantity} × ₹{item.price}</div>
+                      </div>
+                      <div className="font-bold text-green-600">
+                        ₹{(item.price * item.quantity).toFixed(2)}
+                      </div>
+                    </div>
+                  );
+                  })}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
