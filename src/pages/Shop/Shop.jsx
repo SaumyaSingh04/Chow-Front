@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useApi } from '../../context/ApiContext.jsx';
 import Breadcrumb from '../../components/Breadcrumb.jsx';
 import ProductCard from '../../components/ProductCard.jsx';
 
 const Shop = () => {
-  const { fetchItems, fetchCategories, getItemsByCategory, getSubcategoriesByCategory, getItemsBySubcategory, getSubcategories, searchItems, categories, items, loading } = useApi();
+  const { fetchItems, fetchCategories, getItemsByCategory, getSubcategoriesByCategory, getSubcategories, searchItems, categories, items, loading } = useApi();
   const [searchParams] = useSearchParams();
   const [filteredItems, setFilteredItems] = useState([]);
   const [activeCategory, setActiveCategory] = useState('all');
@@ -48,19 +48,10 @@ const Shop = () => {
         if (subcategoryId) {
           const allItems = items.length > 0 ? items : await fetchItems();
           
-          console.log('Target subcategory:', subcategoryId);
-          console.log('Total items:', allItems.length);
-          
           const subcategoryItems = allItems.filter(item => {
-            if (!item.subcategories || !Array.isArray(item.subcategories)) {
-              console.log(`Item ${item.name} has no subcategories`);
-              return false;
-            }
+            if (!item.subcategories || !Array.isArray(item.subcategories)) return false;
             
-            console.log(`Item ${item.name} subcategories:`, item.subcategories);
-            
-            const match = item.subcategories.some(subcat => {
-              // Handle different formats: ObjectId, string, or object with _id
+            return item.subcategories.some(subcat => {
               let subcatId;
               if (typeof subcat === 'string') {
                 subcatId = subcat;
@@ -72,15 +63,10 @@ const Shop = () => {
                 subcatId = subcat;
               }
               
-              console.log(`  Comparing ${subcatId} === ${subcategoryId}`);
               return subcatId === subcategoryId;
             });
-            
-            if (match) console.log(`✓ MATCH: ${item.name}`);
-            return match;
           });
           
-          console.log('Filtered items count:', subcategoryItems.length);
           setFilteredItems(subcategoryItems);
           setActiveSubcategory(subcategoryId);
           
