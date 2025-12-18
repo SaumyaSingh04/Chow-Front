@@ -15,7 +15,7 @@ const Products = () => {
     stockQty: '',
     shortDesc: '',
     longDesc: '',
-    category: '',
+    categories: [],
     subcategories: [],
     images: [],
     video: null,
@@ -115,7 +115,7 @@ const Products = () => {
       
       setShowModal(false);
       setEditingProduct(null);
-      setFormData({ name: '', description: '', price: '', discountPrice: '', stockQty: '', shortDesc: '', longDesc: '', category: '', subcategories: [], images: [], video: null, isBestRated: false, isBestSeller: false, isOnSale: false, isPopular: false, status: 'active' });
+      setFormData({ name: '', description: '', price: '', discountPrice: '', stockQty: '', shortDesc: '', longDesc: '', categories: [], subcategories: [], images: [], video: null, isBestRated: false, isBestSeller: false, isOnSale: false, isPopular: false, status: 'active' });
       setSelectedImages([]);
       setSelectedVideo(null);
       fetchItems();
@@ -138,7 +138,11 @@ const Products = () => {
         stockQty: product.stockQty || '',
         shortDesc: product.shortDesc || '',
         longDesc: product.longDesc || '',
-        category: typeof product.category === 'object' ? product.category._id : product.category || '',
+        categories: Array.isArray(product.categories) 
+          ? product.categories.map(cat => typeof cat === 'object' ? cat._id : cat)
+          : product.category 
+            ? [typeof product.category === 'object' ? product.category._id : product.category]
+            : [],
         subcategories: Array.isArray(product.subcategories) 
           ? product.subcategories.map(sub => typeof sub === 'object' ? sub._id : sub)
           : product.subcategory 
@@ -153,12 +157,20 @@ const Products = () => {
         status: product.status || 'active'
       });
       
-      // Set filtered subcategories if category exists
-      if (product.category && Array.isArray(subcategories)) {
-        const categoryId = typeof product.category === 'object' ? product.category._id : product.category;
+      // Set filtered subcategories if categories exist
+      const categoryIds = Array.isArray(product.categories) 
+        ? product.categories.map(cat => typeof cat === 'object' ? cat._id : cat)
+        : product.category 
+          ? [typeof product.category === 'object' ? product.category._id : product.category]
+          : [];
+      
+      if (categoryIds.length > 0 && Array.isArray(subcategories)) {
         const filtered = subcategories.filter(subcat => {
-          const subcatCategoryId = typeof subcat.category === 'object' ? subcat.category._id : subcat.category;
-          return subcatCategoryId === categoryId;
+          const subcatCategories = Array.isArray(subcat.categories) ? subcat.categories : [subcat.category];
+          return subcatCategories.some(catRef => {
+            const subcatCategoryId = typeof catRef === 'object' ? catRef._id : catRef;
+            return categoryIds.includes(subcatCategoryId);
+          });
         });
         setFilteredSubcategories(filtered);
       } else {
@@ -214,7 +226,7 @@ const Products = () => {
               onClick={() => {
                 setShowModal(false);
                 setEditingProduct(null);
-                setFormData({ name: '', description: '', price: '', discountPrice: '', stockQty: '', shortDesc: '', longDesc: '', category: '', subcategories: [], images: [], video: null, isBestRated: false, isBestSeller: false, isOnSale: false, isPopular: false, status: 'active' });
+                setFormData({ name: '', description: '', price: '', discountPrice: '', stockQty: '', shortDesc: '', longDesc: '', categories: [], subcategories: [], images: [], video: null, isBestRated: false, isBestSeller: false, isOnSale: false, isPopular: false, status: 'active' });
                 setSelectedImages([]);
                 setSelectedVideo(null);
               }}
@@ -249,36 +261,51 @@ const Products = () => {
                   />
                 </div>
 
-                {/* Category Field */}
+                {/* Categories Field */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category <span className="text-red-500">*</span>
+                    Categories (Multiple) <span className="text-red-500">*</span>
                   </label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => {
-                      const selectedCategory = e.target.value;
-                      setFormData({...formData, category: selectedCategory, subcategories: []});
-                      
-                      // Filter subcategories based on selected category
-                      if (selectedCategory) {
-                        const filtered = subcategories.filter(subcat => {
-                          const subcatCategoryId = typeof subcat.category === 'object' ? subcat.category._id : subcat.category;
-                          return subcatCategoryId === selectedCategory;
-                        });
-                        setFilteredSubcategories(filtered);
-                      } else {
-                        setFilteredSubcategories([]);
-                      }
-                    }}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    required
-                  >
-                    <option value="">Select Category</option>
-                    {categories.map((cat) => (
-                      <option key={cat._id} value={cat._id}>{cat.name}</option>
-                    ))}
-                  </select>
+                  <div className="border border-gray-300 rounded-md bg-gray-50 p-3 max-h-32 overflow-y-auto">
+                    {categories.length === 0 ? (
+                      <p className="text-gray-500 text-sm">No categories available</p>
+                    ) : (
+                      categories.map((cat) => (
+                        <label key={cat._id} className="flex items-center space-x-2 mb-2">
+                          <input
+                            type="checkbox"
+                            checked={formData.categories.includes(cat._id)}
+                            onChange={(e) => {
+                              let newCategories;
+                              if (e.target.checked) {
+                                newCategories = [...formData.categories, cat._id];
+                              } else {
+                                newCategories = formData.categories.filter(id => id !== cat._id);
+                              }
+                              
+                              setFormData({...formData, categories: newCategories, subcategories: []});
+                              
+                              // Filter subcategories based on selected categories
+                              if (newCategories.length > 0) {
+                                const filtered = subcategories.filter(subcat => {
+                                  const subcatCategories = Array.isArray(subcat.categories) ? subcat.categories : [subcat.category];
+                                  return subcatCategories.some(catRef => {
+                                    const subcatCategoryId = typeof catRef === 'object' ? catRef._id : catRef;
+                                    return newCategories.includes(subcatCategoryId);
+                                  });
+                                });
+                                setFilteredSubcategories(filtered);
+                              } else {
+                                setFilteredSubcategories([]);
+                              }
+                            }}
+                            className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                          />
+                          <span className="text-sm">{cat.name}</span>
+                        </label>
+                      ))
+                    )}
+                  </div>
                 </div>
 
                 {/* Subcategories Field */}
@@ -287,8 +314,8 @@ const Products = () => {
                     Subcategories (Multiple)
                   </label>
                   <div className="border border-gray-300 rounded-md bg-gray-50 p-3 max-h-32 overflow-y-auto">
-                    {!formData.category ? (
-                      <p className="text-gray-500 text-sm">Select Category First</p>
+                    {formData.categories.length === 0 ? (
+                      <p className="text-gray-500 text-sm">Select Categories First</p>
                     ) : filteredSubcategories.length === 0 ? (
                       <p className="text-gray-500 text-sm">No subcategories available</p>
                     ) : (
@@ -606,7 +633,7 @@ const Products = () => {
             <thead className="bg-[#d80a4e] text-white">
               <tr>
                 <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">Name</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">Category Name</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">Categories</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">Price</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">Discount Price</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">Stock Qty</th>
@@ -624,7 +651,12 @@ const Products = () => {
                 getCurrentPageItems().map((product, index) => (
                 <tr key={product._id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">{product.name}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{typeof product.category === 'object' ? product.category?.name : product.category}</td>
+                  <td className="px-6 py-4 text-sm text-gray-700">
+                    {Array.isArray(product.categories) 
+                      ? product.categories.map(cat => typeof cat === 'object' ? cat.name : cat).join(', ')
+                      : typeof product.category === 'object' ? product.category?.name : product.category
+                    }
+                  </td>
                   <td className="px-6 py-4 text-sm text-gray-700">₹{product.price}</td>
                   <td className="px-6 py-4 text-sm text-gray-700">₹{product.discountPrice || product.price}</td>
                   <td className="px-6 py-4 text-sm text-gray-700">{product.stockQty || 0}</td>
