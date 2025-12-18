@@ -46,38 +46,41 @@ const Shop = () => {
       } else {
         setSearchQuery('');
         if (subcategoryId) {
-          console.log('=== SUBCATEGORY FILTERING DEBUG ===');
-          console.log('Target subcategory ID:', subcategoryId);
-          
-          // Debug: Check all items and their subcategories
           const allItems = items.length > 0 ? items : await fetchItems();
-          console.log('Total items in database:', allItems.length);
           
-          allItems.forEach(item => {
-            console.log(`Item: ${item.name}`);
-            console.log('  - subcategories:', item.subcategories);
-            console.log('  - category:', item.category);
-            console.log('  - categories:', item.categories);
+          console.log('Target subcategory:', subcategoryId);
+          console.log('Total items:', allItems.length);
+          
+          const subcategoryItems = allItems.filter(item => {
+            if (!item.subcategories || !Array.isArray(item.subcategories)) {
+              console.log(`Item ${item.name} has no subcategories`);
+              return false;
+            }
+            
+            console.log(`Item ${item.name} subcategories:`, item.subcategories);
+            
+            const match = item.subcategories.some(subcat => {
+              // Handle different formats: ObjectId, string, or object with _id
+              let subcatId;
+              if (typeof subcat === 'string') {
+                subcatId = subcat;
+              } else if (subcat && subcat._id) {
+                subcatId = subcat._id;
+              } else if (subcat && subcat.$oid) {
+                subcatId = subcat.$oid;
+              } else {
+                subcatId = subcat;
+              }
+              
+              console.log(`  Comparing ${subcatId} === ${subcategoryId}`);
+              return subcatId === subcategoryId;
+            });
+            
+            if (match) console.log(`✓ MATCH: ${item.name}`);
+            return match;
           });
           
-          let subcategoryItems = await getItemsBySubcategory(subcategoryId);
-          console.log('API filtered items count:', subcategoryItems.length);
-          
-          // Manual backup filter if API returns empty
-          if (subcategoryItems.length === 0) {
-            console.log('API returned empty, trying manual filter...');
-            subcategoryItems = allItems.filter(item => {
-              const itemSubcats = Array.isArray(item.subcategories) ? item.subcategories : [];
-              return itemSubcats.some(subcat => {
-                const subcatId = typeof subcat === 'object' ? subcat._id : subcat;
-                const match = subcatId === subcategoryId;
-                if (match) console.log(`Manual match found: ${item.name}`);
-                return match;
-              });
-            });
-            console.log('Manual filter result:', subcategoryItems.length);
-          }
-          
+          console.log('Filtered items count:', subcategoryItems.length);
           setFilteredItems(subcategoryItems);
           setActiveSubcategory(subcategoryId);
           
@@ -122,7 +125,27 @@ const Shop = () => {
 
   const handleSubcategoryFilter = async (subcatId) => {
     setActiveSubcategory(subcatId);
-    const subcategoryItems = await getItemsBySubcategory(subcatId);
+    
+    const allItems = items.length > 0 ? items : await fetchItems();
+    const subcategoryItems = allItems.filter(item => {
+      if (!item.subcategories || !Array.isArray(item.subcategories)) return false;
+      
+      return item.subcategories.some(subcat => {
+        let subcatId_inner;
+        if (typeof subcat === 'string') {
+          subcatId_inner = subcat;
+        } else if (subcat && subcat._id) {
+          subcatId_inner = subcat._id;
+        } else if (subcat && subcat.$oid) {
+          subcatId_inner = subcat.$oid;
+        } else {
+          subcatId_inner = subcat;
+        }
+        
+        return subcatId_inner === subcatId;
+      });
+    });
+    
     setFilteredItems(subcategoryItems);
   };
 

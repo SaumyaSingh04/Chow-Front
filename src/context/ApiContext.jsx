@@ -178,7 +178,18 @@ export const ApiProvider = ({ children }) => {
           console.log(`Item "${item.name}" subcategories:`, itemSubcategories);
           
           return itemSubcategories.some(subcat => {
-            const subcatId = typeof subcat === 'object' ? subcat._id : subcat;
+            // Handle different formats: ObjectId, string, or object with _id
+            let subcatId;
+            if (typeof subcat === 'string') {
+              subcatId = subcat;
+            } else if (subcat && subcat._id) {
+              subcatId = subcat._id;
+            } else if (subcat && subcat.$oid) {
+              subcatId = subcat.$oid;
+            } else {
+              subcatId = subcat;
+            }
+            
             const match = subcatId === subcategoryId;
             if (match) console.log(`✓ Match found: ${item.name}`);
             return match;
