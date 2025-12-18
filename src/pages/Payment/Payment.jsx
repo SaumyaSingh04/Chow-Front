@@ -66,7 +66,7 @@ const Payment = () => {
       }
       
       const orderData = {
-        customerId: user._id || user.id,
+        userId: user._id || user.id,
         addressId: addressId,
         items: cartItems.map(item => ({
           itemId: item._id,
@@ -78,7 +78,13 @@ const Payment = () => {
         paymentStatus: 'pending'
       };
 
-      await createOrder(orderData);
+      console.log('Final order data being sent:', orderData);
+      console.log('User data:', user);
+      console.log('Cart items:', cartItems);
+      console.log('Address ID:', addressId);
+
+      const orderResponse = await createOrder(orderData);
+      console.log('Order creation response:', orderResponse);
       alert('Payment successful! Order placed.');
       clearCart();
       navigate('/orders');

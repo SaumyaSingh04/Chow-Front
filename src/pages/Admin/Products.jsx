@@ -16,7 +16,7 @@ const Products = () => {
     shortDesc: '',
     longDesc: '',
     category: '',
-    subcategory: '',
+    subcategories: [],
     images: [],
     video: null,
     isBestRated: false,
@@ -85,10 +85,17 @@ const Products = () => {
       
       // Add text fields
       Object.keys(formData).forEach(key => {
-        if (key !== 'images' && key !== 'video' && formData[key]) {
+        if (key !== 'images' && key !== 'video' && key !== 'subcategories' && formData[key]) {
           submitData.append(key, formData[key]);
         }
       });
+      
+      // Add subcategories array properly
+      if (formData.subcategories && formData.subcategories.length > 0) {
+        formData.subcategories.forEach(subcatId => {
+          submitData.append('subcategories', subcatId);
+        });
+      }
       
       // Add images
       selectedImages.forEach(image => {
@@ -108,7 +115,7 @@ const Products = () => {
       
       setShowModal(false);
       setEditingProduct(null);
-      setFormData({ name: '', description: '', price: '', discountPrice: '', stockQty: '', shortDesc: '', longDesc: '', category: '', subcategory: '', images: [], video: null, isBestRated: false, isBestSeller: false, isOnSale: false, isPopular: false, status: 'active' });
+      setFormData({ name: '', description: '', price: '', discountPrice: '', stockQty: '', shortDesc: '', longDesc: '', category: '', subcategories: [], images: [], video: null, isBestRated: false, isBestSeller: false, isOnSale: false, isPopular: false, status: 'active' });
       setSelectedImages([]);
       setSelectedVideo(null);
       fetchItems();
@@ -132,7 +139,11 @@ const Products = () => {
         shortDesc: product.shortDesc || '',
         longDesc: product.longDesc || '',
         category: typeof product.category === 'object' ? product.category._id : product.category || '',
-        subcategory: typeof product.subcategory === 'object' ? product.subcategory._id : product.subcategory || '',
+        subcategories: Array.isArray(product.subcategories) 
+          ? product.subcategories.map(sub => typeof sub === 'object' ? sub._id : sub)
+          : product.subcategory 
+            ? [typeof product.subcategory === 'object' ? product.subcategory._id : product.subcategory]
+            : [],
         images: product.images || [],
         video: product.video || null,
         isBestRated: product.isBestRated || false,
@@ -203,7 +214,7 @@ const Products = () => {
               onClick={() => {
                 setShowModal(false);
                 setEditingProduct(null);
-                setFormData({ name: '', description: '', price: '', discountPrice: '', stockQty: '', shortDesc: '', longDesc: '', category: '', subcategory: '', images: [], video: null, isBestRated: false, isBestSeller: false, isOnSale: false, isPopular: false, status: 'active' });
+                setFormData({ name: '', description: '', price: '', discountPrice: '', stockQty: '', shortDesc: '', longDesc: '', category: '', subcategories: [], images: [], video: null, isBestRated: false, isBestSeller: false, isOnSale: false, isPopular: false, status: 'active' });
                 setSelectedImages([]);
                 setSelectedVideo(null);
               }}
@@ -247,7 +258,7 @@ const Products = () => {
                     value={formData.category}
                     onChange={(e) => {
                       const selectedCategory = e.target.value;
-                      setFormData({...formData, category: selectedCategory, subcategory: ''});
+                      setFormData({...formData, category: selectedCategory, subcategories: []});
                       
                       // Filter subcategories based on selected category
                       if (selectedCategory) {
@@ -270,22 +281,42 @@ const Products = () => {
                   </select>
                 </div>
 
-                {/* Subcategory Field */}
+                {/* Subcategories Field */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Subcategory
+                    Subcategories (Multiple)
                   </label>
-                  <select
-                    value={formData.subcategory}
-                    onChange={(e) => setFormData({...formData, subcategory: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    disabled={!formData.category}
-                  >
-                    <option value="">{!formData.category ? 'Select Category First' : 'Select Subcategory (Optional)'}</option>
-                    {filteredSubcategories.map((subcat) => (
-                      <option key={subcat._id} value={subcat._id}>{subcat.name}</option>
-                    ))}
-                  </select>
+                  <div className="border border-gray-300 rounded-md bg-gray-50 p-3 max-h-32 overflow-y-auto">
+                    {!formData.category ? (
+                      <p className="text-gray-500 text-sm">Select Category First</p>
+                    ) : filteredSubcategories.length === 0 ? (
+                      <p className="text-gray-500 text-sm">No subcategories available</p>
+                    ) : (
+                      filteredSubcategories.map((subcat) => (
+                        <label key={subcat._id} className="flex items-center space-x-2 mb-2">
+                          <input
+                            type="checkbox"
+                            checked={formData.subcategories.includes(subcat._id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setFormData({
+                                  ...formData, 
+                                  subcategories: [...formData.subcategories, subcat._id]
+                                });
+                              } else {
+                                setFormData({
+                                  ...formData, 
+                                  subcategories: formData.subcategories.filter(id => id !== subcat._id)
+                                });
+                              }
+                            }}
+                            className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                          />
+                          <span className="text-sm">{subcat.name}</span>
+                        </label>
+                      ))
+                    )}
+                  </div>
                 </div>
               </div>
 

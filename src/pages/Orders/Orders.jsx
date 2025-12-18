@@ -12,12 +12,20 @@ const Orders = () => {
     const fetchOrders = async () => {
       try {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
+        console.log('Orders page - User data:', user);
+        
         if (user._id || user.id) {
-          const userOrders = await getMyOrders(user._id || user.id);
-          setOrders(userOrders);
+          const userId = user._id || user.id;
+          console.log('Orders page - Fetching orders for user ID:', userId);
+          
+          const userOrders = await getMyOrders(userId);
+          console.log('Orders page - Received orders:', userOrders);
+          console.log('Orders page - Orders count:', userOrders?.length || 0);
+          
+          setOrders(Array.isArray(userOrders) ? userOrders : []);
           
           // Fetch user addresses
-          const userAddresses = await getUserAddresses(user._id || user.id);
+          const userAddresses = await getUserAddresses(userId);
           console.log('Fetched addresses:', userAddresses);
           const addressMap = {};
           if (userAddresses.address) {
@@ -27,8 +35,9 @@ const Orders = () => {
             });
           }
           console.log('Address map:', addressMap);
-          console.log('Orders:', userOrders);
           setAddresses(addressMap);
+        } else {
+          console.log('Orders page - No user ID found');
         }
       } catch (error) {
         console.error('Error fetching orders:', error);

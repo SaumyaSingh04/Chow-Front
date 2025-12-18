@@ -32,8 +32,23 @@ class ApiService {
       const response = await fetch(url, config);
       
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        let errorData;
+        try {
+          errorData = await response.json();
+          console.error('Server error response:', errorData);
+        } catch (e) {
+          errorData = { message: `HTTP error! status: ${response.status}` };
+        }
+        
+        const errorMessage = errorData.message || errorData.error || `HTTP error! status: ${response.status}`;
+        console.error('API Error Details:', {
+          status: response.status,
+          statusText: response.statusText,
+          url: url,
+          errorData: errorData
+        });
+        
+        throw new Error(errorMessage);
       }
       
       return await response.json();
@@ -57,6 +72,13 @@ class ApiService {
   put(endpoint, data) {
     return this.request(endpoint, {
       method: 'PUT',
+      body: data instanceof FormData ? data : JSON.stringify(data),
+    });
+  }
+
+  patch(endpoint, data) {
+    return this.request(endpoint, {
+      method: 'PATCH',
       body: data instanceof FormData ? data : JSON.stringify(data),
     });
   }
@@ -525,7 +547,7 @@ export const ApiProvider = ({ children }) => {
     // Orders
     getAllOrders: async () => {
       try {
-        const data = await apiService.get('/api/orders/all');
+        const data = await apiService.get('/api/orders');
         return data.orders || data;
       } catch (error) {
         console.error('Error fetching all orders:', error);
@@ -535,10 +557,22 @@ export const ApiProvider = ({ children }) => {
     
     updateOrderStatus: async (orderId, status) => {
       try {
-        const response = await apiService.put(`/api/orders/update/${orderId}`, { status });
+        console.log('API: Updating order status for ID:', orderId, 'Status:', status);
+        const response = await apiService.patch(`/api/orders/${orderId}/status`, { status });
+        console.log('API: Order status update response:', response);
         return response;
       } catch (error) {
         console.error('Error updating order status:', error);
+        throw error;
+      }
+    },
+    
+    updatePaymentStatus: async (orderId, paymentStatus) => {
+      try {
+        const response = await apiService.patch(`/api/orders/${orderId}/payment-status`, { paymentStatus });
+        return response;
+      } catch (error) {
+        console.error('Error updating payment status:', error);
         throw error;
       }
     },
@@ -553,12 +587,39 @@ export const ApiProvider = ({ children }) => {
       }
     },
     
-    getMyOrders: async (customerId) => {
+    getMyOrders: async (userId) => {
       try {
-        const data = await apiService.get(`/api/orders/my/${customerId}`);
-        return data.orders || data;
+        console.log('API: Fetching orders for user ID:', userId);
+        
+        // Try specific user endpoint first
+        try {
+          const data = await apiService.get(`/api/orders/my/${userId}`);
+          console.log('API: Orders response:', data);
+          const orders = data.orders || data;
+          console.log('API: Processed orders:', orders);
+          return orders;
+        } catch (specificError) {
+          console.log('Specific endpoint failed, trying getAllOrders and filtering...');
+          
+          // Fallback: Get all orders and filter by userId
+          const allOrdersData = await apiService.get('/api/orders');
+          const allOrders = allOrdersData.orders || allOrdersData;
+          console.log('API: All orders received:', allOrders);
+          
+          // Filter orders by userId
+          const userOrders = Array.isArray(allOrders) 
+            ? allOrders.filter(order => 
+                (order.userId === userId) || 
+                (typeof order.userId === 'object' && order.userId._id === userId)
+              )
+            : [];
+          
+          console.log('API: Filtered user orders:', userOrders);
+          return userOrders;
+        }
       } catch (error) {
-        console.error('Error fetching customer orders:', error);
+        console.error('Error fetching user orders:', error);
+        console.error('User ID used:', userId);
         return [];
       }
     },
@@ -566,11 +627,24 @@ export const ApiProvider = ({ children }) => {
     createOrder: async (orderData) => {
       try {
         console.log('API: Creating order with data:', orderData);
-        const response = await apiService.post('/api/orders/add', orderData);
+        
+        // Validate required fields before sending
+        if (!orderData.userId) {
+          throw new Error('User ID is required');
+        }
+        if (!orderData.items || orderData.items.length === 0) {
+          throw new Error('Order items are required');
+        }
+        if (!orderData.totalAmount) {
+          throw new Error('Total amount is required');
+        }
+        
+        const response = await apiService.post('/api/orders', orderData);
         console.log('API: Order creation response:', response);
         return response;
       } catch (error) {
         console.error('Error creating order:', error);
+        console.error('Order data that failed:', orderData);
         throw error;
       }
     },

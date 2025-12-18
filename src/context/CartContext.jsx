@@ -13,25 +13,48 @@ export const useCart = () => {
 
 export const CartProvider = ({ children }) => {
   const { showNotification } = useNotification();
-  const [cartItems, setCartItems] = useState(() => {
-    // Initialize state from localStorage
-    try {
-      const savedCart = localStorage.getItem('cart');
-      return savedCart ? JSON.parse(savedCart) : [];
-    } catch (error) {
-      console.error('Error loading cart from localStorage:', error);
-      return [];
-    }
-  });
+  const [cartItems, setCartItems] = useState([]);
+  const [currentUserId, setCurrentUserId] = useState(null);
 
-  // Save cart to localStorage whenever it changes
+  // Get current user ID from localStorage
   useEffect(() => {
-    try {
-      localStorage.setItem('cart', JSON.stringify(cartItems));
-    } catch (error) {
-      console.error('Error saving cart to localStorage:', error);
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
+    if (token && user) {
+      try {
+        const userData = JSON.parse(user);
+        setCurrentUserId(userData.id || userData._id);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+      }
     }
-  }, [cartItems]);
+  }, []);
+
+  // Load user-specific cart when user changes
+  useEffect(() => {
+    if (currentUserId) {
+      try {
+        const savedCart = localStorage.getItem(`cart_${currentUserId}`);
+        setCartItems(savedCart ? JSON.parse(savedCart) : []);
+      } catch (error) {
+        console.error('Error loading cart from localStorage:', error);
+        setCartItems([]);
+      }
+    } else {
+      setCartItems([]);
+    }
+  }, [currentUserId]);
+
+  // Save user-specific cart to localStorage whenever it changes
+  useEffect(() => {
+    if (currentUserId) {
+      try {
+        localStorage.setItem(`cart_${currentUserId}`, JSON.stringify(cartItems));
+      } catch (error) {
+        console.error('Error saving cart to localStorage:', error);
+      }
+    }
+  }, [cartItems, currentUserId]);
 
   const addToCart = (product, quantity = 1) => {
     setCartItems(prevItems => {
@@ -80,7 +103,17 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = () => {
     setCartItems([]);
+    if (currentUserId) {
+      localStorage.removeItem(`cart_${currentUserId}`);
+    }
     showNotification('Cart cleared!');
+  };
+
+  const clearUserCart = () => {
+    if (currentUserId) {
+      localStorage.removeItem(`cart_${currentUserId}`);
+      setCartItems([]);
+    }
   };
 
   const getCartTotal = () => {
@@ -97,6 +130,7 @@ export const CartProvider = ({ children }) => {
     removeFromCart,
     updateQuantity,
     clearCart,
+    clearUserCart,
     getCartTotal,
     getCartItemsCount
   };
