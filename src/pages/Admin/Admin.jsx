@@ -3,6 +3,7 @@ import Dashboard from './Dashboard.jsx';
 import Products from './Products.jsx';
 import Categories from './Categories.jsx';
 import Subcategories from './Subcategories.jsx';
+import AdminOrders from './AdminOrders.jsx';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -12,7 +13,8 @@ const Admin = () => {
     { id: 'dashboard', label: 'Dashboard', icon: '🏠' },
     { id: 'categories', label: 'Category', icon: '📂' },
     { id: 'subcategories', label: 'Subcategory', icon: '📁' },
-    { id: 'products', label: 'Product', icon: '📦' }
+    { id: 'products', label: 'Product', icon: '📦' },
+    { id: 'orders', label: 'Orders', icon: '📋' }
   ];
 
   const renderContent = () => {
@@ -21,6 +23,7 @@ const Admin = () => {
       case 'products': return <Products />;
       case 'categories': return <Categories />;
       case 'subcategories': return <Subcategories />;
+      case 'orders': return <AdminOrders />;
       default: return <Dashboard />;
     }
   };

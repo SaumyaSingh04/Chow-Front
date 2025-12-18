@@ -9,6 +9,7 @@ const Categories = () => {
     name: '',
     description: ''
   });
+  const [updating, setUpdating] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
 
@@ -19,6 +20,7 @@ const Categories = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setUpdating(true);
       if (editingCategory) {
         await updateCategory(editingCategory._id, formData);
       } else {
@@ -30,6 +32,8 @@ const Categories = () => {
       fetchCategories();
     } catch (error) {
       console.error('Error saving category:', error);
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -137,9 +141,13 @@ const Categories = () => {
               <div className="flex justify-end">
                 <button
                   type="submit"
-                  className="bg-[#d80a4e] text-white px-8 py-3 rounded-md hover:bg-[#b8083e] font-medium"
+                  disabled={updating}
+                  className="bg-[#d80a4e] text-white px-8 py-3 rounded-md hover:bg-[#b8083e] font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                  {editingCategory ? 'Update Category' : 'Add Category'}
+                  {updating && (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  )}
+                  {updating ? 'Updating...' : (editingCategory ? 'Update Category' : 'Add Category')}
                 </button>
               </div>
             </form>

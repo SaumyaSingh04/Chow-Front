@@ -533,6 +533,26 @@ export const ApiProvider = ({ children }) => {
       }
     },
     
+    updateOrderStatus: async (orderId, status) => {
+      try {
+        const response = await apiService.put(`/api/orders/update/${orderId}`, { status });
+        return response;
+      } catch (error) {
+        console.error('Error updating order status:', error);
+        throw error;
+      }
+    },
+    
+    updateItemStock: async (itemId, quantity) => {
+      try {
+        const response = await apiService.put(`/api/items/update-stock/${itemId}`, { quantity });
+        return response;
+      } catch (error) {
+        console.error('Error updating item stock:', error);
+        throw error;
+      }
+    },
+    
     getMyOrders: async (customerId) => {
       try {
         const data = await apiService.get(`/api/orders/my/${customerId}`);

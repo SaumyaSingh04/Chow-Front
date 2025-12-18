@@ -5,12 +5,15 @@ import Breadcrumb from '../../components/Breadcrumb.jsx';
 import ProductCard from '../../components/ProductCard.jsx';
 
 const Shop = () => {
-  const { fetchItems, fetchCategories, getItemsByCategory, searchItems, categories, items, loading } = useApi();
+  const { fetchItems, fetchCategories, getItemsByCategory, getSubcategoriesByCategory, getItemsBySubcategory, searchItems, categories, items, loading } = useApi();
   const [searchParams] = useSearchParams();
   const [filteredItems, setFilteredItems] = useState([]);
   const [activeCategory, setActiveCategory] = useState('all');
+  const [activeSubcategory, setActiveSubcategory] = useState(null);
+  const [subcategories, setSubcategories] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const categoryId = searchParams.get('category');
+  const subcategoryId = searchParams.get('subcategory');
   const urlSearchQuery = searchParams.get('search');
 
   useEffect(() => {
@@ -42,29 +45,54 @@ const Shop = () => {
         setActiveCategory('search');
       } else {
         setSearchQuery('');
-        if (categoryId) {
-        const categoryItems = await getItemsByCategory(categoryId);
-        setFilteredItems(categoryItems);
-        setActiveCategory(categoryId);
+        if (subcategoryId) {
+          const subcategoryItems = await getItemsBySubcategory(subcategoryId);
+          setFilteredItems(subcategoryItems);
+          setActiveSubcategory(subcategoryId);
+          // Find parent category for subcategory display
+          const allSubcats = await getSubcategoriesByCategory(categoryId);
+          setSubcategories(allSubcats);
+          setActiveCategory(categoryId);
+        } else if (categoryId) {
+          const categoryItems = await getItemsByCategory(categoryId);
+          setFilteredItems(categoryItems);
+          setActiveCategory(categoryId);
+          setActiveSubcategory(null);
+          // Load subcategories for this category
+          const categorySubcats = await getSubcategoriesByCategory(categoryId);
+          setSubcategories(categorySubcats);
         } else {
           const allItems = items.length > 0 ? items : await fetchItems();
           setFilteredItems(allItems);
           setActiveCategory('all');
+          setActiveSubcategory(null);
+          setSubcategories([]);
         }
       }
     };
     loadData();
-  }, [categoryId, urlSearchQuery]);
+  }, [categoryId, subcategoryId, urlSearchQuery]);
 
   const handleCategoryFilter = async (catId) => {
     setActiveCategory(catId);
+    setActiveSubcategory(null);
     if (catId === 'all') {
       const allItems = items.length > 0 ? items : await fetchItems();
       setFilteredItems(allItems);
+      setSubcategories([]);
     } else {
       const categoryItems = await getItemsByCategory(catId);
       setFilteredItems(categoryItems);
+      // Load subcategories for this category
+      const categorySubcats = await getSubcategoriesByCategory(catId);
+      setSubcategories(categorySubcats);
     }
+  };
+
+  const handleSubcategoryFilter = async (subcatId) => {
+    setActiveSubcategory(subcatId);
+    const subcategoryItems = await getItemsBySubcategory(subcatId);
+    setFilteredItems(subcategoryItems);
   };
 
   if (loading) {
@@ -164,7 +192,7 @@ const Shop = () => {
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex justify-center mb-8">
+        <div className="flex justify-center mb-6">
           <div className="flex space-x-6 flex-wrap">
             <button 
               onClick={() => handleCategoryFilter('all')}
@@ -191,6 +219,37 @@ const Shop = () => {
             ))}
           </div>
         </div>
+
+        {/* Subcategory Tabs */}
+        {subcategories.length > 0 && (
+          <div className="flex justify-center mb-8">
+            <div className="flex space-x-4 flex-wrap">
+              <button 
+                onClick={() => handleCategoryFilter(activeCategory)}
+                className={`text-sm font-medium pb-1 px-3 py-1 rounded-full ${
+                  !activeSubcategory 
+                    ? 'bg-[#d80a4e] text-white' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                All {categories.find(c => c._id === activeCategory)?.name}
+              </button>
+              {subcategories.map((subcategory) => (
+                <button 
+                  key={subcategory._id}
+                  onClick={() => handleSubcategoryFilter(subcategory._id)}
+                  className={`text-sm font-medium pb-1 px-3 py-1 rounded-full ${
+                    activeSubcategory === subcategory._id 
+                      ? 'bg-[#d80a4e] text-white' 
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {subcategory.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">

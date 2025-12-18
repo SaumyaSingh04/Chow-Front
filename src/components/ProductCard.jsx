@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext.jsx';
 
 const ProductCard = ({ product, showSpecialTag = false }) => {
@@ -10,7 +11,7 @@ const ProductCard = ({ product, showSpecialTag = false }) => {
   return (
     <div className="group">
       {/* Image */}
-      <div className="overflow-hidden rounded-md relative">
+      <Link to={`/product/${product._id}`} className="block overflow-hidden rounded-md relative">
         <img
           src={product.images?.[0]}
           alt={product.name}
@@ -23,15 +24,17 @@ const ProductCard = ({ product, showSpecialTag = false }) => {
             </div>
           </div>
         )}
-      </div>
+      </Link>
 
       {/* Content */}
       <div className="pt-1 relative h-20 overflow-hidden">
         {/* Default Content */}
         <div className="transition-all duration-700 ease-out transform group-hover:translate-y-[-80px] group-hover:opacity-0">
-          <h4 className="text-[15px] font-medium text-black mb-0">
-            {product.name}
-          </h4>
+          <Link to={`/product/${product._id}`}>
+            <h4 className="text-[15px] font-medium text-black mb-0 hover:text-[#d80a4e]">
+              {product.name}
+            </h4>
+          </Link>
           <span className="block text-[16px] font-semibold text-black mb-1">
             ₹{product.price}
           </span>

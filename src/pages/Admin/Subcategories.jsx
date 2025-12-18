@@ -11,6 +11,7 @@ const Subcategories = () => {
     description: '',
     category: ''
   });
+  const [updating, setUpdating] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
 
@@ -34,6 +35,7 @@ const Subcategories = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setUpdating(true);
       if (editingSubcategory) {
         await updateSubcategory(editingSubcategory._id, formData);
       } else {
@@ -45,6 +47,8 @@ const Subcategories = () => {
       loadData();
     } catch (error) {
       console.error('Error saving subcategory:', error);
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -180,9 +184,13 @@ const Subcategories = () => {
               <div className="flex justify-end">
                 <button
                   type="submit"
-                  className="bg-[#d80a4e] text-white px-8 py-3 rounded-md hover:bg-[#b8083e] font-medium"
+                  disabled={updating}
+                  className="bg-[#d80a4e] text-white px-8 py-3 rounded-md hover:bg-[#b8083e] font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                  {editingSubcategory ? 'Update Subcategory' : 'Add Subcategory'}
+                  {updating && (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  )}
+                  {updating ? 'Updating...' : (editingSubcategory ? 'Update Subcategory' : 'Add Subcategory')}
                 </button>
               </div>
             </form>

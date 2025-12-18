@@ -21,6 +21,7 @@ import Checkout from './pages/Checkout/Checkout';
 import Payment from './pages/Payment/Payment';
 import Orders from './pages/Orders/Orders';
 import Admin from './pages/Admin/Admin';
+import ProductDetail from './pages/ProductDetail/ProductDetail';
 
 const AppContent = () => {
   const location = useLocation();
@@ -38,6 +39,7 @@ const AppContent = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/specials" element={<Specials />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
