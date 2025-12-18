@@ -3,7 +3,7 @@ import { ShoppingCart, Users, CheckCircle, DollarSign, Package, FolderOpen, Laye
 import { useApi } from "../../context/ApiContext.jsx";
 
 const Dashboard = () => {
-  const { getDashboardStats, getFailedOrders, fetchItems, fetchCategories, getAllSubcategories, items, categories, loading } = useApi();
+  const { getDashboardStats, getFailedOrders, fetchItems, fetchCategories, getAllSubcategories, items, categories, loading, dashboardRefreshTrigger } = useApi();
   const [stats, setStats] = useState({
     newOrders: 0,
     totalCustomers: 0,
@@ -14,7 +14,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     loadDashboardStats();
-  }, [items, categories]);
+  }, [items, categories, dashboardRefreshTrigger]);
 
   const loadDashboardStats = async () => {
     try {

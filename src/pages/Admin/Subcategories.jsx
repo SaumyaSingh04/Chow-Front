@@ -9,7 +9,7 @@ const Subcategories = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    category: ''
+    categories: []
   });
   const [updating, setUpdating] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -43,7 +43,7 @@ const Subcategories = () => {
       }
       setShowModal(false);
       setEditingSubcategory(null);
-      setFormData({ name: '', description: '', category: '' });
+      setFormData({ name: '', description: '', categories: [] });
       loadData();
     } catch (error) {
       console.error('Error saving subcategory:', error);
@@ -57,7 +57,11 @@ const Subcategories = () => {
     setFormData({
       name: subcategory.name || '',
       description: subcategory.description || '',
-      category: typeof subcategory.category === 'object' ? subcategory.category._id : subcategory.category || ''
+      categories: Array.isArray(subcategory.categories) 
+        ? subcategory.categories.map(cat => typeof cat === 'object' ? cat._id : cat)
+        : subcategory.category 
+          ? [typeof subcategory.category === 'object' ? subcategory.category._id : subcategory.category]
+          : []
     });
     setShowModal(true);
   };
@@ -90,11 +94,25 @@ const Subcategories = () => {
     return `${startIndex} – ${endIndex} of ${length}`;
   };
 
-  const getCategoryName = (categoryRef) => {
-    if (typeof categoryRef === 'object' && categoryRef?.name) {
-      return categoryRef.name;
+  const getCategoryNames = (categoriesRef) => {
+    if (!categoriesRef) return 'No categories';
+    
+    // Handle array of categories
+    if (Array.isArray(categoriesRef)) {
+      return categoriesRef.map(catRef => {
+        if (typeof catRef === 'object' && catRef?.name) {
+          return catRef.name;
+        }
+        const category = categories.find(cat => cat._id === catRef);
+        return category ? category.name : 'Unknown';
+      }).join(', ');
     }
-    const category = categories.find(cat => cat._id === categoryRef);
+    
+    // Handle single category (backward compatibility)
+    if (typeof categoriesRef === 'object' && categoriesRef?.name) {
+      return categoriesRef.name;
+    }
+    const category = categories.find(cat => cat._id === categoriesRef);
     return category ? category.name : 'Unknown';
   };
 
@@ -111,7 +129,7 @@ const Subcategories = () => {
               onClick={() => {
                 setShowModal(false);
                 setEditingSubcategory(null);
-                setFormData({ name: '', description: '', category: '' });
+                setFormData({ name: '', description: '', categories: [] });
               }}
               className="bg-orange-400 text-white px-4 py-2 rounded-md hover:bg-orange-500 flex items-center gap-2"
             >
@@ -144,22 +162,40 @@ const Subcategories = () => {
                   />
                 </div>
 
-                {/* Category Field */}
+                {/* Categories Field */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category <span className="text-red-500">*</span>
+                    Categories (Multiple) <span className="text-red-500">*</span>
                   </label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({...formData, category: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    required
-                  >
-                    <option value="">Select Category</option>
-                    {categories.map((cat) => (
-                      <option key={cat._id} value={cat._id}>{cat.name}</option>
-                    ))}
-                  </select>
+                  <div className="border border-gray-300 rounded-md bg-gray-50 p-3 max-h-32 overflow-y-auto">
+                    {categories.length === 0 ? (
+                      <p className="text-gray-500 text-sm">No categories available</p>
+                    ) : (
+                      categories.map((cat) => (
+                        <label key={cat._id} className="flex items-center space-x-2 mb-2">
+                          <input
+                            type="checkbox"
+                            checked={formData.categories.includes(cat._id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setFormData({
+                                  ...formData, 
+                                  categories: [...formData.categories, cat._id]
+                                });
+                              } else {
+                                setFormData({
+                                  ...formData, 
+                                  categories: formData.categories.filter(id => id !== cat._id)
+                                });
+                              }
+                            }}
+                            className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                          />
+                          <span className="text-sm">{cat.name}</span>
+                        </label>
+                      ))
+                    )}
+                  </div>
                 </div>
 
                 {/* Empty third column for layout */}
@@ -219,7 +255,7 @@ const Subcategories = () => {
             <thead className="bg-[#d80a4e] text-white">
               <tr>
                 <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">Name</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">Category Name</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">Categories</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">Description</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">Action</th>
               </tr>
@@ -228,7 +264,7 @@ const Subcategories = () => {
               {getCurrentPageItems().map((subcategory, index) => (
                 <tr key={subcategory._id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">{subcategory.name}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{getCategoryName(subcategory.category)}</td>
+                  <td className="px-6 py-4 text-sm text-gray-700">{getCategoryNames(subcategory.categories || subcategory.category)}</td>
                   <td className="px-6 py-4 text-sm text-gray-700">{subcategory.description || 'No description'}</td>
                   <td className="px-6 py-4 text-sm">
                     <button

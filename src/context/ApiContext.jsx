@@ -96,6 +96,7 @@ export const ApiProvider = ({ children }) => {
   const [categories, setCategories] = useState([]);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [dashboardRefreshTrigger, setDashboardRefreshTrigger] = useState(0);
 
   const api = {
     baseUrl: BASE_URL,
@@ -105,6 +106,7 @@ export const ApiProvider = ({ children }) => {
     categories,
     items,
     loading,
+    dashboardRefreshTrigger,
     
     // Categories
     fetchCategories: async () => {
@@ -570,11 +572,19 @@ export const ApiProvider = ({ children }) => {
     updatePaymentStatus: async (orderId, paymentStatus) => {
       try {
         const response = await apiService.patch(`/api/orders/${orderId}/payment-status`, { paymentStatus });
+        // Trigger dashboard refresh when payment is marked as paid
+        if (paymentStatus === 'paid') {
+          setDashboardRefreshTrigger(prev => prev + 1);
+        }
         return response;
       } catch (error) {
         console.error('Error updating payment status:', error);
         throw error;
       }
+    },
+    
+    refreshDashboard: () => {
+      setDashboardRefreshTrigger(prev => prev + 1);
     },
     
     updateItemStock: async (itemId, quantity) => {
