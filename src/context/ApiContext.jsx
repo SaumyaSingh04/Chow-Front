@@ -166,6 +166,33 @@ export const ApiProvider = ({ children }) => {
       }
     },
     
+    getItemsBySubcategory: async (subcategoryId) => {
+      try {
+        console.log('API: Filtering items for subcategory:', subcategoryId);
+        const allItems = await apiService.get('/api/items/all');
+        const items = allItems.items || allItems;
+        console.log('API: Total items to filter:', items.length);
+        
+        const filtered = items.filter(item => {
+          const itemSubcategories = Array.isArray(item.subcategories) ? item.subcategories : [];
+          console.log(`Item "${item.name}" subcategories:`, itemSubcategories);
+          
+          return itemSubcategories.some(subcat => {
+            const subcatId = typeof subcat === 'object' ? subcat._id : subcat;
+            const match = subcatId === subcategoryId;
+            if (match) console.log(`✓ Match found: ${item.name}`);
+            return match;
+          });
+        });
+        
+        console.log('API: Final filtered count:', filtered.length);
+        return filtered;
+      } catch (error) {
+        console.error('Error filtering items by subcategory:', error);
+        return [];
+      }
+    },
+    
     getFeaturedItems: async (type = 'bestseller') => {
       try {
         const data = await apiService.get(`/api/items/featured/${type}`);

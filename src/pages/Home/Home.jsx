@@ -5,17 +5,38 @@ import { FaTruck, FaShieldAlt, FaCreditCard, FaHeadset, FaGift, FaBox, FaStar, F
 import ProductCard from "../../components/ProductCard.jsx";
 
 const Home = () => {
-  const { fetchItems, getFeaturedItems, items, loading } = useApi();
+  const { fetchItems, getFeaturedItems, getSubcategories, fetchCategories, items, categories, loading } = useApi();
   const [featured, setFeatured] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
+  const [filteredItems, setFilteredItems] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [showVideo, setShowVideo] = useState(false);
 
   useEffect(() => {
     const load = async () => {
       await fetchItems();
+      await fetchCategories();
       setFeatured(await getFeaturedItems("popular"));
+      const subcats = await getSubcategories();
+      setSubcategories(Array.isArray(subcats) ? subcats : subcats?.subcategories || []);
     };
     load();
   }, []);
+
+  useEffect(() => {
+    if (selectedCategory) {
+      const filtered = items.filter(item => {
+        const itemCategories = Array.isArray(item.categories) ? item.categories : [item.category];
+        return itemCategories.some(cat => {
+          const catId = typeof cat === 'object' ? cat._id : cat;
+          return catId === selectedCategory;
+        });
+      });
+      setFilteredItems(filtered);
+    } else {
+      setFilteredItems(items.slice(0, 8));
+    }
+  }, [items, selectedCategory]);
 
   if (loading) {
     return (
@@ -37,22 +58,19 @@ const Home = () => {
             <h4 className="font-semibold mb-3 text-[#d80a4e] flex items-center">
               <FaFolder className="mr-2" /> Categories
             </h4>
-            {[
-              [<FaStar />, "Customized"],
-              [<FaGift />, "Gift Boxes"],
-              [<FaBox />, "Hampers"],
-              [<FaSmile />, "Box of Smiles"],
-              [<FaFire />, "Our Specials"],
-            ].map((c, i) => (
-              <Link 
-                key={i} 
-                to={c[1] === 'Our Specials' ? '/specials' : `/shop?category=${c[1].toLowerCase().replace(' ', '-')}`}
-                className="flex items-center gap-2 text-sm py-2 px-2 hover:bg-pink-50 hover:text-[#d80a4e] transition-colors cursor-pointer rounded"
-              >
-                <span className="text-[#d80a4e] text-sm">{c[0]}</span>
-                {c[1]}
-              </Link>
-            ))}
+            {subcategories.slice(0, 5).map((subcat, i) => {
+              const icons = [<FaStar />, <FaGift />, <FaBox />, <FaSmile />, <FaFire />];
+              return (
+                <Link 
+                  key={subcat._id} 
+                  to={`/shop?subcategory=${subcat._id}`}
+                  className="flex items-center gap-2 text-sm py-2 px-2 hover:bg-pink-50 hover:text-[#d80a4e] transition-colors cursor-pointer rounded"
+                >
+                  <span className="text-[#d80a4e] text-sm">{icons[i] || <FaFolder />}</span>
+                  {subcat.name}
+                </Link>
+              );
+            })}
             
             <div className="mt-4 pt-3 border-t border-gray-200">
               <div className="space-y-1 text-sm text-black font-bold">
@@ -136,43 +154,34 @@ const Home = () => {
     {/* Header */}
     <div className="flex justify-between items-end mb-10">
       <h2 className="text-4xl font-bold text-black">
-        Popular{" "}
+        {categories[0]?.name || "Popular"}{" "}
         <span className="text-[#d80a4e] underline underline-offset-4">
-          Sweets
+          {categories[1]?.name || "Sweets"}
         </span>
       </h2>
 
       <div className="flex gap-10 text-[15px] font-medium">
-        <Link
-          to="/shop"
-          className="text-[#d80a4e] underline underline-offset-4"
+        <button
+          onClick={() => setSelectedCategory(null)}
+          className={`${!selectedCategory ? 'text-[#d80a4e] underline underline-offset-4' : 'text-black hover:text-[#d80a4e]'}`}
         >
           All
-        </Link>
-        <Link
-          to="/shop?category=gift"
-          className="text-black hover:text-[#d80a4e]"
-        >
-          Gift
-        </Link>
-        <Link
-          to="/shop?category=Festival"
-          className="text-black hover:text-[#d80a4e]"
-        >
-          Festival
-        </Link>
-        <Link
-          to="/specials"
-          className="text-black hover:text-[#d80a4e]"
-        >
-          Popular
-        </Link>
+        </button>
+        {categories.slice(0, 3).map((category) => (
+          <button
+            key={category._id}
+            onClick={() => setSelectedCategory(category._id)}
+            className={`${selectedCategory === category._id ? 'text-[#d80a4e] underline underline-offset-4' : 'text-black hover:text-[#d80a4e]'}`}
+          >
+            {category.name}
+          </button>
+        ))}
       </div>
     </div>
 
     {/* Products Grid */}
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-      {items.map(p => (
+      {filteredItems.map(p => (
         <ProductCard key={p._id} product={p} />
       ))}
     </div>

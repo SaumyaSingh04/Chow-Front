@@ -5,7 +5,7 @@ import Breadcrumb from '../../components/Breadcrumb.jsx';
 import ProductCard from '../../components/ProductCard.jsx';
 
 const Shop = () => {
-  const { fetchItems, fetchCategories, getItemsByCategory, getSubcategoriesByCategory, getItemsBySubcategory, searchItems, categories, items, loading } = useApi();
+  const { fetchItems, fetchCategories, getItemsByCategory, getSubcategoriesByCategory, getItemsBySubcategory, getSubcategories, searchItems, categories, items, loading } = useApi();
   const [searchParams] = useSearchParams();
   const [filteredItems, setFilteredItems] = useState([]);
   const [activeCategory, setActiveCategory] = useState('all');
@@ -46,13 +46,44 @@ const Shop = () => {
       } else {
         setSearchQuery('');
         if (subcategoryId) {
-          const subcategoryItems = await getItemsBySubcategory(subcategoryId);
+          console.log('=== SUBCATEGORY FILTERING DEBUG ===');
+          console.log('Target subcategory ID:', subcategoryId);
+          
+          // Debug: Check all items and their subcategories
+          const allItems = items.length > 0 ? items : await fetchItems();
+          console.log('Total items in database:', allItems.length);
+          
+          allItems.forEach(item => {
+            console.log(`Item: ${item.name}`);
+            console.log('  - subcategories:', item.subcategories);
+            console.log('  - category:', item.category);
+            console.log('  - categories:', item.categories);
+          });
+          
+          let subcategoryItems = await getItemsBySubcategory(subcategoryId);
+          console.log('API filtered items count:', subcategoryItems.length);
+          
+          // Manual backup filter if API returns empty
+          if (subcategoryItems.length === 0) {
+            console.log('API returned empty, trying manual filter...');
+            subcategoryItems = allItems.filter(item => {
+              const itemSubcats = Array.isArray(item.subcategories) ? item.subcategories : [];
+              return itemSubcats.some(subcat => {
+                const subcatId = typeof subcat === 'object' ? subcat._id : subcat;
+                const match = subcatId === subcategoryId;
+                if (match) console.log(`Manual match found: ${item.name}`);
+                return match;
+              });
+            });
+            console.log('Manual filter result:', subcategoryItems.length);
+          }
+          
           setFilteredItems(subcategoryItems);
           setActiveSubcategory(subcategoryId);
-          // Find parent category for subcategory display
-          const allSubcats = await getSubcategoriesByCategory(categoryId);
-          setSubcategories(allSubcats);
-          setActiveCategory(categoryId);
+          
+          const allSubcats = await getSubcategories();
+          setSubcategories(Array.isArray(allSubcats) ? allSubcats : allSubcats?.subcategories || []);
+          setActiveCategory('subcategory');
         } else if (categoryId) {
           const categoryItems = await getItemsByCategory(categoryId);
           setFilteredItems(categoryItems);
