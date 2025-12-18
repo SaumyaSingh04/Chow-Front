@@ -12,32 +12,23 @@ const Orders = () => {
     const fetchOrders = async () => {
       try {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
-        console.log('Orders page - User data:', user);
         
         if (user._id || user.id) {
           const userId = user._id || user.id;
-          console.log('Orders page - Fetching orders for user ID:', userId);
           
           const userOrders = await getMyOrders(userId);
-          console.log('Orders page - Received orders:', userOrders);
-          console.log('Orders page - Orders count:', userOrders?.length || 0);
-          
           setOrders(Array.isArray(userOrders) ? userOrders : []);
           
           // Fetch user addresses
           const userAddresses = await getUserAddresses(userId);
-          console.log('Fetched addresses:', userAddresses);
           const addressMap = {};
-          if (userAddresses.address) {
-            userAddresses.address.forEach(addr => {
-              console.log('Address ID:', addr._id, 'Address:', addr);
+          const addressList = userAddresses.addresses || userAddresses.address || [];
+          if (addressList.length > 0) {
+            addressList.forEach(addr => {
               addressMap[addr._id] = addr;
             });
           }
-          console.log('Address map:', addressMap);
           setAddresses(addressMap);
-        } else {
-          console.log('Orders page - No user ID found');
         }
       } catch (error) {
         console.error('Error fetching orders:', error);
@@ -177,12 +168,7 @@ const Orders = () => {
                         Delivery Information
                       </h5>
                       <div className="space-y-2 text-sm">
-                        {(() => {
-                          console.log('Looking for address ID:', order.addressId);
-                          console.log('Available addresses:', Object.keys(addresses));
-                          console.log('Address found:', addresses[order.addressId]);
-                          return addresses[order.addressId];
-                        })() ? (
+                        {addresses[order.addressId] ? (
                           <>
                             <p className="font-medium">{addresses[order.addressId].firstName} {addresses[order.addressId].lastName}</p>
                             <p className="text-gray-600">{addresses[order.addressId].street}</p>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApi } from '../../context/ApiContext.jsx';
 
 const AdminOrders = () => {
-  const { getAllOrders, updateOrderStatus, updatePaymentStatus, updateItemStock } = useApi();
+  const { getAllOrders, updateOrderStatus, updatePaymentStatus } = useApi();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingOrder, setUpdatingOrder] = useState(null);
@@ -56,45 +56,12 @@ const AdminOrders = () => {
     }
   };
 
-  const handleStatusUpdate = async (orderId, newStatus, orderItems) => {
+  const handleStatusUpdate = async (orderId, newStatus) => {
     try {
-      console.log('Updating order:', orderId, 'to status:', newStatus);
       setUpdatingOrder(orderId);
       
-      // Update order status
-      const response = await updateOrderStatus(orderId, newStatus);
-      console.log('Order status update response:', response);
+      await updateOrderStatus(orderId, newStatus);
       
-      // If order is completed, update stock for all items
-      if (newStatus === 'delivered') {
-        console.log('Updating stock for items:', orderItems);
-        for (const item of orderItems) {
-          const itemId = item.itemId || item._id || item.id || item.productId;
-          const itemName = item.name || item.productName || 'Unknown Item';
-          
-          if (!itemId) {
-            console.warn('No item ID found for item:', item);
-            alert(`Warning: Could not update stock for ${itemName} - No item ID found`);
-            continue;
-          }
-          
-          if (!item.quantity || item.quantity <= 0) {
-            console.warn('Invalid quantity for item:', item);
-            continue;
-          }
-          
-          try {
-            console.log(`Updating stock for item ID: ${itemId}, quantity: -${item.quantity}`);
-            const stockResponse = await updateItemStock(itemId, -item.quantity);
-            console.log(`Stock updated for item ${itemName}:`, stockResponse);
-          } catch (error) {
-            console.error(`Error updating stock for item ${itemName}:`, error);
-            alert(`Warning: Could not update stock for ${itemName}: ${error.message}`);
-          }
-        }
-      }
-      
-      // Update state directly instead of refetching
       setOrders(prevOrders => 
         prevOrders.map(order => 
           order._id === orderId 
@@ -103,12 +70,14 @@ const AdminOrders = () => {
         )
       );
       
-      alert(`Order status updated to ${newStatus} successfully!`);
+      const message = newStatus === 'delivered' 
+        ? 'Order marked as delivered and stock updated successfully!' 
+        : `Order status updated to ${newStatus} successfully!`;
+      alert(message);
       
     } catch (error) {
       console.error('Error updating order:', error);
-      const errorMessage = error.message || 'Unknown error occurred';
-      alert(`Error updating order status: ${errorMessage}`);
+      alert(`Error updating order status: ${error.message || 'Unknown error occurred'}`);
     } finally {
       setUpdatingOrder(null);
     }
@@ -224,14 +193,14 @@ const AdminOrders = () => {
                         {order.status === 'pending' && (
                           <>
                             <button
-                              onClick={() => handleStatusUpdate(order._id, 'confirmed', order.items)}
+                              onClick={() => handleStatusUpdate(order._id, 'confirmed')}
                               disabled={updatingOrder === order._id}
                               className="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600 disabled:opacity-50"
                             >
                               {updatingOrder === order._id ? 'Updating...' : 'Confirm'}
                             </button>
                             <button
-                              onClick={() => handleStatusUpdate(order._id, 'shipped', order.items)}
+                              onClick={() => handleStatusUpdate(order._id, 'shipped')}
                               disabled={updatingOrder === order._id}
                               className="bg-purple-500 text-white px-3 py-1 rounded text-xs hover:bg-purple-600 disabled:opacity-50"
                             >
@@ -242,14 +211,14 @@ const AdminOrders = () => {
                         {order.status === 'confirmed' && (
                           <>
                             <button
-                              onClick={() => handleStatusUpdate(order._id, 'shipped', order.items)}
+                              onClick={() => handleStatusUpdate(order._id, 'shipped')}
                               disabled={updatingOrder === order._id}
                               className="bg-purple-500 text-white px-3 py-1 rounded text-xs hover:bg-purple-600 disabled:opacity-50"
                             >
                               {updatingOrder === order._id ? 'Updating...' : 'Ship'}
                             </button>
                             <button
-                              onClick={() => handleStatusUpdate(order._id, 'delivered', order.items)}
+                              onClick={() => handleStatusUpdate(order._id, 'delivered')}
                               disabled={updatingOrder === order._id}
                               className="bg-green-500 text-white px-3 py-1 rounded text-xs hover:bg-green-600 disabled:opacity-50"
                             >
@@ -259,7 +228,7 @@ const AdminOrders = () => {
                         )}
                         {order.status === 'shipped' && (
                           <button
-                            onClick={() => handleStatusUpdate(order._id, 'delivered', order.items)}
+                            onClick={() => handleStatusUpdate(order._id, 'delivered')}
                             disabled={updatingOrder === order._id}
                             className="bg-green-500 text-white px-3 py-1 rounded text-xs hover:bg-green-600 disabled:opacity-50"
                           >
@@ -268,7 +237,7 @@ const AdminOrders = () => {
                         )}
                         {(order.status === 'pending' || order.status === 'confirmed' || order.status === 'shipped') && (
                           <button
-                            onClick={() => handleStatusUpdate(order._id, 'cancelled', order.items)}
+                            onClick={() => handleStatusUpdate(order._id, 'cancelled')}
                             disabled={updatingOrder === order._id}
                             className="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600 disabled:opacity-50"
                           >
@@ -345,13 +314,29 @@ const AdminOrders = () => {
                 </div>
               </div>
               
-              {selectedOrder.deliveryAddress && (
+              <div>
+                <span className="font-medium text-gray-700">Delivery Information:</span>
+                <div className="mt-1 p-3 bg-gray-50 rounded">
+                  {selectedOrder.deliveryAddress ? (
+                    <>
+                      <div className="font-medium">{selectedOrder.deliveryAddress.fullName}</div>
+                      <div>{selectedOrder.deliveryAddress.street}</div>
+                      {selectedOrder.deliveryAddress.apartment && <div>{selectedOrder.deliveryAddress.apartment}</div>}
+                      <div>{selectedOrder.deliveryAddress.city}, {selectedOrder.deliveryAddress.state} {selectedOrder.deliveryAddress.postcode}</div>
+                      <div>{selectedOrder.deliveryAddress.phone}</div>
+                      <div>{selectedOrder.deliveryAddress.email}</div>
+                    </>
+                  ) : (
+                    <div className="text-gray-500">Delivery details not available</div>
+                  )}
+                </div>
+              </div>
+              
+              {selectedOrder.notes && (
                 <div>
-                  <span className="font-medium text-gray-700">Delivery Address:</span>
+                  <span className="font-medium text-gray-700">Order Notes:</span>
                   <div className="mt-1 p-3 bg-gray-50 rounded">
-                    <div>{selectedOrder.deliveryAddress.street}</div>
-                    <div>{selectedOrder.deliveryAddress.city}, {selectedOrder.deliveryAddress.state} {selectedOrder.deliveryAddress.pincode}</div>
-                    {selectedOrder.deliveryAddress.phone && <div>Phone: {selectedOrder.deliveryAddress.phone}</div>}
+                    {selectedOrder.notes}
                   </div>
                 </div>
               )}

@@ -281,7 +281,7 @@ export const ApiProvider = ({ children }) => {
     getUserAddresses: async (userId) => {
       try {
         console.log('API: Fetching addresses for user:', userId);
-        const response = await apiService.get(`/api/auth/address/${userId}`);
+        const response = await apiService.get(`/api/users/${userId}/addresses`);
         console.log('API: Get addresses response:', response);
         return response;
       } catch (error) {
@@ -293,7 +293,7 @@ export const ApiProvider = ({ children }) => {
     addUserAddress: async (userId, addressData) => {
       try {
         console.log('API: Adding address for user:', userId, 'Data:', addressData);
-        const response = await apiService.post(`/api/auth/address/${userId}`, addressData);
+        const response = await apiService.post(`/api/users/${userId}/addresses`, addressData);
         console.log('API: Add address response:', response);
         return response;
       } catch (error) {
@@ -305,7 +305,7 @@ export const ApiProvider = ({ children }) => {
     updateUserAddress: async (userId, addressId, addressData) => {
       try {
         console.log('API: Updating address for user:', userId, 'Address ID:', addressId, 'Data:', addressData);
-        const response = await apiService.put(`/api/auth/address/${userId}/${addressId}`, addressData);
+        const response = await apiService.put(`/api/users/${userId}/addresses/${addressId}`, addressData);
         console.log('API: Update address response:', response);
         return response;
       } catch (error) {
@@ -317,7 +317,7 @@ export const ApiProvider = ({ children }) => {
     deleteUserAddress: async (userId, addressId) => {
       try {
         console.log('API: Deleting address for user:', userId, 'Address ID:', addressId);
-        const response = await apiService.delete(`/api/auth/address/${userId}/${addressId}`);
+        const response = await apiService.delete(`/api/users/${userId}/addresses/${addressId}`);
         console.log('API: Delete address response:', response);
         return response;
       } catch (error) {

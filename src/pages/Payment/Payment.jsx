@@ -6,7 +6,7 @@ import Breadcrumb from '../../components/Breadcrumb.jsx';
 
 const Payment = () => {
   const { cartItems, getCartTotal, clearCart } = useCart();
-  const { createOrder, addUserAddress } = useApi();
+  const { createOrder, addUserAddress, getUserAddresses } = useApi();
   const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,41 +33,48 @@ const Payment = () => {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       const billingDetails = JSON.parse(localStorage.getItem('billingDetails') || '{}');
       
-      // First create/get address ID
-      let addressId;
-      if (billingDetails && Object.keys(billingDetails).length > 0) {
-        const addressData = {
-          addressType: billingDetails.addressType || 'home',
-          firstName: billingDetails.firstName,
-          lastName: billingDetails.lastName,
-          street: billingDetails.address,
-          apartment: billingDetails.apartment || '',
-          city: billingDetails.city,
-          state: billingDetails.state,
-          postcode: billingDetails.postcode,
-          email: billingDetails.email,
-          phone: billingDetails.phone,
-          orderNotes: billingDetails.orderNotes || ''
-        };
-        
-        const addressResponse = await addUserAddress(user._id || user.id, addressData);
-        console.log('Address response:', addressResponse);
-        // Extract address ID from response - it's in an array
-        if (addressResponse.address && Array.isArray(addressResponse.address)) {
-          addressId = addressResponse.address[0]._id;
-        } else if (addressResponse._id) {
-          addressId = addressResponse._id;
-        } else {
-          throw new Error('Failed to get address ID');
-        }
-      } else {
-        // Use default address ID or create a temporary one
-        addressId = '000000000000000000000000'; // Placeholder
+      // Always create new address with current billing details
+      const addressData = {
+        addressType: billingDetails.addressType || 'delivery',
+        firstName: billingDetails.firstName,
+        lastName: billingDetails.lastName,
+        street: billingDetails.address,
+        apartment: billingDetails.apartment || '',
+        city: billingDetails.city,
+        state: billingDetails.state,
+        postcode: billingDetails.postcode,
+        email: billingDetails.email,
+        phone: billingDetails.phone,
+        orderNotes: billingDetails.orderNotes || ''
+      };
+      
+      const newAddressResponse = await addUserAddress(user._id || user.id, addressData);
+      const addressId = newAddressResponse.address?._id || newAddressResponse.addressId || newAddressResponse._id;
+      
+      if (!addressId) {
+        throw new Error('Failed to create address - no address ID returned');
       }
+      
+      console.log('Using addressId:', addressId);
+      
+      // Create deliveryAddress object for direct access
+      const deliveryAddress = {
+        firstName: billingDetails.firstName,
+        lastName: billingDetails.lastName,
+        street: billingDetails.address,
+        apartment: billingDetails.apartment || '',
+        city: billingDetails.city,
+        state: billingDetails.state,
+        postcode: billingDetails.postcode,
+        email: billingDetails.email,
+        phone: billingDetails.phone,
+        orderNotes: billingDetails.orderNotes || ''
+      };
       
       const orderData = {
         userId: user._id || user.id,
         addressId: addressId,
+        deliveryAddress: deliveryAddress,
         items: cartItems.map(item => ({
           itemId: item._id,
           quantity: item.quantity,
@@ -78,13 +85,8 @@ const Payment = () => {
         paymentStatus: 'pending'
       };
 
-      console.log('Final order data being sent:', orderData);
-      console.log('User data:', user);
-      console.log('Cart items:', cartItems);
-      console.log('Address ID:', addressId);
-
       const orderResponse = await createOrder(orderData);
-      console.log('Order creation response:', orderResponse);
+
       alert('Payment successful! Order placed.');
       clearCart();
       navigate('/orders');
