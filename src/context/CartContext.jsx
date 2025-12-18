@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNotification } from './NotificationContext';
 
 const CartContext = createContext();
 
@@ -11,6 +12,7 @@ export const useCart = () => {
 };
 
 export const CartProvider = ({ children }) => {
+  const { showNotification } = useNotification();
   const [cartItems, setCartItems] = useState(() => {
     // Initialize state from localStorage
     try {
@@ -36,19 +38,27 @@ export const CartProvider = ({ children }) => {
       const existingItem = prevItems.find(item => item._id === product._id);
       
       if (existingItem) {
+        showNotification(`${product.name} quantity updated in cart!`);
         return prevItems.map(item =>
           item._id === product._id
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       } else {
+        showNotification(`${product.name} added to cart!`);
         return [...prevItems, { ...product, quantity }];
       }
     });
   };
 
   const removeFromCart = (productId) => {
-    setCartItems(prevItems => prevItems.filter(item => item._id !== productId));
+    setCartItems(prevItems => {
+      const item = prevItems.find(item => item._id === productId);
+      if (item) {
+        showNotification(`${item.name} removed from cart!`);
+      }
+      return prevItems.filter(item => item._id !== productId);
+    });
   };
 
   const updateQuantity = (productId, quantity) => {
@@ -57,15 +67,20 @@ export const CartProvider = ({ children }) => {
       return;
     }
     
-    setCartItems(prevItems =>
-      prevItems.map(item =>
+    setCartItems(prevItems => {
+      const item = prevItems.find(item => item._id === productId);
+      if (item) {
+        showNotification(`${item.name} quantity updated!`);
+      }
+      return prevItems.map(item =>
         item._id === productId ? { ...item, quantity } : item
-      )
-    );
+      );
+    });
   };
 
   const clearCart = () => {
     setCartItems([]);
+    showNotification('Cart cleared!');
   };
 
   const getCartTotal = () => {

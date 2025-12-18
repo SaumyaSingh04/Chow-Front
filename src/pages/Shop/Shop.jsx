@@ -79,7 +79,7 @@ const Shop = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white relative z-0">
       <Breadcrumb currentPage="Shop Now" />
 
       {/* Main Content */}
