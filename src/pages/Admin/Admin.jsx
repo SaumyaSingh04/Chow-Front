@@ -5,6 +5,7 @@ import Categories from './Categories.jsx';
 import Subcategories from './Subcategories.jsx';
 import AdminOrders from './AdminOrders.jsx';
 import Tickets from './Tickets.jsx';
+import FailedOrders from './FailedOrders.jsx';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -16,6 +17,7 @@ const Admin = () => {
     { id: 'subcategories', label: 'Subcategory', icon: '📁' },
     { id: 'products', label: 'Product', icon: '📦' },
     { id: 'orders', label: 'Orders', icon: '📋' },
+    { id: 'failed-orders', label: 'Failed Orders', icon: '❌' },
     { id: 'tickets', label: 'Messages', icon: '💬' }
   ];
 
@@ -26,6 +28,7 @@ const Admin = () => {
       case 'categories': return <Categories />;
       case 'subcategories': return <Subcategories />;
       case 'orders': return <AdminOrders />;
+      case 'failed-orders': return <FailedOrders />;
       case 'tickets': return <Tickets />;
       default: return <Dashboard />;
     }
