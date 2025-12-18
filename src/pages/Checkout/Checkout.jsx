@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '../../context/CartContext';
 import { useNavigate } from 'react-router-dom';
+import { useApi } from '../../context/ApiContext.jsx';
 import Breadcrumb from '../../components/Breadcrumb.jsx';
 
 const Checkout = () => {
   const { cartItems, getCartTotal } = useCart();
+  const { getUserAddresses } = useApi();
   const navigate = useNavigate();
+  const [savedAddresses, setSavedAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState('');
   const [formData, setFormData] = useState({
     addressType: '',
     firstName: '',
@@ -19,6 +23,52 @@ const Checkout = () => {
     phone: '',
     orderNotes: ''
   });
+
+  useEffect(() => {
+    fetchSavedAddresses();
+  }, []);
+
+  const fetchSavedAddresses = async () => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    console.log('User from localStorage:', user);
+    if (user._id) {
+      try {
+        const response = await getUserAddresses(user._id);
+        console.log('Addresses response:', response);
+        // Handle different response structures
+        const addresses = response.addresses || response.address || user.address || [];
+        setSavedAddresses(addresses);
+      } catch (error) {
+        console.error('Error fetching addresses:', error);
+        // Fallback to user addresses from localStorage if API fails
+        setSavedAddresses(user.address || []);
+      }
+    }
+  };
+
+  const handleAddressSelect = (e) => {
+    const addressId = e.target.value;
+    setSelectedAddressId(addressId);
+    
+    if (addressId) {
+      const selectedAddress = savedAddresses.find(addr => addr._id === addressId);
+      if (selectedAddress) {
+        setFormData({
+          addressType: selectedAddress.addressType || selectedAddress.type || '',
+          firstName: selectedAddress.firstName || '',
+          lastName: selectedAddress.lastName || '',
+          address: selectedAddress.street || selectedAddress.address || '',
+          apartment: selectedAddress.apartment || '',
+          city: selectedAddress.city || '',
+          state: selectedAddress.state || '',
+          postcode: selectedAddress.postcode || selectedAddress.pincode || '',
+          email: selectedAddress.email || '',
+          phone: selectedAddress.phone || '',
+          orderNotes: formData.orderNotes
+        });
+      }
+    }
+  };
 
   const handleInputChange = (e) => {
     setFormData({
@@ -50,10 +100,27 @@ const Checkout = () => {
           
           {/* Left Side - Address Form */}
           <div>
-            <h2 className="text-2xl font-bold mb-2">Saved Addresses</h2>
-            <h3 className="text-xl font-semibold mb-6 text-gray-700">Billing Details</h3>
+            <h2 className="text-2xl font-bold mb-6">Billing Details</h2>
             
             <form className="space-y-6">
+              {/* Saved Addresses Dropdown */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Use Saved Address ({savedAddresses.length} found)
+                </label>
+                <select
+                  value={selectedAddressId}
+                  onChange={handleAddressSelect}
+                  className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-[#d80a4e]"
+                >
+                  <option value="">Select a saved address or enter new</option>
+                  {savedAddresses.map((address) => (
+                    <option key={address._id} value={address._id}>
+                      {address.type || 'Address'} - {address.street || address.address}, {address.city}
+                    </option>
+                  ))}
+                </select>
+              </div>
               {/* Address Type */}
               <div>
                 <label className="block text-sm font-medium mb-2">
