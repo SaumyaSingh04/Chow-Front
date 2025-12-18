@@ -247,7 +247,7 @@ const Home = () => {
         className="w-full h-[420px] object-cover"
       />
       <button
-        onClick={() => setShowVideo(true)}
+        onClick={() => window.open('https://www.youtube.com/watch?v=FhlsxCf1aOU', '_blank')}
         className="absolute inset-0 flex items-center justify-center"
       >
         <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg text-xl">
@@ -255,26 +255,7 @@ const Home = () => {
         </div>
       </button>
     </div>
-    {showVideo && (
-      <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
-        <div className="w-[90%] max-w-3xl aspect-video bg-black relative">
-          <button
-            onClick={() => setShowVideo(false)}
-            className="absolute -top-10 right-0 text-white text-xl"
-          >
-            ✕
-          </button>
-          <iframe
-            className="w-full h-full"
-            src="https://www.youtube.com/embed/FhlsxCf1aOU?autoplay=1"
-            title="Chowdhry Sweet House Video"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        </div>
-      </div>
-    )}
+
 
   </div>
 </section>
