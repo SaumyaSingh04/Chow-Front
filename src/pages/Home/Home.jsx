@@ -3,6 +3,10 @@ import { Link } from "react-router-dom";
 import { useApi } from "../../context/ApiContext";
 import { FaTruck, FaShieldAlt, FaCreditCard, FaHeadset, FaGift, FaBox, FaStar, FaSmile, FaFire, FaTags, FaCrown, FaMagic, FaFolder } from "react-icons/fa";
 import ProductCard from "../../components/ProductCard.jsx";
+import ban1 from "../../assets/ban1.jpg";
+import compressedcard1 from "../../assets/compressedcard1.jpg";
+import compressedcard2 from "../../assets/compressedcard2.jpg";
+import screenshot from "../../assets/Screenshot 2025-12-16 at 21.07.41.png";
 
 const Home = () => {
   const { fetchItems, getFeaturedItems, getSubcategories, fetchCategories, items, categories, loading } = useApi();
@@ -99,7 +103,7 @@ const Home = () => {
           {/* MAIN SLIDER */}
           <div className="lg:col-span-7 relative rounded-lg overflow-hidden h-[420px]">
             <img
-              src="/src/assets/ban1.jpg"
+              src={ban1}
               className="w-full h-[420px] object-cover"
             />
             <div className="absolute inset-0" />
@@ -121,13 +125,13 @@ const Home = () => {
           {/* RIGHT BANNERS */}
           <div className="lg:col-span-3 flex flex-col gap-6">
             <div className="relative rounded-lg overflow-hidden">
-              <img src="/src/assets/compressedcard1.jpg" className="w-full h-full object-cover" />
+              <img src={compressedcard1} className="w-full h-full object-cover" />
               <div className="absolute inset-0 flex items-center justify-center">
                 <p className="text-white text-sm font-medium text-center px-4">Freshly Sweet Made, Every Day...</p>
               </div>
             </div>
             <div className="relative rounded-lg overflow-hidden">
-              <img src="/src/assets/compressedcard2.jpg" className="w-full h-full object-cover" />
+              <img src={compressedcard2} className="w-full h-full object-cover" />
               <div className="absolute inset-0 flex items-center justify-center">
                 <p className="text-white text-sm font-medium text-center px-4">Freshly Sweet Made, Every Day...</p>
               </div>
@@ -251,7 +255,7 @@ const Home = () => {
     {/* RIGHT VIDEO */}
     <div className="relative  overflow-hidden">
       <img
-        src="/src/assets/Screenshot 2025-12-16 at 21.07.41.png"
+        src={screenshot}
         alt="Chowdhry Sweet House"
         className="w-full h-[420px] object-cover"
       />
