@@ -558,15 +558,15 @@ const Products = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Products Management</h2>
+    <div className="p-4 md:p-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+        <h2 className="text-xl md:text-2xl font-bold text-gray-900">Products Management</h2>
         <button
           onClick={() => {
             console.log('Add Product clicked');
             setShowModal(true);
           }}
-          className="bg-[#d80a4e] text-white px-4 py-2 rounded hover:bg-[#b8083e]"
+          className="bg-[#d80a4e] text-white px-4 py-2 rounded hover:bg-[#b8083e] w-full sm:w-auto"
         >
           Add Product
         </button>
@@ -574,7 +574,7 @@ const Products = () => {
 
       {/* Search Bar */}
       <div className="mb-6">
-        <div className="relative max-w-md">
+        <div className="relative w-full md:max-w-md">
           <input
             type="text"
             value={searchQuery}
@@ -604,8 +604,8 @@ const Products = () => {
               }
             }}
             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-            placeholder="Search products by name, description, or category..."
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d80a4e]"
+            placeholder="Search products..."
+            className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d80a4e] text-sm"
           />
           <button
             onClick={handleSearch}
@@ -629,45 +629,47 @@ const Products = () => {
       {/* Products Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full">
+          <table className="min-w-[800px] w-full">
             <thead className="bg-[#d80a4e] text-white">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">Name</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">Categories</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">Price</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">Discount Price</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">Stock Qty</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">Action</th>
+                <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold uppercase tracking-wider">Name</th>
+                <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold uppercase tracking-wider">Categories</th>
+                <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold uppercase tracking-wider">Price</th>
+                <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold uppercase tracking-wider">Discount</th>
+                <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold uppercase tracking-wider">Stock</th>
+                <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold uppercase tracking-wider">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {getCurrentPageItems().length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan="6" className="px-3 md:px-6 py-8 md:py-12 text-center text-gray-500 text-sm">
                     {searchQuery ? `No products found matching "${searchQuery}"` : 'No products available'}
                   </td>
                 </tr>
               ) : (
                 getCurrentPageItems().map((product, index) => (
                 <tr key={product._id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{product.name}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">
+                  <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm font-medium text-gray-900">
+                    {product.name}
+                  </td>
+                  <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-gray-700">
                     {Array.isArray(product.categories) 
                       ? product.categories.map(cat => typeof cat === 'object' ? cat.name : cat).join(', ')
                       : typeof product.category === 'object' ? product.category?.name : product.category
                     }
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-700">₹{product.price}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">₹{product.discountPrice || product.price}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{product.stockQty || 0}</td>
-                  <td className="px-6 py-4 text-sm">
+                  <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-gray-700">₹{product.price}</td>
+                  <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-gray-700">₹{product.discountPrice || product.price}</td>
+                  <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-gray-700">{product.stockQty || 0}</td>
+                  <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm">
                     <button
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         handleEdit(product);
                       }}
-                      className="bg-[#d80a4e] text-white px-4 py-2 rounded hover:bg-[#b8083e] text-xs font-medium transition-colors duration-200"
+                      className="bg-[#d80a4e] text-white px-2 md:px-4 py-1 md:py-2 rounded hover:bg-[#b8083e] text-xs font-medium transition-colors duration-200"
                     >
                       Update / View
                     </button>
@@ -680,23 +682,26 @@ const Products = () => {
         </div>
         
         {/* Pagination */}
-        <div className="bg-white px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-          <div className="flex items-center text-sm text-gray-700">
+        <div className="bg-white px-3 md:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center text-xs md:text-sm text-gray-700 gap-2 sm:gap-0">
             <span>Items per page: {itemsPerPage}</span>
-            <span className="ml-8">{getPageInfo()}</span>
+            <span className="sm:ml-8">{getPageInfo()}</span>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center justify-center sm:justify-end space-x-2">
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1 text-xs md:text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               ◀
             </button>
+            <span className="text-xs md:text-sm text-gray-600">
+              {currentPage} / {getTotalPages()}
+            </span>
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, getTotalPages()))}
               disabled={currentPage === getTotalPages()}
-              className="px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1 text-xs md:text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               ▶
             </button>
