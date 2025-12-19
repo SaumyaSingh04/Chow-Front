@@ -1,10 +1,23 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 import Breadcrumb from "../../components/Breadcrumb.jsx";
 
 const Cart = () => {
   const { cartItems, updateQuantity, removeFromCart, getCartTotal } = useCart();
+  const navigate = useNavigate();
+  
+  const handleCheckout = () => {
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    if (!token || !user._id) {
+      navigate('/account');
+      return;
+    }
+    
+    navigate('/checkout');
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -186,12 +199,12 @@ const Cart = () => {
                 </div>
               </div>
 
-              <Link 
-                to="/checkout"
+              <button 
+                onClick={handleCheckout}
                 className="block w-full mt-6 bg-[#d80a4e] text-white py-3 text-center font-semibold hover:bg-[#b8083e] transition"
               >
                 Proceed to Checkout
-              </Link>
+              </button>
             </div>
 
           </div>

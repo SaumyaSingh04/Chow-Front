@@ -151,16 +151,16 @@ const Shop = () => {
       <Breadcrumb currentPage="Shop Now" />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-2 py-1">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-6">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold">
+        <div className="text-center mb-6 md:mb-8">
+          <h2 className="text-xl md:text-2xl font-bold">
             Popular <span className="text-[#d80a4e]">Sweets</span>
           </h2>
         </div>
 
         {/* Search Bar */}
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-4 md:mb-6 px-2">
           <div className="relative w-full max-w-md">
             <input
               type="text"
@@ -232,11 +232,11 @@ const Shop = () => {
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex justify-center mb-6">
-          <div className="flex space-x-6 flex-wrap">
+        <div className="flex justify-center mb-6 px-4">
+          <div className="flex flex-wrap justify-center gap-3 md:gap-6">
             <button 
               onClick={() => handleCategoryFilter('all')}
-              className={`font-medium pb-1 ${
+              className={`font-medium pb-1 whitespace-nowrap ${
                 activeCategory === 'all' 
                   ? 'text-[#d80a4e] border-b-2 border-[#d80a4e]' 
                   : 'text-gray-600 hover:text-[#d80a4e]'
@@ -248,7 +248,7 @@ const Shop = () => {
               <button 
                 key={category._id}
                 onClick={() => handleCategoryFilter(category._id)}
-                className={`font-medium pb-1 ${
+                className={`font-medium pb-1 whitespace-nowrap ${
                   activeCategory === category._id 
                     ? 'text-[#d80a4e] border-b-2 border-[#d80a4e]' 
                     : 'text-gray-600 hover:text-[#d80a4e]'
@@ -262,11 +262,11 @@ const Shop = () => {
 
         {/* Subcategory Tabs */}
         {subcategories.length > 0 && (
-          <div className="flex justify-center mb-8">
-            <div className="flex space-x-4 flex-wrap">
+          <div className="flex justify-center mb-8 px-4">
+            <div className="flex flex-wrap justify-center gap-2 md:gap-4">
               <button 
                 onClick={() => handleCategoryFilter(activeCategory)}
-                className={`text-sm font-medium pb-1 px-3 py-1 rounded-full ${
+                className={`text-xs md:text-sm font-medium px-3 py-2 rounded-full whitespace-nowrap ${
                   !activeSubcategory 
                     ? 'bg-[#d80a4e] text-white' 
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -278,7 +278,7 @@ const Shop = () => {
                 <button 
                   key={subcategory._id}
                   onClick={() => handleSubcategoryFilter(subcategory._id)}
-                  className={`text-sm font-medium pb-1 px-3 py-1 rounded-full ${
+                  className={`text-xs md:text-sm font-medium px-3 py-2 rounded-full whitespace-nowrap ${
                     activeSubcategory === subcategory._id 
                       ? 'bg-[#d80a4e] text-white' 
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -292,12 +292,12 @@ const Shop = () => {
         )}
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6 max-w-6xl mx-auto">
           {filteredItems.length > 0 ? filteredItems.map((product) => (
             <ProductCard key={product._id} product={product} />
           )) : (
-            <div className="col-span-full text-center py-12">
-              <p className="text-gray-500 text-lg">No products found in this category.</p>
+            <div className="col-span-full text-center py-8 md:py-12">
+              <p className="text-gray-500 text-sm md:text-lg">No products found in this category.</p>
             </div>
           )}
         </div>

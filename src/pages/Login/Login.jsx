@@ -37,6 +37,7 @@ const Login = () => {
       if (response.token) {
         localStorage.setItem('token', response.token);
         if (response.user) {
+          console.log('Storing user data:', response.user);
           localStorage.setItem('user', JSON.stringify(response.user));
           setUser(response.user);
         }
@@ -141,7 +142,7 @@ const Login = () => {
 
                 <div className="text-sm">
                   <span className="text-gray-600">Don't have an account? </span>
-                  <Link to="/signup" className="text-[#d80a4e] hover:underline">Sign up</Link>
+                  <Link to="/account" className="text-[#d80a4e] hover:underline">Sign up</Link>
                 </div>
 
                 <button

@@ -36,7 +36,7 @@ const Admin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-white flex">
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div 
@@ -86,22 +86,25 @@ const Admin = () => {
       {/* Main Content */}
       <div className="flex-1 lg:ml-0">
         {/* Header */}
-        <div className="bg-white shadow-sm border-b px-4 sm:px-6 py-4">
+        <div className="bg-white shadow-sm border-b px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
               <button 
-                className="mr-4 lg:hidden"
+                className="mr-3 lg:hidden p-1"
                 onClick={() => setSidebarOpen(true)}
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
+              <h1 className="text-sm sm:text-base font-medium text-gray-900 lg:hidden">
+                {tabs.find(tab => tab.id === activeTab)?.label || 'Dashboard'}
+              </h1>
             </div>
             <div className="flex items-center">
-              <span className="mr-2 text-gray-700">Admin</span>
-              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                <svg className="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+              <span className="mr-2 text-xs sm:text-sm text-gray-700">Admin</span>
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                <svg className="w-3 h-3 sm:w-5 sm:h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                 </svg>
               </div>
@@ -110,7 +113,7 @@ const Admin = () => {
         </div>
 
         {/* Content */}
-        <div className="p-4 sm:p-6">
+        <div className="p-4 sm:p-6" style={{overflowX: 'visible'}}>
           {renderContent()}
         </div>
       </div>

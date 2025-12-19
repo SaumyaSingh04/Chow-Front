@@ -120,9 +120,9 @@ const Subcategories = () => {
     return (
       <div className="bg-gray-50 min-h-screen">
         {/* Header */}
-        <div className="bg-white border-b px-6 py-4">
+        <div className="bg-white border-b px-3 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-gray-900 underline">
+            <h1 className="text-lg sm:text-xl font-semibold text-gray-900 underline">
               {editingSubcategory ? 'Edit Subcategory' : 'Add Subcategory'}
             </h1>
             <button 
@@ -131,18 +131,18 @@ const Subcategories = () => {
                 setEditingSubcategory(null);
                 setFormData({ name: '', description: '', categories: [] });
               }}
-              className="bg-orange-400 text-white px-4 py-2 rounded-md hover:bg-orange-500 flex items-center gap-2"
+              className="bg-orange-400 text-white px-3 sm:px-4 py-2 rounded-md hover:bg-orange-500 flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
             >
-              ← Go Back
+              ← <span className="hidden sm:inline">Go Back</span>
             </button>
           </div>
         </div>
 
         {/* Form Content */}
-        <div className="p-6">
-          <div className="bg-white rounded-lg border p-6">
-            <div className="mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Basic Information :</h3>
+        <div className="p-3 sm:p-6">
+          <div className="bg-white rounded-lg border p-3 sm:p-6">
+            <div className="mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Basic Information :</h3>
             </div>
             
             <form onSubmit={handleSubmit}>
@@ -237,39 +237,40 @@ const Subcategories = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Subcategories Management</h2>
+    <div className="p-4 md:p-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+        <h2 className="text-xl md:text-2xl font-bold text-gray-900">Subcategories Management</h2>
         <button
           onClick={() => setShowModal(true)}
-          className="bg-[#d80a4e] text-white px-4 py-2 rounded hover:bg-[#b8083e]"
+          className="bg-[#d80a4e] text-white px-4 py-2 rounded hover:bg-[#b8083e] w-full sm:w-auto"
         >
           Add Subcategory
         </button>
       </div>
 
       {/* Subcategories Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-lg shadow">
+        {/* Horizontal scroll wrapper */}
         <div className="overflow-x-auto">
-          <table className="min-w-full">
+          <table className="min-w-[700px] w-full">
             <thead className="bg-[#d80a4e] text-white">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">Name</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">Categories</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">Description</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">Action</th>
+                <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold uppercase tracking-wider">Name</th>
+                <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold uppercase tracking-wider">Categories</th>
+                <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold uppercase tracking-wider">Description</th>
+                <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold uppercase tracking-wider">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {getCurrentPageItems().map((subcategory, index) => (
                 <tr key={subcategory._id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{subcategory.name}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{getCategoryNames(subcategory.categories || subcategory.category)}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{subcategory.description || 'No description'}</td>
-                  <td className="px-6 py-4 text-sm">
+                  <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm font-medium text-gray-900">{subcategory.name}</td>
+                  <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-gray-700">{getCategoryNames(subcategory.categories || subcategory.category)}</td>
+                  <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-gray-700">{subcategory.description || 'No description'}</td>
+                  <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm">
                     <button
                       onClick={() => handleEdit(subcategory)}
-                      className="bg-[#d80a4e] text-white px-4 py-2 rounded hover:bg-[#b8083e] text-xs font-medium"
+                      className="bg-[#d80a4e] text-white px-2 md:px-4 py-1 md:py-2 rounded hover:bg-[#b8083e] text-xs font-medium"
                     >
                       Update / View
                     </button>
@@ -281,23 +282,26 @@ const Subcategories = () => {
         </div>
         
         {/* Pagination */}
-        <div className="bg-white px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-          <div className="flex items-center text-sm text-gray-700">
+        <div className="bg-white px-3 md:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center text-xs md:text-sm text-gray-700 gap-2 sm:gap-0">
             <span>Items per page: {itemsPerPage}</span>
-            <span className="ml-8">{getPageInfo()}</span>
+            <span className="sm:ml-8">{getPageInfo()}</span>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center justify-center sm:justify-end space-x-2">
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1 text-xs md:text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               ◀
             </button>
+            <span className="text-xs md:text-sm text-gray-600">
+              {currentPage} / {getTotalPages()}
+            </span>
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, getTotalPages()))}
               disabled={currentPage === getTotalPages()}
-              className="px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1 text-xs md:text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               ▶
             </button>
