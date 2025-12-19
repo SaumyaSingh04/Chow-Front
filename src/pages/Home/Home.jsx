@@ -161,22 +161,22 @@ const Home = () => {
       </section>
 
      {/* ================= POPULAR SWEETS ================= */}
-<section className="bg-white py-10">
-  <div className="max-w-[1400px] mx-auto px-6">
+<section className="bg-white py-6 md:py-10">
+  <div className="max-w-[1400px] mx-auto px-4 md:px-6">
 
     {/* Header */}
-    <div className="flex justify-between items-end mb-10">
-      <h2 className="text-4xl font-bold text-black">
+    <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 md:gap-0 mb-6 md:mb-10">
+      <h2 className="text-2xl md:text-4xl font-bold text-black">
         Popular{" "}
         <span className="text-[#d80a4e] underline underline-offset-4">
           Sweets
         </span>
       </h2>
 
-      <div className="flex gap-10 text-[15px] font-medium">
+      <div className="flex flex-wrap gap-4 md:gap-10 text-sm md:text-[15px] font-medium">
         <button
           onClick={() => setSelectedCategory(null)}
-          className={`${!selectedCategory ? 'text-[#d80a4e] underline underline-offset-4' : 'text-black hover:text-[#d80a4e]'}`}
+          className={`${!selectedCategory ? 'text-[#d80a4e] underline underline-offset-4' : 'text-black hover:text-[#d80a4e]'} whitespace-nowrap`}
         >
           All
         </button>
@@ -184,7 +184,7 @@ const Home = () => {
           <button
             key={category._id}
             onClick={() => setSelectedCategory(category._id)}
-            className={`${selectedCategory === category._id ? 'text-[#d80a4e] underline underline-offset-4' : 'text-black hover:text-[#d80a4e]'}`}
+            className={`${selectedCategory === category._id ? 'text-[#d80a4e] underline underline-offset-4' : 'text-black hover:text-[#d80a4e]'} whitespace-nowrap`}
           >
             {category.name}
           </button>
@@ -193,7 +193,7 @@ const Home = () => {
     </div>
 
     {/* Products Grid */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
       {filteredItems.map(p => (
         <ProductCard key={p._id} product={p} />
       ))}
