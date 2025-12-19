@@ -12,7 +12,7 @@ const Cart = () => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     
     if (!token || !user._id) {
-      navigate('/signup');
+      navigate('/account');
       return;
     }
     
