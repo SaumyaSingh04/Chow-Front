@@ -120,7 +120,8 @@ const AdminOrders = () => {
           <p className="text-gray-500">No orders found</p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-lg shadow">
+          {/* Horizontal scroll wrapper */}
           <div className="overflow-x-auto">
             <table className="min-w-[900px] w-full">
               <thead className="bg-[#d80a4e] text-white">

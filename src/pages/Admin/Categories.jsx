@@ -76,9 +76,9 @@ const Categories = () => {
     return (
       <div className="bg-gray-50 min-h-screen">
         {/* Header */}
-        <div className="bg-white border-b px-6 py-4">
+        <div className="bg-white border-b px-3 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-gray-900 underline">
+            <h1 className="text-lg sm:text-xl font-semibold text-gray-900 underline">
               {editingCategory ? 'Edit Category' : 'Add Category'}
             </h1>
             <button 
@@ -87,18 +87,18 @@ const Categories = () => {
                 setEditingCategory(null);
                 setFormData({ name: '', description: '' });
               }}
-              className="bg-orange-400 text-white px-4 py-2 rounded-md hover:bg-orange-500 flex items-center gap-2"
+              className="bg-orange-400 text-white px-3 sm:px-4 py-2 rounded-md hover:bg-orange-500 flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
             >
-              ← Go Back
+              ← <span className="hidden sm:inline">Go Back</span>
             </button>
           </div>
         </div>
 
         {/* Form Content */}
-        <div className="p-6">
-          <div className="bg-white rounded-lg border p-6">
-            <div className="mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Basic Information :</h3>
+        <div className="p-3 sm:p-6">
+          <div className="bg-white rounded-lg border p-3 sm:p-6">
+            <div className="mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Basic Information :</h3>
             </div>
             
             <form onSubmit={handleSubmit}>
@@ -170,7 +170,8 @@ const Categories = () => {
       </div>
 
       {/* Categories Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-lg shadow">
+        {/* Horizontal scroll wrapper */}
         <div className="overflow-x-auto">
           <table className="min-w-[600px] w-full">
             <thead className="bg-[#d80a4e] text-white">

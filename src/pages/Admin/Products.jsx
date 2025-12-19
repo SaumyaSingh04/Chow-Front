@@ -217,9 +217,9 @@ const Products = () => {
     return (
       <div className="bg-gray-50 min-h-screen">
         {/* Header */}
-        <div className="bg-white border-b px-6 py-4">
+        <div className="bg-white border-b px-3 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-gray-900 underline">
+            <h1 className="text-lg sm:text-xl font-semibold text-gray-900 underline">
               {editingProduct ? 'Edit Product' : 'Add Product'}
             </h1>
             <button 
@@ -230,18 +230,18 @@ const Products = () => {
                 setSelectedImages([]);
                 setSelectedVideo(null);
               }}
-              className="bg-orange-400 text-white px-4 py-2 rounded-md hover:bg-orange-500 flex items-center gap-2"
+              className="bg-orange-400 text-white px-3 sm:px-4 py-2 rounded-md hover:bg-orange-500 flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
             >
-              ← Go Back
+              ← <span className="hidden sm:inline">Go Back</span>
             </button>
           </div>
         </div>
 
         {/* Form Content */}
-        <div className="p-6">
-          <div className="bg-white rounded-lg border p-6">
-            <div className="mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Basic Information :</h3>
+        <div className="p-3 sm:p-6">
+          <div className="bg-white rounded-lg border p-3 sm:p-6">
+            <div className="mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Basic Information :</h3>
             </div>
             
             <form onSubmit={handleSubmit}>
@@ -558,7 +558,7 @@ const Products = () => {
   }
 
   return (
-    <div className="p-4 md:p-6">
+    <div className="p-4 md:p-6" style={{overflowX: 'visible'}}>
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <h2 className="text-xl md:text-2xl font-bold text-gray-900">Products Management</h2>
         <button
@@ -627,51 +627,47 @@ const Products = () => {
       )}
 
       {/* Products Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-[800px] w-full">
+      <div className="bg-white rounded-lg shadow">
+        <div className="w-full" style={{overflowX: 'auto', WebkitOverflowScrolling: 'touch'}}>
+          <table className="w-full text-xs" style={{minWidth: '600px'}}>
             <thead className="bg-[#d80a4e] text-white">
               <tr>
-                <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold uppercase tracking-wider">Name</th>
-                <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold uppercase tracking-wider">Categories</th>
-                <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold uppercase tracking-wider">Price</th>
-                <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold uppercase tracking-wider">Discount</th>
-                <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold uppercase tracking-wider">Stock</th>
-                <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold uppercase tracking-wider">Action</th>
+                <th className="px-2 py-3 text-left font-semibold uppercase" style={{width: '25%', minWidth: '100px'}}>Name</th>
+                <th className="px-2 py-3 text-left font-semibold uppercase" style={{width: '20%', minWidth: '80px'}}>Categories</th>
+                <th className="px-2 py-3 text-left font-semibold uppercase" style={{width: '15%', minWidth: '70px'}}>Price</th>
+                <th className="px-2 py-3 text-left font-semibold uppercase" style={{width: '15%', minWidth: '70px'}}>Discount</th>
+                <th className="px-2 py-3 text-left font-semibold uppercase" style={{width: '10%', minWidth: '50px'}}>Stock</th>
+                <th className="px-2 py-3 text-left font-semibold uppercase" style={{width: '15%', minWidth: '80px'}}>Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {getCurrentPageItems().length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-3 md:px-6 py-8 md:py-12 text-center text-gray-500 text-sm">
+                  <td colSpan="6" className="px-4 py-8 text-center text-gray-500">
                     {searchQuery ? `No products found matching "${searchQuery}"` : 'No products available'}
                   </td>
                 </tr>
               ) : (
                 getCurrentPageItems().map((product, index) => (
                 <tr key={product._id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm font-medium text-gray-900">
+                  <td className="px-2 py-3 font-medium text-gray-900">
                     {product.name}
                   </td>
-                  <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-gray-700">
+                  <td className="px-2 py-3 text-gray-700">
                     {Array.isArray(product.categories) 
                       ? product.categories.map(cat => typeof cat === 'object' ? cat.name : cat).join(', ')
                       : typeof product.category === 'object' ? product.category?.name : product.category
                     }
                   </td>
-                  <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-gray-700">₹{product.price}</td>
-                  <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-gray-700">₹{product.discountPrice || product.price}</td>
-                  <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-gray-700">{product.stockQty || 0}</td>
-                  <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm">
+                  <td className="px-2 py-3 text-gray-700">₹{product.price}</td>
+                  <td className="px-2 py-3 text-gray-700">₹{product.discountPrice || product.price}</td>
+                  <td className="px-2 py-3 text-gray-700 text-center">{product.stockQty || 0}</td>
+                  <td className="px-2 py-3">
                     <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleEdit(product);
-                      }}
-                      className="bg-[#d80a4e] text-white px-2 md:px-4 py-1 md:py-2 rounded hover:bg-[#b8083e] text-xs font-medium transition-colors duration-200"
+                      onClick={() => handleEdit(product)}
+                      className="bg-[#d80a4e] text-white px-3 py-1 rounded text-xs hover:bg-[#b8083e]"
                     >
-                      Update / View
+                      Edit
                     </button>
                   </td>
                 </tr>
@@ -682,26 +678,21 @@ const Products = () => {
         </div>
         
         {/* Pagination */}
-        <div className="bg-white px-3 md:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex flex-col sm:flex-row sm:items-center text-xs md:text-sm text-gray-700 gap-2 sm:gap-0">
-            <span>Items per page: {itemsPerPage}</span>
-            <span className="sm:ml-8">{getPageInfo()}</span>
-          </div>
-          <div className="flex items-center justify-center sm:justify-end space-x-2">
+        <div className="bg-white px-2 py-2 border-t flex justify-between items-center text-xs">
+          <span className="text-gray-600">{getPageInfo()}</span>
+          <div className="flex items-center space-x-1">
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1 text-xs md:text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-2 py-1 border rounded disabled:opacity-50"
             >
               ◀
             </button>
-            <span className="text-xs md:text-sm text-gray-600">
-              {currentPage} / {getTotalPages()}
-            </span>
+            <span className="px-2">{currentPage}/{getTotalPages()}</span>
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, getTotalPages()))}
               disabled={currentPage === getTotalPages()}
-              className="px-3 py-1 text-xs md:text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-2 py-1 border rounded disabled:opacity-50"
             >
               ▶
             </button>
