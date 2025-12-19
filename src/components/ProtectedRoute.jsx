@@ -12,7 +12,7 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
 
   if (!token) {
     console.log('No token, redirecting to login');
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/account" replace />;
   }
 
   if (requireAdmin && user.role !== 'admin') {
