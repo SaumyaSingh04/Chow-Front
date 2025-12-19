@@ -541,9 +541,22 @@ export const ApiProvider = ({ children }) => {
     // Admin Dashboard APIs
     getDashboardStats: async () => {
       try {
-        return await apiService.get('/api/dashboard/stats');
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        console.log('Dashboard API - Token exists:', !!token);
+        console.log('Dashboard API - User role:', user.role);
+        
+        const response = await apiService.get('/api/dashboard/stats');
+        console.log('Dashboard API response:', response);
+        return response;
       } catch (error) {
         console.error('Error fetching dashboard stats:', error);
+        // If token is invalid, clear localStorage and redirect to login
+        if (error.message === 'Invalid token') {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/account';
+        }
         return null;
       }
     },
