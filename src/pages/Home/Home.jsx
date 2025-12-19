@@ -63,11 +63,11 @@ const Home = () => {
       )}
 
       {/* ================= HERO ================= */}
-      <section className="max-w-[1400px] mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <section className="max-w-[1400px] mx-auto px-3 sm:px-6 py-4 sm:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-6">
 
-          {/* CATEGORIES */}
-          <div className="lg:col-span-2 bg-white rounded-lg p-4 h-fit">
+          {/* CATEGORIES - Hidden on mobile */}
+          <div className="hidden lg:block lg:col-span-2 bg-white rounded-lg p-4 h-fit">
             <h4 className="font-semibold mb-3 text-[#d80a4e] flex items-center">
               <FaFolder className="mr-2" /> Categories
             </h4>
@@ -101,39 +101,39 @@ const Home = () => {
           </div>
 
           {/* MAIN SLIDER */}
-          <div className="lg:col-span-7 relative rounded-lg overflow-hidden h-[420px]">
+          <div className="lg:col-span-7 relative rounded-lg overflow-hidden h-[250px] sm:h-[350px] lg:h-[420px]">
             <img
               src={ban1}
-              className="w-full h-[420px] object-cover"
+              className="w-full h-full object-cover"
             />
             <div className="absolute inset-0" />
-            <div className="absolute inset-0 p-10 flex flex-col justify-center animate-fade-in">
-              <p className="text-pink-500 mb-2 animate-fade-in-delay-1">Deliciously Crafted Treats</p>
-              <h1 className="text-white text-4xl font-bold animate-fade-in-delay-2">
+            <div className="absolute inset-0 p-4 sm:p-6 lg:p-10 flex flex-col justify-center animate-fade-in">
+              <p className="text-pink-500 mb-2 text-sm sm:text-base animate-fade-in-delay-1">Deliciously Crafted Treats</p>
+              <h1 className="text-white text-xl sm:text-2xl lg:text-4xl font-bold animate-fade-in-delay-2">
                 Premium Sweets <br />
                 <span className="text-pink-500">& Exquisite</span> Flavors.
               </h1>
               <Link
                 to="/shop"
-                className="mt-6 bg-white text-black px-6 py-3 w-fit rounded animate-fade-in-delay-3 hover:bg-gray-100 transition-colors"
+                className="mt-4 sm:mt-6 bg-white text-black px-4 sm:px-6 py-2 sm:py-3 w-fit rounded text-sm sm:text-base animate-fade-in-delay-3 hover:bg-gray-100 transition-colors"
               >
                 Shop Now →
               </Link>
             </div>
           </div>
 
-          {/* RIGHT BANNERS */}
-          <div className="lg:col-span-3 flex flex-col gap-6">
-            <div className="relative rounded-lg overflow-hidden">
+          {/* RIGHT BANNERS - Stack on mobile */}
+          <div className="lg:col-span-3 flex flex-row lg:flex-col gap-3 sm:gap-6">
+            <div className="relative rounded-lg overflow-hidden flex-1 h-[120px] sm:h-[150px] lg:h-auto">
               <img src={compressedcard1} className="w-full h-full object-cover" />
               <div className="absolute inset-0 flex items-center justify-center">
-                <p className="text-white text-sm font-medium text-center px-4">Freshly Sweet Made, Every Day...</p>
+                <p className="text-white text-xs sm:text-sm font-medium text-center px-2 sm:px-4">Freshly Sweet Made, Every Day...</p>
               </div>
             </div>
-            <div className="relative rounded-lg overflow-hidden">
+            <div className="relative rounded-lg overflow-hidden flex-1 h-[120px] sm:h-[150px] lg:h-auto">
               <img src={compressedcard2} className="w-full h-full object-cover" />
               <div className="absolute inset-0 flex items-center justify-center">
-                <p className="text-white text-sm font-medium text-center px-4">Freshly Sweet Made, Every Day...</p>
+                <p className="text-white text-xs sm:text-sm font-medium text-center px-2 sm:px-4">Freshly Sweet Made, Every Day...</p>
               </div>
             </div>        
             </div>
@@ -141,20 +141,20 @@ const Home = () => {
       </section>
 
       {/* ================= FEATURES ================= */}
-      <section className="max-w-[1700px] mx-auto px-6 pb-10">
-        <div className="grid md:grid-cols-4 gap-6 text-white">
+      <section className="max-w-[1700px] mx-auto px-3 sm:px-6 pb-6 sm:pb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 text-white">
           {[
             [<FaTruck />, "Free shipping", "Free shipping orders under 5KM"],
             [<FaShieldAlt />, "Secured Shipping", "No Damage Packed Shipping"],
             [<FaCreditCard />, "Secured Payments", "All major credit cards"],
             [<FaHeadset />, "Customer Service", "Top notch service"],
           ].map((f, i) => (
-            <div key={i} className="border border-gray-700 p-4 rounded-lg">
+            <div key={i} className="border border-gray-700 p-3 sm:p-4 rounded-lg">
               <div className="flex items-center gap-1 mb-1">
-                <div className="text-[#d80a4e] text-xl">{f[0]}</div>
-                <h4 className="font-semibold">{f[1]}</h4>
+                <div className="text-[#d80a4e] text-lg sm:text-xl">{f[0]}</div>
+                <h4 className="font-semibold text-sm sm:text-base">{f[1]}</h4>
               </div>
-              <p className="text-sm text-gray-400">{f[2]}</p>
+              <p className="text-xs sm:text-sm text-gray-400">{f[2]}</p>
             </div>
           ))}
         </div>
@@ -202,8 +202,8 @@ const Home = () => {
   </div>
 </section>
       {/* ================= EXCLUSIVE SWEET DEALS ================= */}
-<section className="bg-[#f7efe9] ">
-  <div className="max-w-[1400px] mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
+<section className="bg-[#f7efe9] py-6 sm:py-12">
+  <div className="max-w-[1400px] mx-auto px-3 sm:px-6 grid lg:grid-cols-2 gap-6 sm:gap-12 items-center">
 
     {/* LEFT CONTENT */}
     <div>
@@ -230,7 +230,7 @@ const Home = () => {
       </div>
 
       {/* COUNTDOWN */}
-      <div className="flex gap-4 items-center">
+      <div className="flex flex-wrap gap-2 sm:gap-4 items-center">
         {[
           ["0", "Days"],
           ["0", "Hour"],
@@ -239,31 +239,31 @@ const Home = () => {
         ].map((t, i) => (
           <div
             key={i}
-            className="bg-white w-20 h-20 rounded-lg flex flex-col items-center justify-center shadow"
+            className="bg-white w-14 h-14 sm:w-20 sm:h-20 rounded-lg flex flex-col items-center justify-center shadow"
           >
-            <span className="text-xl font-bold">{t[0]}</span>
+            <span className="text-base sm:text-xl font-bold">{t[0]}</span>
             <span className="text-xs text-gray-500">{t[1]}</span>
           </div>
         ))}
 
-        <p className="text-sm text-gray-500 ml-4 max-w-[120px]">
+        <p className="text-xs sm:text-sm text-gray-500 ml-2 sm:ml-4 max-w-[120px]">
           Remains until the end of the offer
         </p>
       </div>
     </div>
 
     {/* RIGHT VIDEO */}
-    <div className="relative  overflow-hidden">
+    <div className="relative overflow-hidden rounded-lg">
       <img
         src={screenshot}
         alt="Chowdhry Sweet House"
-        className="w-full h-[420px] object-cover"
+        className="w-full h-[250px] sm:h-[350px] lg:h-[420px] object-cover"
       />
       <button
         onClick={() => window.open('https://www.youtube.com/watch?v=FhlsxCf1aOU', '_blank')}
         className="absolute inset-0 flex items-center justify-center"
       >
-        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg text-xl">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full flex items-center justify-center shadow-lg text-lg sm:text-xl">
           ▶
         </div>
       </button>
