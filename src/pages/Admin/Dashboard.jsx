@@ -79,61 +79,61 @@ const Dashboard = () => {
   return (
     <div className="p-4 sm:p-6">
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 max-w-7xl">
         
         {/* New Orders */}
-        <div className="relative h-32 sm:h-36 rounded-xl bg-gradient-to-r from-purple-700 to-pink-600 text-white shadow-lg overflow-hidden">
-          <div className="relative z-10 h-full flex items-center justify-between px-4 sm:px-6">
+        <div className="relative h-28 sm:h-32 lg:h-36 rounded-xl bg-gradient-to-r from-purple-700 to-pink-600 text-white shadow-lg overflow-hidden">
+          <div className="relative z-10 h-full flex items-center justify-between px-3 sm:px-4 lg:px-6">
             <div>
-              <p className="text-xs sm:text-sm font-medium opacity-90">New Orders</p>
-              <h2 className="text-2xl sm:text-3xl font-bold mt-1 sm:mt-2">{stats.newOrders?.toLocaleString() || '0'}</h2>
+              <p className="text-xs font-medium opacity-90">New Orders</p>
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mt-1">{stats.newOrders?.toLocaleString() || '0'}</h2>
             </div>
           </div>
-          <ShoppingCart className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-16 sm:w-20 lg:w-24 h-16 sm:h-20 lg:h-24 opacity-20" />
+          <ShoppingCart className="absolute right-2 sm:right-3 lg:right-4 top-1/2 -translate-y-1/2 w-12 sm:w-16 lg:w-20 h-12 sm:h-16 lg:h-20 opacity-20" />
         </div>
 
         {/* Customers */}
-        <div className="relative h-32 sm:h-36 rounded-xl bg-gradient-to-r from-blue-700 to-blue-500 text-white shadow-lg overflow-hidden">
-          <div className="relative z-10 h-full flex items-center justify-between px-4 sm:px-6">
+        <div className="relative h-28 sm:h-32 lg:h-36 rounded-xl bg-gradient-to-r from-blue-700 to-blue-500 text-white shadow-lg overflow-hidden">
+          <div className="relative z-10 h-full flex items-center justify-between px-3 sm:px-4 lg:px-6">
             <div>
-              <p className="text-xs sm:text-sm font-medium opacity-90">Customers</p>
-              <h2 className="text-2xl sm:text-3xl font-bold mt-1 sm:mt-2">{stats.totalCustomers?.toLocaleString() || '0'}</h2>
+              <p className="text-xs font-medium opacity-90">Customers</p>
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mt-1">{stats.totalCustomers?.toLocaleString() || '0'}</h2>
             </div>
           </div>
-          <Users className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-16 sm:w-20 lg:w-24 h-16 sm:h-20 lg:h-24 opacity-20" />
+          <Users className="absolute right-2 sm:right-3 lg:right-4 top-1/2 -translate-y-1/2 w-12 sm:w-16 lg:w-20 h-12 sm:h-16 lg:h-20 opacity-20" />
         </div>
 
         {/* Ticket Resolved */}
-        <div className="relative h-32 sm:h-36 rounded-xl bg-gradient-to-r from-emerald-700 to-green-400 text-white shadow-lg overflow-hidden">
-          <div className="relative z-10 h-full flex items-center justify-between px-4 sm:px-6">
+        <div className="relative h-28 sm:h-32 lg:h-36 rounded-xl bg-gradient-to-r from-emerald-700 to-green-400 text-white shadow-lg overflow-hidden">
+          <div className="relative z-10 h-full flex items-center justify-between px-3 sm:px-4 lg:px-6">
             <div>
-              <p className="text-xs sm:text-sm font-medium opacity-90">Ticket Resolved</p>
-              <h2 className="text-2xl sm:text-3xl font-bold mt-1 sm:mt-2">{stats.ticketsResolved?.toLocaleString() || '0'}</h2>
+              <p className="text-xs font-medium opacity-90">Ticket Resolved</p>
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mt-1">{stats.ticketsResolved?.toLocaleString() || '0'}</h2>
             </div>
           </div>
-          <CheckCircle className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-16 sm:w-20 lg:w-24 h-16 sm:h-20 lg:h-24 opacity-20" />
+          <CheckCircle className="absolute right-2 sm:right-3 lg:right-4 top-1/2 -translate-y-1/2 w-12 sm:w-16 lg:w-20 h-12 sm:h-16 lg:h-20 opacity-20" />
         </div>
 
         {/* Revenue Today */}
-        <div className="relative h-32 sm:h-36 rounded-xl bg-gradient-to-r from-orange-600 to-yellow-400 text-white shadow-lg overflow-hidden">
-          <div className="relative z-10 h-full flex items-center justify-between px-4 sm:px-6">
+        <div className="relative h-28 sm:h-32 lg:h-36 rounded-xl bg-gradient-to-r from-orange-600 to-yellow-400 text-white shadow-lg overflow-hidden">
+          <div className="relative z-10 h-full flex items-center justify-between px-3 sm:px-4 lg:px-6">
             <div>
-              <p className="text-xs sm:text-sm font-medium opacity-90">Revenue Today</p>
-              <h2 className="text-2xl sm:text-3xl font-bold mt-1 sm:mt-2">₹{stats.revenueToday?.toLocaleString() || '0'}</h2>
+              <p className="text-xs font-medium opacity-90">Revenue Today</p>
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mt-1">₹{stats.revenueToday?.toLocaleString() || '0'}</h2>
             </div>
           </div>
-          <DollarSign className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-16 sm:w-20 lg:w-24 h-16 sm:h-20 lg:h-24 opacity-20" />
+          <DollarSign className="absolute right-2 sm:right-3 lg:right-4 top-1/2 -translate-y-1/2 w-12 sm:w-16 lg:w-20 h-12 sm:h-16 lg:h-20 opacity-20" />
         </div>
 
         {/* Failed Orders */}
-        <div className="relative h-32 sm:h-36 rounded-xl bg-gradient-to-r from-red-700 to-red-500 text-white shadow-lg overflow-hidden">
-          <div className="relative z-10 h-full flex items-center justify-between px-4 sm:px-6">
+        <div className="relative h-28 sm:h-32 lg:h-36 rounded-xl bg-gradient-to-r from-red-700 to-red-500 text-white shadow-lg overflow-hidden">
+          <div className="relative z-10 h-full flex items-center justify-between px-3 sm:px-4 lg:px-6">
             <div>
-              <p className="text-xs sm:text-sm font-medium opacity-90">Failed Orders</p>
-              <h2 className="text-2xl sm:text-3xl font-bold mt-1 sm:mt-2">{stats.failedOrders?.toLocaleString() || '0'}</h2>
+              <p className="text-xs font-medium opacity-90">Failed Orders</p>
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mt-1">{stats.failedOrders?.toLocaleString() || '0'}</h2>
             </div>
           </div>
-          <XCircle className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-16 sm:w-20 lg:w-24 h-16 sm:h-20 lg:h-24 opacity-20" />
+          <XCircle className="absolute right-2 sm:right-3 lg:right-4 top-1/2 -translate-y-1/2 w-12 sm:w-16 lg:w-20 h-12 sm:h-16 lg:h-20 opacity-20" />
         </div>
 
       </div>

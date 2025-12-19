@@ -53,20 +53,20 @@ const Specials = () => {
     <div className="min-h-screen bg-white overflow-x-hidden">
       <Breadcrumb currentPage="Specials" />
       
-      <div className="max-w-7xl mx-auto px-6 py-8 overflow-x-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8 overflow-x-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
           
           {/* Categories Sidebar */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg border shadow-sm">
-              <div className="bg-[#d80a4e] text-white p-4">
-                <h3 className="font-bold">Categories</h3>
+              <div className="bg-[#d80a4e] text-white p-3 sm:p-4">
+                <h3 className="font-bold text-sm sm:text-base">Categories</h3>
               </div>
-              <div className="p-4">
+              <div className="p-3 sm:p-4">
                 <ul className="space-y-2">
                   <li 
                     onClick={() => handleCategoryFilter('all')}
-                    className={`p-2 rounded cursor-pointer ${
+                    className={`p-2 rounded cursor-pointer text-sm sm:text-base ${
                       activeCategory === 'all' 
                         ? 'text-[#d80a4e] bg-pink-50' 
                         : 'text-gray-700 hover:bg-gray-50'
@@ -78,7 +78,7 @@ const Specials = () => {
                     <li 
                       key={category._id}
                       onClick={() => handleCategoryFilter(category._id)}
-                      className={`p-2 rounded cursor-pointer ${
+                      className={`p-2 rounded cursor-pointer text-sm sm:text-base ${
                         activeCategory === category._id 
                           ? 'text-[#d80a4e] bg-pink-50' 
                           : 'text-gray-700 hover:bg-gray-50'
@@ -94,7 +94,7 @@ const Specials = () => {
           
           {/* Products Grid */}
           <div className="lg:col-span-3">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {specialProducts.length > 0 ? specialProducts.map((product) => (
                 <ProductCard key={product._id} product={product} showSpecialTag={true} />
               )) : (

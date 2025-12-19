@@ -49,9 +49,9 @@ const Admin = () => {
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       } lg:translate-x-0`}>
         {/* Logo */}
-        <div className="p-1">
+        <div className="p-2 sm:p-4">
           <div className="flex items-center justify-between">
-            <img src="/src/assets/logo.png" alt="Chowdhry" className="h-30 mx-auto" />
+            <img src="/src/assets/logo.png" alt="Chowdhry" className="h-20 sm:h-24 lg:h-30 mx-auto" />
             <button 
               className="lg:hidden p-2"
               onClick={() => setSidebarOpen(false)}
@@ -69,13 +69,13 @@ const Admin = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`w-full flex items-center px-6 py-3 text-left hover:bg-red-300 ${
+              className={`w-full flex items-center px-4 sm:px-6 py-3 text-left hover:bg-red-300 text-sm sm:text-base ${
                 activeTab === tab.id
                   ? 'bg-red-500 text-white border-r-4 border-red-600'
                   : 'text-gray-700'
               }`}
             >
-              <span className="mr-3">{tab.icon}</span>
+              <span className="mr-2 sm:mr-3 text-sm sm:text-base">{tab.icon}</span>
               {tab.label}
             </button>
           ))}

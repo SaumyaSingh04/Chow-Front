@@ -88,10 +88,10 @@ const Account = () => {
       <div className="min-h-screen bg-gray-100">
         <Breadcrumb currentPage="My Profile" />
 
-        <div className="max-w-7xl mx-auto px-6 py-1">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-1">
           <div className="flex justify-center">
             <div className="w-full max-w-4xl">
-              <div className="bg-white rounded-lg shadow-lg p-8">
+              <div className="bg-white rounded-lg shadow-lg p-4 sm:p-8">
                 <div className="text-center mb-8">
                   <div className="w-20 h-20 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i className="fas fa-user text-[#d80a4e] text-3xl"></i>
@@ -118,7 +118,7 @@ const Account = () => {
                   </Link>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
                   <div className="bg-gray-50 p-6 rounded-lg">
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Profile Information</h3>
                     <div className="space-y-3">
@@ -187,12 +187,12 @@ const Account = () => {
     <div className="min-h-screen bg-gray-100">
       <Breadcrumb currentPage={isLogin ? 'Login' : 'Sign Up'} />
 
-      <div className="max-w-7xl mx-auto px-6 py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-16">
         <div className="flex justify-center">
           <div className="w-full max-w-4xl">
             <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-              <div className="flex">
-                <div className="w-1/2 hidden md:block">
+              <div className="flex flex-col md:flex-row">
+                <div className="w-full md:w-1/2 hidden md:block">
                   <img 
                     src="/assets/img/product/home-one/product-1.jpg" 
                     alt="Sweet Box"
@@ -200,7 +200,7 @@ const Account = () => {
                   />
                 </div>
                 
-                <div className="w-full md:w-1/2 p-8">
+                <div className="w-full md:w-1/2 p-4 sm:p-8">
                   <div className="mb-6">
                     <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mb-4">
                       <i className={`fas ${isLogin ? 'fa-user' : 'fa-user-plus'} text-[#d80a4e] text-xl`}></i>

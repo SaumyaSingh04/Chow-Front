@@ -102,8 +102,8 @@ const Payment = () => {
     <div className="min-h-screen bg-white">
       <Breadcrumb currentPage="Payment" />
       
-      <div className="max-w-6xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12">
           
           {/* Left - Payment Methods */}
           <div>

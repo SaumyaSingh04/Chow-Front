@@ -56,11 +56,11 @@ const Contact = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12">
 
           {/* Contact Info */}
-          <div className=" p-8 rounded-lg">
-            <h2 className="text-3xl font-bold mb-8 text-[#d80a4e]">Get In Touch</h2>
+          <div className="p-4 sm:p-8 rounded-lg">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-[#d80a4e]">Get In Touch</h2>
 
             <div className="space-y-6 text-gray-700">
               <div className="flex items-start gap-3">
@@ -89,12 +89,12 @@ const Contact = () => {
               </div>
             </div>
 
-            <div className="mt-8 space-y-3">
+            <div className="mt-6 sm:mt-8 space-y-3">
               <div className="flex flex-col sm:flex-row gap-3">
-                <a href="tel:+917525025100" className="bg-[#d80a4e] text-white px-6 py-3 rounded text-center hover:bg-[#b8083e] transition-colors">
+                <a href="tel:+917525025100" className="bg-[#d80a4e] text-white px-4 sm:px-6 py-3 rounded text-center hover:bg-[#b8083e] transition-colors text-sm sm:text-base">
                   Get Support On Call
                 </a>
-                <a href="https://maps.google.com/?q=Chowdhry+Sweet+House+Vijay+Chowk+Gorakhpur" target="_blank" rel="noopener noreferrer" className="bg-gray-800 text-white px-6 py-3 rounded text-center hover:bg-gray-700 transition-colors">
+                <a href="https://maps.google.com/?q=Chowdhry+Sweet+House+Vijay+Chowk+Gorakhpur" target="_blank" rel="noopener noreferrer" className="bg-gray-800 text-white px-4 sm:px-6 py-3 rounded text-center hover:bg-gray-700 transition-colors text-sm sm:text-base">
                   Get Direction
                 </a>
               </div>
@@ -102,14 +102,14 @@ const Contact = () => {
           </div>
 
           {/* Contact Form */}
-          <div className="bg-white border border-gray-200 p-8 rounded-lg shadow-sm">
-            <h2 className="text-3xl font-bold mb-2 text-[#d80a4e]">Make Custom Request</h2>
+          <div className="bg-white border border-gray-200 p-4 sm:p-8 rounded-lg shadow-sm">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-[#d80a4e]">Make Custom Request</h2>
             <p className="text-gray-600 mb-6">
               Have a special request? We'd love to help you create the perfect sweet experience!
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <input
                   name="fullName"
                   value={formData.fullName}
@@ -129,7 +129,7 @@ const Contact = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <input
                   name="phone"
                   value={formData.phone}

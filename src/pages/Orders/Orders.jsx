@@ -55,8 +55,7 @@ const Orders = () => {
     <div className="min-h-screen bg-gray-50">
       <Breadcrumb currentPage="My Orders" />
       
-      <div className="max-w-7xl mx-auto px-6 py-2">
-        {/* <h1 className="text-3xl font-bold text-gray-800 mb-8">My Orders</h1> */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2">
         
         {orders.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm p-12 text-center">
@@ -71,10 +70,10 @@ const Orders = () => {
             {orders.map((order) => (
               <div key={order._id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 {/* Order Header */}
-                <div className="bg-gradient-to-r from-[#d80a4e] to-[#b8083e] text-white p-2">
-                  <div className="flex justify-between items-start">
+                <div className="bg-gradient-to-r from-[#d80a4e] to-[#b8083e] text-white p-3 sm:p-4">
+                  <div className="flex flex-col sm:flex-row justify-between items-start gap-2 sm:gap-0">
                     <div>
-                      <h3 className="text-xl font-bold mb-1">Order #{order._id?.slice(-8)}</h3>
+                      <h3 className="text-lg sm:text-xl font-bold mb-1">Order #{order._id?.slice(-8)}</h3>
                       <p className="text-pink-100">
                         <i className="fas fa-calendar-alt mr-2"></i>
                         Placed on {new Date(order.createdAt).toLocaleDateString('en-IN', {
@@ -134,7 +133,7 @@ const Orders = () => {
                   </div>
 
                   {/* Order Details Grid */}
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     {/* Payment & Billing */}
                     <div className="bg-blue-50 rounded-lg p-4">
                       <h5 className="font-semibold text-gray-800 mb-3 flex items-center">

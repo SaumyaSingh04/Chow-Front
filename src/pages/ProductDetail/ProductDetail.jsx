@@ -63,12 +63,12 @@ const ProductDetail = () => {
     <div className="min-h-screen bg-white">
       <Breadcrumb currentPage={product.name} />
       
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12">
           {/* Product Media Gallery */}
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             {/* Thumbnail Gallery - Side */}
-            <div className="flex flex-col gap-3 w-20">
+            <div className="flex sm:flex-col gap-3 w-full sm:w-20 order-2 sm:order-1 overflow-x-auto sm:overflow-x-visible">
               {/* Show up to 3 images */}
               {product.images?.slice(0, 3).map((image, index) => (
                 <button
@@ -126,7 +126,7 @@ const ProductDetail = () => {
             </div>
             
             {/* Main Display */}
-            <div className="flex-1 aspect-square overflow-hidden rounded-2xl bg-gray-100 shadow-lg border border-gray-200 relative">
+            <div className="flex-1 aspect-square overflow-hidden rounded-2xl bg-gray-100 shadow-lg border border-gray-200 relative order-1 sm:order-2">
               <div className={`w-full h-full transition-all duration-500 ease-in-out ${
                 isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
               }`}>
@@ -162,9 +162,9 @@ const ProductDetail = () => {
           </div>
 
           {/* Product Info */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
               
               {/* Badges */}
               <div className="flex flex-wrap gap-2 mb-3">
@@ -191,17 +191,17 @@ const ProductDetail = () => {
               </div>
 
               {/* Price */}
-              <div className="flex items-center space-x-3">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 {product.discountPrice ? (
                   <>
-                    <p className="text-2xl font-semibold text-[#d80a4e]">₹{product.discountPrice}</p>
-                    <p className="text-lg text-gray-500 line-through">₹{product.price}</p>
+                    <p className="text-xl sm:text-2xl font-semibold text-[#d80a4e]">₹{product.discountPrice}</p>
+                    <p className="text-base sm:text-lg text-gray-500 line-through">₹{product.price}</p>
                     <span className="bg-red-100 text-red-800 text-sm font-medium px-2 py-1 rounded">
                       {Math.round(((product.price - product.discountPrice) / product.price) * 100)}% OFF
                     </span>
                   </>
                 ) : (
-                  <p className="text-2xl font-semibold text-[#d80a4e]">₹{product.price}</p>
+                  <p className="text-xl sm:text-2xl font-semibold text-[#d80a4e]">₹{product.price}</p>
                 )}
               </div>
             </div>

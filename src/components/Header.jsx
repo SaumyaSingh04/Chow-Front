@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { ShoppingCart, User, Search } from "lucide-react";
+import { ShoppingCart, User, Search, Menu, X } from "lucide-react";
 import { useCart } from '../context/CartContext.jsx';
 
 const Header = () => {
   const { getCartItemsCount } = useCart();
   const [searchQuery, setSearchQuery] = useState('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -42,7 +43,7 @@ const Header = () => {
             />
           </Link>
 
-          {/* Navigation */}
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex gap-4 lg:gap-8 font-medium text-gray-800 text-sm lg:text-base">
             <Link to="/" className="hover:text-[#d80a4e]">Home</Link>
             <Link to="/specials" className="hover:text-[#d80a4e]">Our Specials</Link>
@@ -53,6 +54,14 @@ const Header = () => {
 
           {/* Right Section */}
           <div className="flex items-center gap-3 sm:gap-4 overflow-visible mr-2">
+            
+            {/* Mobile Menu Button */}
+            <button 
+              className="md:hidden p-2"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
             
             {/* Cart */}
             <Link to="/cart" className="relative flex-shrink-0 z-20 p-2">
@@ -92,6 +101,47 @@ const Header = () => {
           </div>
         </div>
       </div>
+      
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-white border-t shadow-lg">
+          <nav className="px-4 py-4 space-y-3">
+            <Link to="/" className="block py-2 hover:text-[#d80a4e]" onClick={() => setMobileMenuOpen(false)}>Home</Link>
+            <Link to="/specials" className="block py-2 hover:text-[#d80a4e]" onClick={() => setMobileMenuOpen(false)}>Our Specials</Link>
+            <Link to="/about" className="block py-2 hover:text-[#d80a4e]" onClick={() => setMobileMenuOpen(false)}>About</Link>
+            <Link to="/contact" className="block py-2 hover:text-[#d80a4e]" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
+            <Link to="/shop" className="block py-2 hover:text-[#d80a4e]" onClick={() => setMobileMenuOpen(false)}>Shop Now</Link>
+            
+            {/* Mobile Search */}
+            <div className="pt-3 border-t">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && searchQuery.trim()) {
+                      navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+                      setMobileMenuOpen(false);
+                    }
+                  }}
+                  placeholder="Search products..."
+                  className="w-full pl-8 pr-3 py-2 border rounded-md text-sm focus:outline-none"
+                />
+                <Search 
+                  className="absolute left-2 top-2.5 w-4 h-4 text-gray-400 cursor-pointer" 
+                  onClick={() => {
+                    if (searchQuery.trim()) {
+                      navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+                      setMobileMenuOpen(false);
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </nav>
+        </div>
+      )}
     </header>
   );
 };

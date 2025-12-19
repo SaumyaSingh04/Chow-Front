@@ -33,14 +33,14 @@ const Cart = () => {
       ) : (
         /* CART CONTENT */
         <div className="max-w-7xl mx-auto px-6 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-12">
             
             {/* LEFT – CART TABLE */}
             <div className="lg:col-span-2">
               <div className="border border-gray-200">
 
-                {/* HEADER */}
-                <div className="grid grid-cols-7 text-sm font-semibold text-gray-700 border-b px-4 py-3 bg-gray-50">
+                {/* HEADER - Hidden on mobile */}
+                <div className="hidden sm:grid grid-cols-7 text-sm font-semibold text-gray-700 border-b px-4 py-3 bg-gray-50">
                   <div>Images</div>
                   <div>Name</div>
                   <div>Unit Price</div>
@@ -51,65 +51,106 @@ const Cart = () => {
 
                 {/* ROWS */}
                 {cartItems.map((item) => (
-                  <div
-                    key={item._id}
-                    className="grid grid-cols-7 items-center text-sm px-4 py-5 border-b"
-                  >
-                    {/* IMAGE */}
-                    <div>
-                      <img
-                        src={item.images?.[0] || item.image || "/placeholder.jpg"}
-                        alt={item.name}
-                        className="w-20 h-20 object-cover border"
-                      />
-                    </div>
-
-                    {/* NAME */}
-                    <div className="font-medium text-gray-800">
-                      {item.name}
-                    </div>
-
-                    {/* UNIT PRICE */}
-                    <div>INR {item.price}</div>
-
-                    {/* QUANTITY */}
-                    <div className="col-span-2 flex justify-center">
-                      <div className="flex border">
-                        <button
-                          onClick={() =>
-                            updateQuantity(item._id, item.quantity - 1)
-                          }
-                          className="px-3 border-r hover:bg-gray-100"
-                        >
-                          -
-                        </button>
-                        <span className="px-4 py-1">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() =>
-                            updateQuantity(item._id, item.quantity + 1)
-                          }
-                          className="px-3 border-l hover:bg-gray-100"
-                        >
-                          +
-                        </button>
+                  <div key={item._id}>
+                    {/* Mobile Card View */}
+                    <div className="block sm:hidden border-b p-4">
+                      <div className="flex items-start gap-4">
+                        <img
+                          src={item.images?.[0] || item.image || "/placeholder.jpg"}
+                          alt={item.name}
+                          className="w-16 h-16 object-cover border rounded"
+                        />
+                        <div className="flex-1">
+                          <h3 className="font-medium text-gray-800 mb-1">{item.name}</h3>
+                          <p className="text-sm text-gray-600 mb-2">INR {item.price}</p>
+                          <div className="flex items-center justify-between">
+                            <div className="flex border rounded">
+                              <button
+                                onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                                className="px-3 py-1 border-r hover:bg-gray-100 text-sm"
+                              >
+                                -
+                              </button>
+                              <span className="px-3 py-1 text-sm">{item.quantity}</span>
+                              <button
+                                onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                                className="px-3 py-1 border-l hover:bg-gray-100 text-sm"
+                              >
+                                +
+                              </button>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium">INR {(item.price * item.quantity).toFixed(2)}</p>
+                              <button
+                                onClick={() => removeFromCart(item._id)}
+                                className="text-red-500 hover:text-red-700 text-sm mt-1"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
+                    
+                    {/* Desktop Table View */}
+                    <div className="hidden sm:grid grid-cols-7 items-center text-sm px-4 py-5 border-b">
+                      {/* IMAGE */}
+                      <div>
+                        <img
+                          src={item.images?.[0] || item.image || "/placeholder.jpg"}
+                          alt={item.name}
+                          className="w-20 h-20 object-cover border"
+                        />
+                      </div>
 
-                    {/* TOTAL */}
-                    <div>
-                      INR {(item.price * item.quantity).toFixed(2)}
-                    </div>
+                      {/* NAME */}
+                      <div className="font-medium text-gray-800">
+                        {item.name}
+                      </div>
 
-                    {/* REMOVE */}
-                    <div className="text-center">
-                      <button
-                        onClick={() => removeFromCart(item._id)}
-                        className="text-xl text-gray-500 hover:text-red-600"
-                      >
-                        ×
-                      </button>
+                      {/* UNIT PRICE */}
+                      <div>INR {item.price}</div>
+
+                      {/* QUANTITY */}
+                      <div className="col-span-2 flex justify-center">
+                        <div className="flex border">
+                          <button
+                            onClick={() =>
+                              updateQuantity(item._id, item.quantity - 1)
+                            }
+                            className="px-3 border-r hover:bg-gray-100"
+                          >
+                            -
+                          </button>
+                          <span className="px-4 py-1">
+                            {item.quantity}
+                          </span>
+                          <button
+                            onClick={() =>
+                              updateQuantity(item._id, item.quantity + 1)
+                            }
+                            className="px-3 border-l hover:bg-gray-100"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* TOTAL */}
+                      <div>
+                        INR {(item.price * item.quantity).toFixed(2)}
+                      </div>
+
+                      {/* REMOVE */}
+                      <div className="text-center">
+                        <button
+                          onClick={() => removeFromCart(item._id)}
+                          className="text-xl text-gray-500 hover:text-red-600"
+                        >
+                          ×
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}

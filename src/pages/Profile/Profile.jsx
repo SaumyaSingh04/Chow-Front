@@ -152,8 +152,8 @@ const Profile = () => {
     <div className="min-h-screen bg-gray-100">
       <Breadcrumb currentPage="Profile" />
       
-      <div className="max-w-4xl mx-auto px-4 md:px-6 py-8">
-        <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800">My Profile</h2>
             <button
@@ -177,7 +177,7 @@ const Profile = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Full Name
@@ -224,9 +224,9 @@ const Profile = () => {
             </div>
 
             {/* Address Section */}
-            <div className="col-span-2">
+            <div className="sm:col-span-2">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Address Information</h3>
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
                   <input
