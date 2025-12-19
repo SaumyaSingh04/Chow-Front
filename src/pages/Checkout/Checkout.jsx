@@ -25,8 +25,16 @@ const Checkout = () => {
   });
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    if (!token || !user._id) {
+      navigate('/signup');
+      return;
+    }
+    
     fetchSavedAddresses();
-  }, []);
+  }, [navigate]);
 
   const fetchSavedAddresses = async () => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -78,6 +86,14 @@ const Checkout = () => {
   };
 
   const handlePlaceOrder = () => {
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    if (!token || !user._id) {
+      navigate('/signup');
+      return;
+    }
+    
     const requiredFields = ['addressType', 'firstName', 'lastName', 'address', 'city', 'state', 'postcode', 'email', 'phone'];
     const missingFields = requiredFields.filter(field => !formData[field].trim());
     
