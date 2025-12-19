@@ -8,6 +8,7 @@ import {
   FaYoutube,
   FaPhoneAlt,
 } from "react-icons/fa";
+import logo from '../assets/logo.png';
 
 const Footer = () => {
   return (
@@ -18,7 +19,7 @@ const Footer = () => {
           {/* Logo & Description */}
           <div>
             <img
-              src="/src/assets/logo.png"
+              src={logo}
               alt="Chowdhry"
               className="w-32 sm:w-40 lg:w-48 mb-4"
             />

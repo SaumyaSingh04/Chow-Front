@@ -6,6 +6,7 @@ import Subcategories from './Subcategories.jsx';
 import AdminOrders from './AdminOrders.jsx';
 import Tickets from './Tickets.jsx';
 import FailedOrders from './FailedOrders.jsx';
+import logo from '../../assets/logo.png';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -51,7 +52,7 @@ const Admin = () => {
         {/* Logo */}
         <div className="p-2 sm:p-4">
           <div className="flex items-center justify-between">
-            <img src="/src/assets/logo.png" alt="Chowdhry" className="h-20 sm:h-24 lg:h-30 mx-auto" />
+            <img src={logo} alt="Chowdhry" className="h-20 sm:h-24 lg:h-30 mx-auto" />
             <button 
               className="lg:hidden p-2"
               onClick={() => setSidebarOpen(false)}

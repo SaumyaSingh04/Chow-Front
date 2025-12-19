@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { ShoppingCart, User, Search, Menu, X } from "lucide-react";
 import { useCart } from '../context/CartContext.jsx';
+import logo from '../assets/logo.png';
 
 const Header = () => {
   const { getCartItemsCount } = useCart();
@@ -37,7 +38,7 @@ const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <img
-              src="/src/assets/logo.png"
+              src={logo}
               alt="Chowdhry Sweet House"
               className="h-12 sm:h-16 lg:h-20 object-contain"
             />

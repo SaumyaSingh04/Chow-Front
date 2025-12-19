@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import logo from '../assets/logo.png';
 
 const Breadcrumb = ({ currentPage }) => {
   return (
@@ -14,7 +15,7 @@ const Breadcrumb = ({ currentPage }) => {
         </div>
         <h1 className="text-2xl md:text-4xl font-bold">{currentPage}</h1>
       </div>
-      <img src="/src/assets/logo.png" alt="Chowdhry Sweet House" className="h-20 md:h-40 absolute right-2 md:right-6 top-1/2 transform -translate-y-1/2" />
+      <img src={logo} alt="Chowdhry Sweet House" className="h-20 md:h-40 absolute right-2 md:right-6 top-1/2 transform -translate-y-1/2" />
     </div>
   );
 };

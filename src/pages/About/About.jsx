@@ -1,6 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import Breadcrumb from "../../components/Breadcrumb.jsx";
+import amavatBarfi from "../../assets/Amavat Barfi (1).jpg";
+import chocolateBarfi from "../../assets/Chocolate Fruits Barfi (1).jpg";
 
 const About = () => {
   return (
@@ -10,12 +12,12 @@ const About = () => {
       <div className="max-w-7xl mx-auto px-6 pt-1">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           <img
-            src="/src/assets/Amavat Barfi (1).jpg"
+            src={amavatBarfi}
             alt="Sweet"
             className="w-full h-90 object-cover"
           />
           <img
-            src="/src/assets/Chocolate Fruits Barfi (1).jpg"
+            src={chocolateBarfi}
             alt="Sweet"
             className="w-full h-90 object-cover"
           />
