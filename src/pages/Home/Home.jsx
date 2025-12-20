@@ -99,7 +99,7 @@ const Home = () => {
           <div className="lg:col-span-7 relative rounded-lg overflow-hidden h-[250px] sm:h-[350px] lg:h-[420px]">
             <img
               src={ban1}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover brightness-90"
             />
             <div className="absolute inset-0" />
             <div className="absolute inset-0 p-4 sm:p-6 lg:p-10 flex flex-col justify-center animate-fade-in">
@@ -120,13 +120,13 @@ const Home = () => {
           {/* RIGHT BANNERS - Stack on mobile */}
           <div className="lg:col-span-3 flex flex-row lg:flex-col gap-3 sm:gap-6">
             <div className="relative rounded-lg overflow-hidden flex-1 h-[120px] sm:h-[150px] lg:h-auto">
-              <img src={compressedcard1} className="w-full h-full object-cover" />
+              <img src={compressedcard1} className="w-full h-full object-cover brightness-75" />
               <div className="absolute inset-0 flex items-center justify-center">
                 <p className="text-white text-sm sm:text-base font-medium text-center px-2 sm:px-4">Freshly Sweet Made, Every Day...</p>
               </div>
             </div>
             <div className="relative rounded-lg overflow-hidden flex-1 h-[120px] sm:h-[150px] lg:h-auto">
-              <img src={compressedcard2} className="w-full h-full object-cover" />
+              <img src={compressedcard2} className="w-full h-full object-cover brightness-75" />
               <div className="absolute inset-0 flex items-center justify-center">
                 <p className="text-white text-sm sm:text-base font-medium text-center px-2 sm:px-4">Freshly Sweet Made, Every Day...</p>
               </div>
