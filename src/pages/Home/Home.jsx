@@ -56,11 +56,6 @@ const Home = () => {
 
   return (
     <main className="bg-black relative">
-      {(loading || pageLoading) && (
-        <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
-          <div className="animate-spin h-14 w-14 border-b-4 border-red-600 rounded-full" />
-        </div>
-      )}
 
       {/* ================= HERO ================= */}
       <section className="max-w-[1400px] mx-auto px-3 sm:px-6 py-4 sm:py-8">
