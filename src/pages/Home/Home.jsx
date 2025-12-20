@@ -6,7 +6,7 @@ import ProductCard from "../../components/ProductCard.jsx";
 import ban1 from "../../assets/ban1.jpg";
 import compressedcard1 from "../../assets/compressedcard1.jpg";
 import compressedcard2 from "../../assets/compressedcard2.jpg";
-import screenshot from "../../assets/Screenshot 2025-12-16 at 21.07.41.png";
+import Video from "../../assets/video.jpeg";
 
 const Home = () => {
   const { fetchItems, getFeaturedItems, getSubcategories, fetchCategories, items, categories, loading } = useApi();
@@ -255,7 +255,7 @@ const Home = () => {
     {/* RIGHT VIDEO */}
     <div className="relative overflow-hidden rounded-lg">
       <img
-        src={screenshot}
+        src={Video}
         alt="Chowdhry Sweet House"
         className="w-full h-[250px] sm:h-[350px] lg:h-[420px] object-cover"
       />
