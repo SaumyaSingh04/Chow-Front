@@ -6,11 +6,13 @@ import Breadcrumb from '../../components/Breadcrumb.jsx';
 
 const Checkout = () => {
   const { cartItems, getCartTotal } = useCart();
-  const { getUserAddresses } = useApi();
+  const { getUserAddresses, service } = useApi();
   const navigate = useNavigate();
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState('');
   const [isAddressSaved, setIsAddressSaved] = useState(false);
+  const [distance, setDistance] = useState(0);
+  const [deliveryFee, setDeliveryFee] = useState(0);
   const [formData, setFormData] = useState({
     addressType: '',
     firstName: '',
@@ -24,6 +26,39 @@ const Checkout = () => {
     phone: '',
     orderNotes: ''
   });
+
+  // Validate Indian pincode
+  const validatePincode = (pincode) => {
+    // Indian pincode format: 6 digits, first digit 1-9
+    const pincodeRegex = /^[1-9][0-9]{5}$/;
+    return pincodeRegex.test(pincode);
+  };
+
+  // Calculate distance using backend API
+  const calculateDeliveryFee = async (pincode) => {
+    if (!pincode || !validatePincode(pincode)) {
+      setDistance(0);
+      setDeliveryFee(0);
+      return;
+    }
+
+    try {
+      const data = await service.post('/api/calculate-distance', { pincode });
+      setDistance(data.distance);
+      setDeliveryFee(data.fee);
+    } catch (error) {
+      console.error('Error calling distance API:', error);
+      setDistance(100);
+      setDeliveryFee(100);
+    }
+  };
+
+  // Watch for postcode changes to calculate delivery fee
+  useEffect(() => {
+    if (formData.postcode) {
+      calculateDeliveryFee(formData.postcode);
+    }
+  }, [formData.postcode]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -83,10 +118,15 @@ const Checkout = () => {
   };
 
   const handleInputChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+    
+    if (name === 'postcode') {
+      calculateDeliveryFee(value);
+    }
   };
 
   const clearAddress = () => {
@@ -364,11 +404,23 @@ const Checkout = () => {
                 </div>
                 <div className="flex justify-between">
                   <span>GST (5%)</span>
-                  <span>INR {(getCartTotal() * 0.05).toFixed(2)}</span>
+                  <span>₹{(getCartTotal() * 0.05).toFixed(2)}</span>
                 </div>
+                {distance > 0 && (
+                  <>
+                    <div className="flex justify-between text-blue-600">
+                      <span>Distance</span>
+                      <span>{distance} km</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Delivery Fee</span>
+                      <span>₹{deliveryFee.toFixed(2)}</span>
+                    </div>
+                  </>
+                )}
                 <div className="flex justify-between font-semibold text-lg border-t pt-3">
                   <span>Order Total</span>
-                  <span>INR {(getCartTotal() * 1.05).toFixed(2)}</span>
+                  <span>₹{(getCartTotal() * 1.05 + deliveryFee).toFixed(2)}</span>
                 </div>
               </div>
 
