@@ -16,18 +16,18 @@ const Orders = () => {
         if (user._id || user.id) {
           const userId = user._id || user.id;
           
-          const userOrders = await getMyOrders(userId);
+          const [userOrders, userAddresses] = await Promise.all([
+            getMyOrders(userId),
+            getUserAddresses(userId)
+          ]);
+          
           setOrders(Array.isArray(userOrders) ? userOrders : []);
           
-          // Fetch user addresses
-          const userAddresses = await getUserAddresses(userId);
-          const addressMap = {};
           const addressList = userAddresses.addresses || userAddresses.address || [];
-          if (addressList.length > 0) {
-            addressList.forEach(addr => {
-              addressMap[addr._id] = addr;
-            });
-          }
+          const addressMap = {};
+          addressList.forEach(addr => {
+            addressMap[addr._id] = addr;
+          });
           setAddresses(addressMap);
         }
       } catch (error) {
@@ -39,6 +39,44 @@ const Orders = () => {
 
     fetchOrders();
   }, [getMyOrders, getUserAddresses]);
+
+  const getStatusIcon = (status) => {
+    const icons = {
+      pending: 'fa-clock',
+      confirmed: 'fa-check-circle',
+      delivered: 'fa-truck',
+      default: 'fa-info-circle'
+    };
+    return icons[status] || icons.default;
+  };
+
+  const getStatusColor = (status) => {
+    const colors = {
+      pending: 'bg-yellow-500 text-white',
+      confirmed: 'bg-blue-500 text-white',
+      delivered: 'bg-green-500 text-white',
+      default: 'bg-gray-500 text-white'
+    };
+    return colors[status] || colors.default;
+  };
+
+  const getPaymentStatusColor = (status) => {
+    const colors = {
+      paid: 'text-green-600',
+      failed: 'text-red-600',
+      default: 'text-yellow-600'
+    };
+    return colors[status] || colors.default;
+  };
+
+  const getPaymentStatusIcon = (status) => {
+    const icons = {
+      paid: 'fa-check-circle',
+      failed: 'fa-times-circle',
+      default: 'fa-clock'
+    };
+    return icons[status] || icons.default;
+  };
 
   if (loading) {
     return (
@@ -56,7 +94,6 @@ const Orders = () => {
       <Breadcrumb currentPage="My Orders" />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2">
-        
         {orders.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm p-12 text-center">
             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -84,18 +121,8 @@ const Orders = () => {
                       </p>
                     </div>
                     <div className="text-right">
-                      <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                        order.status === 'pending' ? 'bg-yellow-500 text-white' :
-                        order.status === 'confirmed' ? 'bg-blue-500 text-white' :
-                        order.status === 'delivered' ? 'bg-green-500 text-white' :
-                        'bg-gray-500 text-white'
-                      }`}>
-                        <i className={`fas ${
-                          order.status === 'pending' ? 'fa-clock' :
-                          order.status === 'confirmed' ? 'fa-check-circle' :
-                          order.status === 'delivered' ? 'fa-truck' :
-                          'fa-info-circle'
-                        } mr-2`}></i>
+                      <span className={`px-4 py-2 rounded-full text-sm font-semibold ${getStatusColor(order.status)}`}>
+                        <i className={`fas ${getStatusIcon(order.status)} mr-2`}></i>
                         {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                       </span>
                     </div>
@@ -142,10 +169,6 @@ const Orders = () => {
                       </h5>
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Payment Method:</span>
-                          <span className="font-medium capitalize">{order.paymentMethod}</span>
-                        </div>
-                        <div className="flex justify-between">
                           <span className="text-gray-600">Subtotal:</span>
                           <span>₹{((order.totalAmount - (order.deliveryFee || 0)) / 1.05).toFixed(2)}</span>
                         </div>
@@ -171,16 +194,8 @@ const Orders = () => {
                         </div>
                         <div className="flex justify-between text-sm text-gray-600 mt-1">
                           <span>Payment Status:</span>
-                          <span className={`font-medium ${
-                            order.paymentStatus === 'paid' ? 'text-green-600' :
-                            order.paymentStatus === 'failed' ? 'text-red-600' :
-                            'text-yellow-600'
-                          }`}>
-                            <i className={`fas ${
-                              order.paymentStatus === 'paid' ? 'fa-check-circle' :
-                              order.paymentStatus === 'failed' ? 'fa-times-circle' :
-                              'fa-clock'
-                            } mr-1`}></i>
+                          <span className={`font-medium ${getPaymentStatusColor(order.paymentStatus)}`}>
+                            <i className={`fas ${getPaymentStatusIcon(order.paymentStatus)} mr-1`}></i>
                             {order.paymentStatus?.charAt(0).toUpperCase() + order.paymentStatus?.slice(1)}
                           </span>
                         </div>

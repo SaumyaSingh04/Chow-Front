@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useCart } from '../../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 import { useApi } from '../../context/ApiContext.jsx';
@@ -27,16 +27,12 @@ const Checkout = () => {
     orderNotes: ''
   });
 
-  // Validate Indian pincode
-  const validatePincode = (pincode) => {
-    // Indian pincode format: 6 digits, first digit 1-9
-    const pincodeRegex = /^[1-9][0-9]{5}$/;
-    return pincodeRegex.test(pincode);
-  };
+  const validatePincode = useCallback((pincode) => {
+    return /^[1-9][0-9]{5}$/.test(pincode);
+  }, []);
 
-  // Calculate distance using backend API
-  const calculateDeliveryFee = async (pincode) => {
-    if (!pincode || !validatePincode(pincode)) {
+  const calculateDeliveryFee = useCallback(async (pincode) => {
+    if (!pincode || pincode.length !== 6 || !validatePincode(pincode)) {
       setDistance(0);
       setDeliveryFee(0);
       return;
@@ -47,18 +43,17 @@ const Checkout = () => {
       setDistance(data.distance);
       setDeliveryFee(data.fee);
     } catch (error) {
-      console.error('Error calling distance API:', error);
+      console.error('Error calculating delivery fee:', error);
       setDistance(100);
       setDeliveryFee(100);
     }
-  };
+  }, [service, validatePincode]);
 
-  // Watch for postcode changes to calculate delivery fee
   useEffect(() => {
     if (formData.postcode) {
       calculateDeliveryFee(formData.postcode);
     }
-  }, [formData.postcode]);
+  }, [formData.postcode, calculateDeliveryFee]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -69,26 +64,21 @@ const Checkout = () => {
       return;
     }
     
-    fetchSavedAddresses();
-  }, [navigate]);
-
-  const fetchSavedAddresses = async () => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    console.log('User from localStorage:', user);
-    if (user._id) {
-      try {
-        const response = await getUserAddresses(user._id);
-        console.log('Addresses response:', response);
-        // Handle different response structures
-        const addresses = response.addresses || response.address || user.address || [];
-        setSavedAddresses(addresses);
-      } catch (error) {
-        console.error('Error fetching addresses:', error);
-        // Fallback to user addresses from localStorage if API fails
-        setSavedAddresses(user.address || []);
+    const fetchSavedAddresses = async () => {
+      if (user._id) {
+        try {
+          const response = await getUserAddresses(user._id);
+          const addresses = response.addresses || response.address || user.address || [];
+          setSavedAddresses(addresses);
+        } catch (error) {
+          console.error('Error fetching addresses:', error);
+          setSavedAddresses(user.address || []);
+        }
       }
-    }
-  };
+    };
+    
+    fetchSavedAddresses();
+  }, [navigate, getUserAddresses]);
 
   const handleAddressSelect = (e) => {
     const addressId = e.target.value;
@@ -119,14 +109,7 @@ const Checkout = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-    
-    if (name === 'postcode') {
-      calculateDeliveryFee(value);
-    }
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const clearAddress = () => {
@@ -157,17 +140,24 @@ const Checkout = () => {
     }
     
     const requiredFields = ['addressType', 'firstName', 'lastName', 'address', 'city', 'state', 'postcode', 'email', 'phone'];
-    const missingFields = requiredFields.filter(field => !formData[field].trim());
+    const missingFields = requiredFields.filter(field => !formData[field]?.trim());
     
     if (missingFields.length > 0) {
       alert('Please fill all required fields');
       return;
     }
     
-    // Save billing details and delivery info to localStorage for order creation
     localStorage.setItem('billingDetails', JSON.stringify(formData));
     localStorage.setItem('deliveryInfo', JSON.stringify({ distance, deliveryFee }));
     navigate('/payment');
+  };
+
+  const isOrderDisabled = () => {
+    const requiredFields = ['addressType', 'firstName', 'lastName', 'address', 'city', 'state', 'postcode', 'email', 'phone'];
+    const hasEmptyFields = requiredFields.some(field => !formData[field]?.trim());
+    const isPincodeInvalid = !formData.postcode || !validatePincode(formData.postcode) || deliveryFee === 0;
+    
+    return hasEmptyFields || isPincodeInvalid;
   };
 
   return (
@@ -427,9 +417,14 @@ const Checkout = () => {
 
               <button
                 onClick={handlePlaceOrder}
-                className="w-full mt-6 bg-[#d80a4e] text-white py-3 rounded font-semibold hover:bg-[#b8083e] transition-colors"
+                disabled={isOrderDisabled()}
+                className={`w-full mt-6 py-3 rounded font-semibold transition-colors ${
+                  isOrderDisabled() 
+                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                    : 'bg-[#d80a4e] text-white hover:bg-[#b8083e]'
+                }`}
               >
-                Place order
+                {isOrderDisabled() ? 'Please Enter valid pincode' : 'Place order'}
               </button>
             </div>
           </div>

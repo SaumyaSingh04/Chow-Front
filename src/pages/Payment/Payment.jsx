@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '../../context/CartContext';
 import { useApi } from '../../context/ApiContext';
 import { useNavigate } from 'react-router-dom';
@@ -6,7 +6,7 @@ import Breadcrumb from '../../components/Breadcrumb.jsx';
 
 const Payment = () => {
   const { cartItems, getCartTotal, clearCart } = useCart();
-  const { createOrder, addUserAddress, getUserAddresses } = useApi();
+  const { createOrder, addUserAddress } = useApi();
   const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,8 +18,7 @@ const Payment = () => {
     cardName: ''
   });
 
-  // Load delivery info from localStorage
-  React.useEffect(() => {
+  useEffect(() => {
     const savedDeliveryInfo = localStorage.getItem('deliveryInfo');
     if (savedDeliveryInfo) {
       setDeliveryInfo(JSON.parse(savedDeliveryInfo));
@@ -42,7 +41,6 @@ const Payment = () => {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       const billingDetails = JSON.parse(localStorage.getItem('billingDetails') || '{}');
       
-      // Always create new address with current billing details
       const addressData = {
         addressType: billingDetails.addressType || 'delivery',
         firstName: billingDetails.firstName,
@@ -64,26 +62,9 @@ const Payment = () => {
         throw new Error('Failed to create address - no address ID returned');
       }
       
-      console.log('Using addressId:', addressId);
-      
-      // Create deliveryAddress object for direct access
-      const deliveryAddress = {
-        firstName: billingDetails.firstName,
-        lastName: billingDetails.lastName,
-        street: billingDetails.address,
-        apartment: billingDetails.apartment || '',
-        city: billingDetails.city,
-        state: billingDetails.state,
-        postcode: billingDetails.postcode,
-        email: billingDetails.email,
-        phone: billingDetails.phone,
-        orderNotes: billingDetails.orderNotes || ''
-      };
-      
       const orderData = {
         userId: user._id || user.id,
         addressId: addressId,
-        deliveryAddress: deliveryAddress,
         items: cartItems.map(item => ({
           itemId: item._id,
           quantity: item.quantity,
@@ -96,10 +77,15 @@ const Payment = () => {
         paymentStatus: 'pending'
       };
 
-      const orderResponse = await createOrder(orderData);
+      await createOrder(orderData);
 
       alert('Payment successful! Order placed.');
       clearCart();
+      
+      // Clean up localStorage
+      localStorage.removeItem('billingDetails');
+      localStorage.removeItem('deliveryInfo');
+      
       navigate('/orders');
     } catch (error) {
       alert('Failed to place order. Please try again.');
