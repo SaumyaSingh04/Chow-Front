@@ -10,12 +10,21 @@ const Payment = () => {
   const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState('');
   const [loading, setLoading] = useState(false);
+  const [deliveryInfo, setDeliveryInfo] = useState({ distance: 0, deliveryFee: 0 });
   const [cardDetails, setCardDetails] = useState({
     cardNumber: '',
     expiryDate: '',
     cvv: '',
     cardName: ''
   });
+
+  // Load delivery info from localStorage
+  React.useEffect(() => {
+    const savedDeliveryInfo = localStorage.getItem('deliveryInfo');
+    if (savedDeliveryInfo) {
+      setDeliveryInfo(JSON.parse(savedDeliveryInfo));
+    }
+  }, []);
 
   const handlePayment = async () => {
     if (!paymentMethod) {
@@ -80,7 +89,9 @@ const Payment = () => {
           quantity: item.quantity,
           price: item.price
         })),
-        totalAmount: getCartTotal() * 1.05,
+        totalAmount: getCartTotal() * 1.05 + deliveryInfo.deliveryFee,
+        distance: deliveryInfo.distance,
+        deliveryFee: deliveryInfo.deliveryFee,
         status: 'pending',
         paymentStatus: 'pending'
       };
@@ -232,9 +243,21 @@ const Payment = () => {
                   <span>GST (5%)</span>
                   <span>INR {(getCartTotal() * 0.05).toFixed(2)}</span>
                 </div>
+                {deliveryInfo.distance > 0 && (
+                  <>
+                    <div className="flex justify-between text-blue-600">
+                      <span>Distance</span>
+                      <span>{deliveryInfo.distance} km</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Delivery Fee</span>
+                      <span>INR {deliveryInfo.deliveryFee.toFixed(2)}</span>
+                    </div>
+                  </>
+                )}
                 <div className="flex justify-between font-semibold text-lg border-t pt-3">
                   <span>Total Amount</span>
-                  <span>INR {(getCartTotal() * 1.05).toFixed(2)}</span>
+                  <span>INR {(getCartTotal() * 1.05 + deliveryInfo.deliveryFee).toFixed(2)}</span>
                 </div>
               </div>
 

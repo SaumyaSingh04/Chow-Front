@@ -164,8 +164,9 @@ const Checkout = () => {
       return;
     }
     
-    // Save billing details to localStorage for order creation
+    // Save billing details and delivery info to localStorage for order creation
     localStorage.setItem('billingDetails', JSON.stringify(formData));
+    localStorage.setItem('deliveryInfo', JSON.stringify({ distance, deliveryFee }));
     navigate('/payment');
   };
 
