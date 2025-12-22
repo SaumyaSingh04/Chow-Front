@@ -13,6 +13,7 @@ const Checkout = () => {
   const [isAddressSaved, setIsAddressSaved] = useState(false);
   const [distance, setDistance] = useState(0);
   const [deliveryFee, setDeliveryFee] = useState(0);
+  const [pincodeError, setPincodeError] = useState('');
   const [formData, setFormData] = useState({
     addressType: '',
     firstName: '',
@@ -32,20 +33,46 @@ const Checkout = () => {
   }, []);
 
   const calculateDeliveryFee = useCallback(async (pincode) => {
-    if (!pincode || pincode.length !== 6 || !validatePincode(pincode)) {
+    if (!pincode) {
       setDistance(0);
       setDeliveryFee(0);
+      setPincodeError('');
+      return;
+    }
+
+    if (pincode.length !== 6) {
+      setDistance(0);
+      setDeliveryFee(0);
+      setPincodeError('Pincode must be 6 digits');
+      return;
+    }
+
+    if (!validatePincode(pincode)) {
+      setDistance(0);
+      setDeliveryFee(0);
+      setPincodeError('Invalid pincode format');
       return;
     }
 
     try {
       const data = await service.post('/api/calculate-distance', { pincode });
+      
+      // Check if API returned error response
+      if (!data || data.error || data.success === false) {
+        setDistance(0);
+        setDeliveryFee(0);
+        setPincodeError('Pincode not serviceable in our delivery area');
+        return;
+      }
+      
       setDistance(data.distance);
       setDeliveryFee(data.fee);
+      setPincodeError('');
     } catch (error) {
       console.error('Error calculating delivery fee:', error);
-      setDistance(100);
-      setDeliveryFee(100);
+      setDistance(0);
+      setDeliveryFee(0);
+      setPincodeError('Pincode not serviceable in our delivery area');
     }
   }, [service, validatePincode]);
 
@@ -158,6 +185,13 @@ const Checkout = () => {
     const isPincodeInvalid = !formData.postcode || !validatePincode(formData.postcode) || deliveryFee === 0;
     
     return hasEmptyFields || isPincodeInvalid;
+  };
+
+  const getButtonText = () => {
+    if (pincodeError) {
+      return 'Please Enter valid pincode';
+    }
+    return 'Place order';
   };
 
   return (
@@ -314,8 +348,13 @@ const Checkout = () => {
                   value={formData.postcode}
                   onChange={handleInputChange}
                   placeholder="Enter postcode"
-                  className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-[#d80a4e]"
+                  className={`w-full p-3 border rounded focus:outline-none ${
+                    pincodeError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-[#d80a4e]'
+                  }`}
                 />
+                {pincodeError && (
+                  <p className="text-red-500 text-sm mt-1">{pincodeError}</p>
+                )}
               </div>
 
               {/* Email and Phone */}
@@ -424,7 +463,7 @@ const Checkout = () => {
                     : 'bg-[#d80a4e] text-white hover:bg-[#b8083e]'
                 }`}
               >
-                {isOrderDisabled() ? 'Please Enter valid pincode' : 'Place order'}
+                {getButtonText()}
               </button>
             </div>
           </div>
