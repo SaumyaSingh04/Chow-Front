@@ -32,7 +32,8 @@ const Home = () => {
         getSubcategories()
       ]);
       setFeatured(featuredData);
-      setSubcategories(Array.isArray(subcatsData) ? subcatsData : subcatsData?.subcategories || []);
+      const processedSubcats = Array.isArray(subcatsData) ? subcatsData : subcatsData?.subcategories || [];
+      setSubcategories(processedSubcats);
       setDataLoaded(true);
       setPageLoading(false);
     };
@@ -155,47 +156,101 @@ const Home = () => {
         </div>
       </section>
 
-     {/* ================= POPULAR SWEETS ================= */}
-<section className="bg-white py-6 md:py-10">
-  <div className="max-w-[1400px] mx-auto px-4 md:px-6">
+    {/* ================= Dynamic Category Sections ================= */}
+{categories.map((category) => {
+  const categoryItems = items
+    .filter(item => {
+      const itemCategories = Array.isArray(item.categories)
+        ? item.categories
+        : [item.category];
+      return itemCategories.some(cat =>
+        (typeof cat === 'object' ? cat._id : cat) === category._id
+      );
+    })
+    .slice(0, 8);
 
-    {/* Header */}
-    <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 md:gap-0 mb-6 md:mb-10">
-      <h2 className="text-2xl md:text-4xl font-bold text-black">
-        Popular{" "}
-        <span className="text-[#d80a4e] underline underline-offset-4">
-          Sweets
-        </span>
-      </h2>
+  const categorySubcategories = subcategories.filter(
+    sub => {
+      // Handle both populated and non-populated categories
+      const subCategories = Array.isArray(sub.categories) ? sub.categories : [];
+      return subCategories.some(cat => 
+        (typeof cat === 'object' ? cat._id : cat) === category._id
+      );
+    }
+  );
 
-      <div className="flex flex-wrap gap-4 md:gap-10 text-base md:text-lg font-medium">
-        <button
-          onClick={() => setSelectedCategory(null)}
-          className={`${!selectedCategory ? 'text-[#d80a4e] underline underline-offset-4' : 'text-black hover:text-[#d80a4e]'} whitespace-nowrap`}
-        >
-          All
-        </button>
-        {categories.slice(0, 3).map((category) => (
-          <button
-            key={category._id}
-            onClick={() => setSelectedCategory(category._id)}
-            className={`${selectedCategory === category._id ? 'text-[#d80a4e] underline underline-offset-4' : 'text-black hover:text-[#d80a4e]'} whitespace-nowrap`}
-          >
+  if (categoryItems.length === 0) return null;
+
+  return (
+    <section key={category._id} className="bg-white py-4 sm:py-6">
+      <div className="max-w-[1400px] mx-auto px-3 sm:px-4 md:px-6">
+
+        {/* Category Title and Subcategories */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#d80a4e] mb-2 sm:mb-0">
             {category.name}
-          </button>
-        ))}
+          </h2>
+          
+          {categorySubcategories.length > 0 && (
+            <div className="flex flex-wrap gap-2 sm:gap-3">
+              {categorySubcategories.map((subcategory) => (
+                <Link
+                  key={subcategory._id}
+                  to={`/shop?subcategory=${subcategory._id}`}
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border 
+                             text-xs sm:text-sm md:text-base text-gray-700 font-medium
+                             hover:border-[#d80a4e] hover:text-[#d80a4e] 
+                             transition whitespace-nowrap"
+                >
+                  {subcategory.name}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Products Grid */}
+        <div className="relative">
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2" id={`products-${category._id}`}>
+            {categoryItems.map(product => (
+              <div
+                key={product._id}
+                className="min-w-[220px] sm:min-w-[260px] lg:min-w-[300px]"
+              >
+                <ProductCard product={product} />
+              </div>
+            ))}
+          </div>
+          {categoryItems.length > 3 && (
+            <>
+              <button
+                onClick={() => {
+                  const container = document.getElementById(`products-${category._id}`);
+                  container.scrollBy({ left: -300, behavior: 'smooth' });
+                }}
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-600 text-xl p-2 rounded-full shadow-md z-10"
+              >
+                ‹‹
+              </button>
+              <button
+                onClick={() => {
+                  const container = document.getElementById(`products-${category._id}`);
+                  container.scrollBy({ left: 300, behavior: 'smooth' });
+                }}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-600 text-xl p-2 rounded-full shadow-md z-10"
+              >
+                ››
+              </button>
+            </>
+          )}
+        </div>
+
+
       </div>
-    </div>
+    </section>
+  );
+})}
 
-    {/* Products Grid */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-      {filteredItems.map(p => (
-        <ProductCard key={p._id} product={p} />
-      ))}
-    </div>
-
-  </div>
-</section>
       {/* ================= EXCLUSIVE SWEET DEALS ================= */}
 <section className="bg-[#f7efe9] py-6 sm:py-12">
   <div className="max-w-[1400px] mx-auto px-3 sm:px-6 grid lg:grid-cols-2 gap-6 sm:gap-12 items-center">
@@ -273,3 +328,4 @@ const Home = () => {
 };
 
 export default Home;
+
