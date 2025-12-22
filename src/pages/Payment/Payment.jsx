@@ -6,7 +6,7 @@ import Breadcrumb from '../../components/Breadcrumb.jsx';
 
 const Payment = () => {
   const { cartItems, getCartTotal, clearCart } = useCart();
-  const { createOrder, addUserAddress } = useApi();
+  const { createOrder, addUserAddress, getUserAddresses } = useApi();
   const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState('');
   const [loading, setLoading] = useState(false);
@@ -41,25 +41,45 @@ const Payment = () => {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       const billingDetails = JSON.parse(localStorage.getItem('billingDetails') || '{}');
       
-      const addressData = {
-        addressType: billingDetails.addressType || 'delivery',
-        firstName: billingDetails.firstName,
-        lastName: billingDetails.lastName,
-        street: billingDetails.address,
-        apartment: billingDetails.apartment || '',
-        city: billingDetails.city,
-        state: billingDetails.state,
-        postcode: billingDetails.postcode,
-        email: billingDetails.email,
-        phone: billingDetails.phone,
-        orderNotes: billingDetails.orderNotes || ''
-      };
+      // Check if address already exists
+      const userAddresses = await getUserAddresses(user._id || user.id);
+      const addresses = userAddresses.addresses || userAddresses.address || [];
       
-      const newAddressResponse = await addUserAddress(user._id || user.id, addressData);
-      const addressId = newAddressResponse.address?._id || newAddressResponse.addressId || newAddressResponse._id;
+      const existingAddress = addresses.find(addr => 
+        addr.firstName === billingDetails.firstName &&
+        addr.lastName === billingDetails.lastName &&
+        addr.street === billingDetails.address &&
+        addr.city === billingDetails.city &&
+        addr.state === billingDetails.state &&
+        addr.postcode === billingDetails.postcode &&
+        addr.phone === billingDetails.phone
+      );
+      
+      let addressId;
+      
+      if (existingAddress) {
+        addressId = existingAddress._id;
+      } else {
+        const addressData = {
+          addressType: billingDetails.addressType || 'delivery',
+          firstName: billingDetails.firstName,
+          lastName: billingDetails.lastName,
+          street: billingDetails.address,
+          apartment: billingDetails.apartment || '',
+          city: billingDetails.city,
+          state: billingDetails.state,
+          postcode: billingDetails.postcode,
+          email: billingDetails.email,
+          phone: billingDetails.phone,
+          orderNotes: billingDetails.orderNotes || ''
+        };
+        
+        const newAddressResponse = await addUserAddress(user._id || user.id, addressData);
+        addressId = newAddressResponse.address?._id || newAddressResponse.addressId || newAddressResponse._id;
+      }
       
       if (!addressId) {
-        throw new Error('Failed to create address - no address ID returned');
+        throw new Error('Failed to get address ID');
       }
       
       const orderData = {
