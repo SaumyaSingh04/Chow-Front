@@ -147,22 +147,7 @@ const Subcategories = () => {
             
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                {/* Name Field */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Subcategory Name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-
-                {/* Categories Field */}
+                {/* Categories Field - First */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Categories (Multiple) <span className="text-red-500">*</span>
@@ -196,6 +181,21 @@ const Subcategories = () => {
                       ))
                     )}
                   </div>
+                </div>
+
+                {/* Name Field - Second */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Subcategory Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Subcategory Name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    required
+                  />
                 </div>
 
                 {/* Empty third column for layout */}
