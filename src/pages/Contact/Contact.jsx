@@ -51,50 +51,52 @@ const Contact = () => {
   };
 
   return (
-    <div className="bg-white">
+    <div className="min-h-screen bg-gray-50">
       <Breadcrumb currentPage="Contact Us" />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
           {/* Contact Info */}
-          <div className="p-4 sm:p-8 rounded-lg">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-[#d80a4e]">Get In Touch</h2>
+          <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
+            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-[#d80a4e]">Get In Touch</h2>
 
             <div className="space-y-6 text-gray-700">
-              <div className="flex items-start gap-3">
-                <span className="text-[#d80a4e] text-xl">📍</span>
+              <div className="flex items-start gap-4">
+                <span className="text-[#d80a4e] text-xl mt-1">📍</span>
                 <div>
-                  <strong className="text-gray-900">Address:</strong><br />
-                  Vijay Chowk, In front of Vijay Talkies,<br />
-                  Golghar, Gorakhpur, Uttar Pradesh – 273001
+                  <strong className="text-gray-900 block mb-1">Address:</strong>
+                  <p className="text-sm md:text-base leading-relaxed">
+                    Vijay Chowk, In front of Vijay Talkies,<br />
+                    Golghar, Gorakhpur, Uttar Pradesh – 273001
+                  </p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3">
-                <span className="text-[#d80a4e] text-xl">📞</span>
+              <div className="flex items-start gap-4">
+                <span className="text-[#d80a4e] text-xl mt-1">📞</span>
                 <div>
-                  <strong className="text-gray-900">Phone:</strong><br />
-                  +91 7525025100
+                  <strong className="text-gray-900 block mb-1">Phone:</strong>
+                  <p className="text-sm md:text-base">+91 7525025100</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3">
-                <span className="text-[#d80a4e] text-xl">⏰</span>
+              <div className="flex items-start gap-4">
+                <span className="text-[#d80a4e] text-xl mt-1">⏰</span>
                 <div>
-                  <strong className="text-gray-900">Store Hours:</strong><br />
-                  08:00 AM – 11:30 PM (7 Days)
+                  <strong className="text-gray-900 block mb-1">Store Hours:</strong>
+                  <p className="text-sm md:text-base">08:00 AM – 11:30 PM (7 Days)</p>
                 </div>
               </div>
             </div>
 
-            <div className="mt-6 sm:mt-8 space-y-3">
+            <div className="mt-8 space-y-3">
               <div className="flex flex-col sm:flex-row gap-3">
-                <a href="tel:+917525025100" className="bg-[#d80a4e] text-white px-4 sm:px-6 py-3 rounded text-center hover:bg-[#b8083e] transition-colors text-sm sm:text-base">
+                <a href="tel:+917525025100" className="bg-[#d80a4e] text-white px-6 py-3 rounded-lg text-center hover:bg-[#b8083e] transition-colors font-medium">
                   Get Support On Call
                 </a>
-                <a href="https://maps.google.com/?q=Chowdhry+Sweet+House+Vijay+Chowk+Gorakhpur" target="_blank" rel="noopener noreferrer" className="bg-gray-800 text-white px-4 sm:px-6 py-3 rounded text-center hover:bg-gray-700 transition-colors text-sm sm:text-base">
+                <a href="https://maps.google.com/?q=Chowdhry+Sweet+House+Vijay+Chowk+Gorakhpur" target="_blank" rel="noopener noreferrer" className="bg-gray-800 text-white px-6 py-3 rounded-lg text-center hover:bg-gray-700 transition-colors font-medium">
                   Get Direction
                 </a>
               </div>
@@ -102,20 +104,20 @@ const Contact = () => {
           </div>
 
           {/* Contact Form */}
-          <div className="bg-white border border-gray-200 p-4 sm:p-8 rounded-lg shadow-sm">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-[#d80a4e]">Make Custom Request</h2>
-            <p className="text-gray-600 mb-6">
+          <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
+            <h2 className="text-2xl md:text-3xl font-bold mb-2 text-[#d80a4e]">Make Custom Request</h2>
+            <p className="text-gray-600 mb-6 text-sm md:text-base">
               Have a special request? We'd love to help you create the perfect sweet experience!
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <input
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleChange}
                   placeholder="Full name"
-                  className="border border-gray-300 rounded px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-[#d80a4e] focus:border-transparent"
+                  className="border border-gray-300 rounded-lg px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-[#d80a4e] focus:border-transparent"
                   required
                 />
                 <input
@@ -124,7 +126,7 @@ const Contact = () => {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Email address"
-                  className="border border-gray-300 rounded px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-[#d80a4e] focus:border-transparent"
+                  className="border border-gray-300 rounded-lg px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-[#d80a4e] focus:border-transparent"
                   required
                 />
               </div>
@@ -135,14 +137,14 @@ const Contact = () => {
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="Phone number"
-                  className="border border-gray-300 rounded px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-[#d80a4e] focus:border-transparent"
+                  className="border border-gray-300 rounded-lg px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-[#d80a4e] focus:border-transparent"
                 />
                 <input
                   name="subject"
                   value={formData.subject}
                   onChange={handleChange}
                   placeholder="Subject"
-                  className="border border-gray-300 rounded px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-[#d80a4e] focus:border-transparent"
+                  className="border border-gray-300 rounded-lg px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-[#d80a4e] focus:border-transparent"
                 />
               </div>
 
@@ -150,9 +152,9 @@ const Contact = () => {
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
-                rows="5"
+                rows="4"
                 placeholder="Enter your message..."
-                className="border border-gray-300 rounded px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-[#d80a4e] focus:border-transparent resize-none"
+                className="border border-gray-300 rounded-lg px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-[#d80a4e] focus:border-transparent resize-none"
               />
 
               {success && (
@@ -170,7 +172,7 @@ const Contact = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-[#d80a4e] text-white px-8 py-3 rounded font-semibold hover:bg-[#b8083e] transition-colors disabled:opacity-50 w-full sm:w-auto"
+                className="bg-[#d80a4e] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#b8083e] transition-colors disabled:opacity-50 w-full sm:w-auto"
               >
                 {loading ? "Sending..." : "Send Message →"}
               </button>
@@ -179,12 +181,12 @@ const Contact = () => {
         </div>
       </div>
 
-      {/* ✅ Google Map Section */}
-      <div className="w-full h-[500px]">
+      {/* Google Map Section */}
+      <div className="w-full h-[400px] md:h-[500px] mt-8">
         <iframe
           title="Chowdhry Sweet House Location"
           src="https://www.google.com/maps?q=Chowdhry%20Sweet%20House%20Vijay%20Chowk%20Gorakhpur&output=embed"
-          className="w-full h-full border-0"
+          className="w-full h-full border-0 rounded-t-lg"
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
         />

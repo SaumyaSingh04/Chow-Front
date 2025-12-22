@@ -6,26 +6,28 @@ import chocolateBarfi from "../../assets/Chocolate Fruits Barfi (1).jpg";
 
 const About = () => {
   return (
-    <div className="bg-white">
-       <Breadcrumb currentPage="About" />
+    <div className="min-h-screen bg-gray-50">
+      <Breadcrumb currentPage="About" />
+      
       {/* Top Images */}
-      <div className="max-w-7xl mx-auto px-6 pt-1">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <img
             src={amavatBarfi}
             alt="Sweet"
-            className="w-full h-90 object-cover"
+            className="w-full h-64 md:h-80 object-cover rounded-lg shadow-sm"
           />
           <img
             src={chocolateBarfi}
             alt="Sweet"
-            className="w-full h-90 object-cover"
+            className="w-full h-64 md:h-80 object-cover rounded-lg shadow-sm"
           />
         </div>
       </div>
 
       {/* Content */}
-      <div className="max-w-5xl mx-auto px-6 py-16">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
         <span className="text-sm text-gray-500 block mb-2">
           About Us
         </span>
@@ -85,47 +87,48 @@ const About = () => {
           <li>⭐ <strong>Hygienic & Authentic Preparation</strong></li>
         </ul>
 
-        {/* Visit */}
-        <div className="mt-12 text-center">
-          <div className=" p-6 rounded-lg mb-6">
-            <div className="space-y-4 text-gray-700">
-              <div>
-                <div className="flex items-center justify-center gap-2 text-[#d80a4e] font-semibold mb-2">
-                  <span className="text-lg">📍</span>
-                  <span>Visit Us:</span>
+          {/* Visit */}
+          <div className="mt-12 text-center">
+            <div className="bg-gray-50 p-6 rounded-lg mb-6">
+              <div className="space-y-4 text-gray-700">
+                <div>
+                  <div className="flex items-center justify-center gap-2 text-[#d80a4e] font-semibold mb-2">
+                    <span className="text-lg">📍</span>
+                    <span>Visit Us:</span>
+                  </div>
+                  <p>Vijay Chowk, in front of Vijay Talkies, Golghar, Gorakhpur</p>
                 </div>
-                <p>Vijay Chowk, in front of Vijay Talkies, Golghar, Gorakhpur</p>
-              </div>
-              
-              <div>
-                <div className="flex items-center justify-center gap-2 text-[#d80a4e] font-semibold mb-2">
-                  <span className="text-lg">📞</span>
-                  <span>Call Now:</span>
+                
+                <div>
+                  <div className="flex items-center justify-center gap-2 text-[#d80a4e] font-semibold mb-2">
+                    <span className="text-lg">📞</span>
+                    <span>Call Now:</span>
+                  </div>
+                  <p>075250 25100</p>
                 </div>
-                <p>075250 25100</p>
-              </div>
-              
-              <div>
-                <div className="flex items-center justify-center gap-2 text-[#d80a4e] font-semibold mb-2">
-                  <span className="text-lg">📲</span>
-                  <span>Order Online:</span>
+                
+                <div>
+                  <div className="flex items-center justify-center gap-2 text-[#d80a4e] font-semibold mb-2">
+                    <span className="text-lg">📲</span>
+                    <span>Order Online:</span>
+                  </div>
+                  <p>Swiggy | Zomato</p>
                 </div>
-                <p>Swiggy | Zomato</p>
+                
+                <p className="text-[#d80a4e] font-semibold mt-4">
+                  Taste the tradition, indulge in excellence! 🍬✨
+                </p>
               </div>
-              
-              <p className="text-[#d80a4e] font-semibold mt-4">
-                Taste the tradition, indulge in excellence! 🍬✨
-              </p>
             </div>
-          </div>
-          
-          <div className="space-x-4">
-            <Link to="/contact" className="bg-[#d80a4e] text-white px-6 py-3 rounded hover:bg-[#b8083e] transition-colors">
-              Contact Us
-            </Link>
-            <Link to="/shop" className="bg-gray-800 text-white px-6 py-3 rounded hover:bg-gray-700 transition-colors">
-              Shop Now
-            </Link>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/contact" className="bg-[#d80a4e] text-white px-6 py-3 rounded-lg hover:bg-[#b8083e] transition-colors">
+                Contact Us
+              </Link>
+              <Link to="/shop" className="bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors">
+                Shop Now
+              </Link>
+            </div>
           </div>
         </div>
       </div>
