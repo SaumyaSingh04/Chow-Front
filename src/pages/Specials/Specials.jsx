@@ -81,23 +81,33 @@ const Specials = () => {
     <div className="min-h-screen bg-gray-50">
       <Breadcrumb currentPage="Specials" />
  
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
           
-          {/* Sticky Filters Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-4 space-y-4">
+          {/* Mobile Filters Toggle */}
+          <div className="lg:hidden">
+            <button 
+              onClick={() => document.getElementById('filters').classList.toggle('hidden')}
+              className="w-full bg-[#d80a4e] text-white px-4 py-3 rounded-lg font-medium mb-4"
+            >
+              Show Filters
+            </button>
+          </div>
+          
+          {/* Filters Sidebar */}
+          <div id="filters" className="hidden lg:block lg:w-80 flex-shrink-0">
+            <div className="lg:sticky lg:top-4 space-y-4">
               
               {/* Categories Filter */}
               <div className="bg-white rounded-lg border shadow-sm">
                 <div className="bg-[#d80a4e] text-white p-3 rounded-t-lg">
-                  <h3 className="font-bold">Categories</h3>
+                  <h3 className="font-bold text-sm sm:text-base">Categories</h3>
                 </div>
-                <div className="p-3 max-h-64 overflow-y-auto">
+                <div className="p-3 max-h-48 sm:max-h-64 overflow-y-auto">
                   <ul className="space-y-1">
                     <li 
                       onClick={() => setActiveCategory('all')}
-                      className={`p-2 rounded cursor-pointer text-sm ${
+                      className={`p-2 rounded cursor-pointer text-xs sm:text-sm ${
                         activeCategory === 'all' 
                           ? 'text-[#d80a4e] bg-pink-50' 
                           : 'text-gray-700 hover:bg-gray-50'
@@ -109,7 +119,7 @@ const Specials = () => {
                       <li 
                         key={category._id}
                         onClick={() => setActiveCategory(category._id)}
-                        className={`p-2 rounded cursor-pointer text-sm ${
+                        className={`p-2 rounded cursor-pointer text-xs sm:text-sm ${
                           activeCategory === category._id 
                             ? 'text-[#d80a4e] bg-pink-50' 
                             : 'text-gray-700 hover:bg-gray-50'
@@ -122,16 +132,16 @@ const Specials = () => {
                 </div>
               </div>
 
-              {/* Sort By & Price Range Combined */}
-              <div className="bg-white rounded-lg border shadow-sm p-4">
+              {/* Sort By & Price Range */}
+              <div className="bg-white rounded-lg border shadow-sm p-3 sm:p-4">
                 <div className="space-y-4">
                   {/* Sort By */}
                   <div>
-                    <h3 className="font-bold text-[#d80a4e] mb-3">Sort By</h3>
+                    <h3 className="font-bold text-[#d80a4e] mb-2 text-sm sm:text-base">Sort By</h3>
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#d80a4e]"
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d80a4e] text-sm"
                     >
                       <option value="name">Name</option>
                       <option value="price-low">Price: Low to High</option>
@@ -141,7 +151,7 @@ const Specials = () => {
 
                   {/* Price Range */}
                   <div>
-                    <h3 className="font-bold text-[#d80a4e] mb-3">Price Range</h3>
+                    <h3 className="font-bold text-[#d80a4e] mb-2 text-sm sm:text-base">Price Range</h3>
                     <div className="space-y-3">
                       <div className="flex gap-2">
                         <input
@@ -149,14 +159,14 @@ const Specials = () => {
                           placeholder="Min"
                           value={priceRange[0]}
                           onChange={(e) => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
-                          className="w-full px-2 py-1 border rounded text-sm"
+                          className="w-full px-2 py-1 border rounded text-xs sm:text-sm"
                         />
                         <input
                           type="number"
                           placeholder="Max"
                           value={priceRange[1]}
                           onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 10000])}
-                          className="w-full px-2 py-1 border rounded text-sm"
+                          className="w-full px-2 py-1 border rounded text-xs sm:text-sm"
                         />
                       </div>
                       <input
@@ -168,7 +178,7 @@ const Specials = () => {
                         onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
                         className="w-full"
                       />
-                      <div className="text-sm text-gray-600">
+                      <div className="text-xs sm:text-sm text-gray-600">
                         ₹{priceRange[0]} - ₹{priceRange[1]}
                       </div>
                     </div>
@@ -178,18 +188,20 @@ const Specials = () => {
             </div>
           </div>
           
-          {/* Scrollable Products Grid */}
-          <div className="lg:col-span-3">
-            <div className="bg-white rounded-lg border shadow-sm p-4 mb-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-gray-900">Products </h2>
-                <div className="flex items-center gap-4">
+          {/* Products Grid */}
+          <div className="flex-1 min-w-0">
+            <div className="bg-white rounded-lg border shadow-sm p-3 sm:p-4 mb-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+                  Products ({filteredProducts.length})
+                </h2>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                   <input
                     type="text"
                     placeholder="Search products..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-64 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#d80a4e]"
+                    className="w-full sm:w-48 lg:w-64 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d80a4e] text-sm"
                   />
                   <button
                     onClick={() => {
@@ -198,7 +210,7 @@ const Specials = () => {
                       setPriceRange([0, 10000]);
                       setSearchQuery('');
                     }}
-                    className="text-sm text-[#d80a4e] hover:underline whitespace-nowrap"
+                    className="text-sm text-[#d80a4e] hover:underline whitespace-nowrap px-2 py-1"
                   >
                     Clear Filters
                   </button>
@@ -206,16 +218,14 @@ const Specials = () => {
               </div>
             </div>
             
-            <div className="max-h-screen overflow-y-auto">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-8">
-                {filteredProducts.length > 0 ? filteredProducts.map((product) => (
-                  <ProductCard key={product._id} product={product} />
-                )) : (
-                  <div className="col-span-full text-center py-12">
-                    <p className="text-gray-500">No products found matching your filters.</p>
-                  </div>
-                )}
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
+              {filteredProducts.length > 0 ? filteredProducts.map((product) => (
+                <ProductCard key={product._id} product={product} />
+              )) : (
+                <div className="col-span-full text-center py-12">
+                  <p className="text-gray-500 text-sm sm:text-base">No products found matching your filters.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
