@@ -7,9 +7,11 @@ const Categories = () => {
   const [editingCategory, setEditingCategory] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
-    description: ''
+    description: '',
+    displayRank: 0
   });
   const [updating, setUpdating] = useState(false);
+  const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
 
@@ -21,17 +23,22 @@ const Categories = () => {
     e.preventDefault();
     try {
       setUpdating(true);
+      setError('');
+      console.log('Submitting category data:', formData);
       if (editingCategory) {
-        await updateCategory(editingCategory._id, formData);
+        const result = await updateCategory(editingCategory._id, formData);
+        console.log('Update result:', result);
       } else {
-        await addCategory(formData);
+        const result = await addCategory(formData);
+        console.log('Add result:', result);
       }
       setShowModal(false);
       setEditingCategory(null);
-      setFormData({ name: '', description: '' });
+      setFormData({ name: '', description: '', displayRank: 0 });
       fetchCategories();
     } catch (error) {
       console.error('Error saving category:', error);
+      setError(error.message || 'Failed to save category');
     } finally {
       setUpdating(false);
     }
@@ -41,7 +48,8 @@ const Categories = () => {
     setEditingCategory(category);
     setFormData({
       name: category.name || '',
-      description: category.description || ''
+      description: category.description || '',
+      displayRank: category.displayRank || 0
     });
     setShowModal(true);
   };
@@ -85,7 +93,8 @@ const Categories = () => {
               onClick={() => {
                 setShowModal(false);
                 setEditingCategory(null);
-                setFormData({ name: '', description: '' });
+                setFormData({ name: '', description: '', displayRank: 0 });
+                setError('');
               }}
               className="bg-orange-400 text-white px-3 sm:px-4 py-2 rounded-md hover:bg-orange-500 flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
             >
@@ -99,6 +108,11 @@ const Categories = () => {
           <div className="bg-white rounded-lg border p-3 sm:p-6">
             <div className="mb-4 sm:mb-6">
               <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Basic Information :</h3>
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+                  {error}
+                </div>
+              )}
             </div>
             
             <form onSubmit={handleSubmit}>
@@ -118,8 +132,23 @@ const Categories = () => {
                   />
                 </div>
 
-                {/* Empty columns for layout */}
-                <div></div>
+                {/* Display Rank Field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Display Rank
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="0"
+                    min="0"
+                    value={formData.displayRank}
+                    onChange={(e) => setFormData({...formData, displayRank: parseInt(e.target.value) || 0})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Lower numbers appear first on homepage</p>
+                </div>
+
+                {/* Empty column for layout */}
                 <div></div>
               </div>
 
@@ -173,10 +202,11 @@ const Categories = () => {
       <div className="bg-white rounded-lg shadow">
         {/* Horizontal scroll wrapper */}
         <div className="overflow-x-auto">
-          <table className="min-w-[600px] w-full">
+          <table className="min-w-[700px] w-full">
             <thead className="bg-[#d80a4e] text-white">
               <tr>
                 <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold uppercase tracking-wider">Name</th>
+                <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold uppercase tracking-wider">Rank</th>
                 <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold uppercase tracking-wider">Description</th>
                 <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold uppercase tracking-wider">Action</th>
               </tr>
@@ -186,6 +216,11 @@ const Categories = () => {
                 <tr key={category._id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                   <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm font-medium text-gray-900">
                     {category.name}
+                  </td>
+                  <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-gray-700">
+                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                      {category.displayRank || 0}
+                    </span>
                   </td>
                   <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-gray-700">
                     {category.description || 'No description'}

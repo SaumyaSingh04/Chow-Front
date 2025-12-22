@@ -110,12 +110,15 @@ export const ApiProvider = ({ children }) => {
     
     // Categories
     fetchCategories: async () => {
-      if (categories.length > 0) return categories;
       setLoading(true);
       try {
-        const data = await apiService.get('/api/categories/all');
-        setCategories(data.categories || data);
-        return data.categories || data;
+        console.log('Fetching categories from API...');
+        const data = await apiService.get('/api/categories?limit=1000');
+        console.log('Categories API response:', data);
+        const categoriesData = data.categories || data;
+        console.log('Processed categories:', categoriesData);
+        setCategories(categoriesData);
+        return categoriesData;
       } catch (error) {
         console.error('Error fetching categories:', error);
         return [];
@@ -340,7 +343,10 @@ export const ApiProvider = ({ children }) => {
     
     updateCategory: async (id, categoryData) => {
       try {
-        return await apiService.put(`/api/categories/update/${id}`, categoryData);
+        console.log('Updating category:', id, 'with data:', categoryData);
+        const response = await apiService.put(`/api/categories/update/${id}`, categoryData);
+        console.log('Update category response:', response);
+        return response;
       } catch (error) {
         console.error('Error updating category:', error);
         throw error;
