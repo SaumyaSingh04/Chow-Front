@@ -10,6 +10,7 @@ const Checkout = () => {
   const navigate = useNavigate();
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState('');
+  const [isAddressSaved, setIsAddressSaved] = useState(false);
   const [formData, setFormData] = useState({
     addressType: '',
     firstName: '',
@@ -74,7 +75,10 @@ const Checkout = () => {
           phone: selectedAddress.phone || '',
           orderNotes: formData.orderNotes
         });
+        setIsAddressSaved(true);
       }
+    } else {
+      setIsAddressSaved(false);
     }
   };
 
@@ -82,6 +86,24 @@ const Checkout = () => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
+    });
+  };
+
+  const clearAddress = () => {
+    setSelectedAddressId('');
+    setIsAddressSaved(false);
+    setFormData({
+      addressType: '',
+      firstName: '',
+      lastName: '',
+      address: '',
+      apartment: '',
+      city: '',
+      state: '',
+      postcode: '',
+      email: '',
+      phone: '',
+      orderNotes: formData.orderNotes
     });
   };
 
@@ -121,13 +143,25 @@ const Checkout = () => {
             <form className="space-y-6">
               {/* Saved Addresses Dropdown */}
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Use Saved Address ({savedAddresses.length} found)
-                </label>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-medium">
+                    Use Saved Address ({savedAddresses.length} found)
+                  </label>
+                  {isAddressSaved && (
+                    <button
+                      type="button"
+                      onClick={clearAddress}
+                      className="text-sm text-[#d80a4e] hover:underline"
+                    >
+                      Clear Address
+                    </button>
+                  )}
+                </div>
                 <select
                   value={selectedAddressId}
                   onChange={handleAddressSelect}
-                  className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-[#d80a4e]"
+                  disabled={isAddressSaved}
+                  className={`w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-[#d80a4e] ${isAddressSaved ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                 >
                   <option value="">Select a saved address or enter new</option>
                   {savedAddresses.map((address) => (
