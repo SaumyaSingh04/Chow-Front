@@ -37,9 +37,11 @@ const Products = () => {
     fetchItems();
     fetchCategories();
     loadSubcategories();
+    console.log('Initial items loaded:', items.length);
   }, []);
 
   useEffect(() => {
+    console.log('Items updated:', items.length, items);
     setFilteredItems(items);
   }, [items]);
   useEffect(() => {
@@ -685,26 +687,28 @@ const Products = () => {
         </div>
         
         {/* Pagination */}
-        <div className="bg-white px-2 py-2 border-t flex justify-between items-center text-xs">
-          <span className="text-gray-600">{getPageInfo()}</span>
-          <div className="flex items-center space-x-1">
-            <button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="px-2 py-1 border rounded disabled:opacity-50"
-            >
-              ◀
-            </button>
-            <span className="px-2">{currentPage}/{getTotalPages()}</span>
-            <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, getTotalPages()))}
-              disabled={currentPage === getTotalPages()}
-              className="px-2 py-1 border rounded disabled:opacity-50"
-            >
-              ▶
-            </button>
+        {getTotalPages() > 1 && (
+          <div className="bg-white px-2 py-2 border-t flex justify-between items-center text-xs">
+            <span className="text-gray-600">{getPageInfo()}</span>
+            <div className="flex items-center space-x-1">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-2 py-1 border rounded disabled:opacity-50 hover:bg-gray-100"
+              >
+                ◀
+              </button>
+              <span className="px-2">{currentPage}/{getTotalPages()}</span>
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, getTotalPages()))}
+                disabled={currentPage === getTotalPages()}
+                className="px-2 py-1 border rounded disabled:opacity-50 hover:bg-gray-100"
+              >
+                ▶
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

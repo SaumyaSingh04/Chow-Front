@@ -138,7 +138,7 @@ export const ApiProvider = ({ children }) => {
       if (items.length > 0) return items;
       setLoading(true);
       try {
-        const data = await apiService.get('/api/items/all');
+        const data = await apiService.get('/api/items/all?limit=1000');
         setItems(data.items || data);
         return data.items || data;
       } catch (error) {
