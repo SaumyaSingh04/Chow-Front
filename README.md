@@ -1,2 +1,0 @@
-# sweets-front
-# Chow-Front

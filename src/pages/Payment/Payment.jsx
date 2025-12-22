@@ -6,36 +6,29 @@ import Breadcrumb from '../../components/Breadcrumb.jsx';
 
 const Payment = () => {
   const { cartItems, getCartTotal, clearCart } = useCart();
-  const { createOrder, addUserAddress, getUserAddresses } = useApi();
+  const { createOrder, addUserAddress, getUserAddresses, service } = useApi();
   const navigate = useNavigate();
-  const [paymentMethod, setPaymentMethod] = useState('');
   const [loading, setLoading] = useState(false);
   const [deliveryInfo, setDeliveryInfo] = useState({ distance: 0, deliveryFee: 0 });
-  const [cardDetails, setCardDetails] = useState({
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    cardName: ''
-  });
 
   useEffect(() => {
     const savedDeliveryInfo = localStorage.getItem('deliveryInfo');
     if (savedDeliveryInfo) {
       setDeliveryInfo(JSON.parse(savedDeliveryInfo));
     }
+
+    // Load Razorpay script
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
   }, []);
 
   const handlePayment = async () => {
-    if (!paymentMethod) {
-      alert('Please select a payment method');
-      return;
-    }
-    
-    if (paymentMethod === 'card' && (!cardDetails.cardNumber || !cardDetails.expiryDate || !cardDetails.cvv)) {
-      alert('Please fill all card details');
-      return;
-    }
-
     setLoading(true);
     try {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -82,34 +75,77 @@ const Payment = () => {
         throw new Error('Failed to get address ID');
       }
       
-      const orderData = {
-        userId: user._id || user.id,
-        addressId: addressId,
-        items: cartItems.map(item => ({
-          itemId: item._id,
-          quantity: item.quantity,
-          price: item.price
-        })),
-        totalAmount: getCartTotal() * 1.05 + deliveryInfo.deliveryFee,
-        distance: deliveryInfo.distance,
-        deliveryFee: deliveryInfo.deliveryFee,
-        status: 'pending',
-        paymentStatus: 'pending'
+      const totalAmount = getCartTotal() * 1.05 + deliveryInfo.deliveryFee;
+      
+      // Create Razorpay order
+      const razorpayOrder = await service.post('/api/payment/create-order', {
+        amount: totalAmount,
+        currency: 'INR'
+      });
+
+      const options = {
+        key: 'rzp_test_o05Pgdf286j2Pl',
+        amount: razorpayOrder.order.amount,
+        currency: razorpayOrder.order.currency,
+        name: 'Chowdhry',
+        description: 'Order Payment',
+        order_id: razorpayOrder.order.id,
+        handler: async function (response) {
+          try {
+            // Verify payment
+            await service.post('/api/payment/verify', {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            });
+
+            // Create order after successful payment
+            const orderData = {
+              userId: user._id || user.id,
+              addressId: addressId,
+              items: cartItems.map(item => ({
+                itemId: item._id,
+                quantity: item.quantity,
+                price: item.price
+              })),
+              totalAmount: totalAmount,
+              distance: deliveryInfo.distance,
+              deliveryFee: deliveryInfo.deliveryFee,
+              status: 'pending',
+              paymentStatus: 'paid',
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id
+            };
+
+            await createOrder(orderData);
+            alert('Payment successful! Order placed.');
+            clearCart();
+            
+            // Clean up localStorage
+            localStorage.removeItem('billingDetails');
+            localStorage.removeItem('deliveryInfo');
+            
+            navigate('/orders');
+          } catch (error) {
+            alert('Payment verification failed. Please contact support.');
+            console.error('Payment verification error:', error);
+          }
+        },
+        prefill: {
+          name: `${billingDetails.firstName} ${billingDetails.lastName}`,
+          email: billingDetails.email,
+          contact: billingDetails.phone
+        },
+        theme: {
+          color: '#d80a4e'
+        }
       };
 
-      await createOrder(orderData);
-
-      alert('Payment successful! Order placed.');
-      clearCart();
-      
-      // Clean up localStorage
-      localStorage.removeItem('billingDetails');
-      localStorage.removeItem('deliveryInfo');
-      
-      navigate('/orders');
+      const rzp = new window.Razorpay(options);
+      rzp.open();
     } catch (error) {
-      alert('Failed to place order. Please try again.');
-      console.error('Order creation failed:', error);
+      alert('Failed to initiate payment. Please try again.');
+      console.error('Payment initiation failed:', error);
     } finally {
       setLoading(false);
     }
@@ -127,99 +163,20 @@ const Payment = () => {
             <h2 className="text-2xl font-bold mb-6">Payment Method</h2>
             
             <div className="space-y-4">
-              {/* Credit/Debit Card */}
-              <div className="border rounded-lg p-4">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="card"
-                    checked={paymentMethod === 'card'}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="mr-3"
-                  />
-                  <span className="font-medium">Credit/Debit Card</span>
-                </label>
-                
-                {paymentMethod === 'card' && (
-                  <div className="mt-4 space-y-3">
-                    <input
-                      type="text"
-                      placeholder="Card Number"
-                      value={cardDetails.cardNumber}
-                      onChange={(e) => setCardDetails({...cardDetails, cardNumber: e.target.value})}
-                      className="w-full p-3 border rounded focus:outline-none focus:border-[#d80a4e]"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Cardholder Name"
-                      value={cardDetails.cardName}
-                      onChange={(e) => setCardDetails({...cardDetails, cardName: e.target.value})}
-                      className="w-full p-3 border rounded focus:outline-none focus:border-[#d80a4e]"
-                    />
-                    <div className="grid grid-cols-2 gap-3">
-                      <input
-                        type="text"
-                        placeholder="MM/YY"
-                        value={cardDetails.expiryDate}
-                        onChange={(e) => setCardDetails({...cardDetails, expiryDate: e.target.value})}
-                        className="p-3 border rounded focus:outline-none focus:border-[#d80a4e]"
-                      />
-                      <input
-                        type="text"
-                        placeholder="CVV"
-                        value={cardDetails.cvv}
-                        onChange={(e) => setCardDetails({...cardDetails, cvv: e.target.value})}
-                        className="p-3 border rounded focus:outline-none focus:border-[#d80a4e]"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* UPI */}
-              <div className="border rounded-lg p-4">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="upi"
-                    checked={paymentMethod === 'upi'}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="mr-3"
-                  />
-                  <span className="font-medium">UPI Payment</span>
-                </label>
-              </div>
-
-              {/* Net Banking */}
-              <div className="border rounded-lg p-4">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="netbanking"
-                    checked={paymentMethod === 'netbanking'}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="mr-3"
-                  />
-                  <span className="font-medium">Net Banking</span>
-                </label>
-              </div>
-
-              {/* Cash on Delivery */}
-              <div className="border rounded-lg p-4">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="cod"
-                    checked={paymentMethod === 'cod'}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="mr-3"
-                  />
-                  <span className="font-medium">Cash on Delivery</span>
-                </label>
+              {/* Razorpay Payment */}
+              <div className="border-2 border-[#d80a4e] rounded-lg p-6 bg-pink-50">
+                <div className="flex items-center justify-center mb-4">
+                  <span className="text-lg font-semibold text-[#d80a4e]">Secure Payment with Razorpay</span>
+                </div>
+                <div className="text-center text-gray-600 mb-4">
+                  <p>Pay securely using Credit/Debit Card, UPI, Net Banking, or Wallet</p>
+                </div>
+                <div className="flex justify-center space-x-4 text-sm text-gray-500">
+                  <span>💳 Cards</span>
+                  <span>📱 UPI</span>
+                  <span>🏦 Net Banking</span>
+                  <span>💰 Wallets</span>
+                </div>
               </div>
             </div>
           </div>

@@ -5,7 +5,7 @@ import { useApi } from '../../context/ApiContext.jsx';
 import Breadcrumb from '../../components/Breadcrumb.jsx';
 
 const Checkout = () => {
-  const { cartItems, getCartTotal } = useCart();
+  const { cartItems, getCartTotal, clearCart } = useCart();
   const { getUserAddresses, service } = useApi();
   const navigate = useNavigate();
   const [savedAddresses, setSavedAddresses] = useState([]);
@@ -157,7 +157,7 @@ const Checkout = () => {
     });
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     
@@ -173,10 +173,131 @@ const Checkout = () => {
       alert('Please fill all required fields');
       return;
     }
-    
-    localStorage.setItem('billingDetails', JSON.stringify(formData));
-    localStorage.setItem('deliveryInfo', JSON.stringify({ distance, deliveryFee }));
-    navigate('/payment');
+
+    try {
+      // Check if address already exists
+      const userAddresses = await getUserAddresses(user._id);
+      const addresses = userAddresses.addresses || userAddresses.address || [];
+      
+      const existingAddress = addresses.find(addr => 
+        addr.firstName === formData.firstName &&
+        addr.lastName === formData.lastName &&
+        addr.street === formData.address &&
+        addr.city === formData.city &&
+        addr.state === formData.state &&
+        addr.postcode === formData.postcode &&
+        addr.phone === formData.phone
+      );
+      
+      let addressId;
+      
+      if (existingAddress) {
+        addressId = existingAddress._id;
+      } else {
+        const addressData = {
+          addressType: formData.addressType,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          street: formData.address,
+          apartment: formData.apartment || '',
+          city: formData.city,
+          state: formData.state,
+          postcode: formData.postcode,
+          email: formData.email,
+          phone: formData.phone,
+          orderNotes: formData.orderNotes || ''
+        };
+        
+        const newAddressResponse = await service.post(`/api/users/${user._id}/addresses`, addressData);
+        addressId = newAddressResponse.address?._id || newAddressResponse.addressId || newAddressResponse._id;
+      }
+      
+      const totalAmount = getCartTotal() * 1.05 + deliveryFee;
+      
+      // Create Razorpay order
+      const razorpayOrder = await service.post('/api/payment/create-order', {
+        amount: totalAmount,
+        currency: 'INR'
+      });
+
+      // Load Razorpay script if not already loaded
+      if (!window.Razorpay) {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        document.body.appendChild(script);
+        await new Promise(resolve => script.onload = resolve);
+      }
+
+      const options = {
+        key: 'rzp_test_o05Pgdf286j2Pl',
+        amount: razorpayOrder.order.amount,
+        currency: razorpayOrder.order.currency,
+        name: 'Chowdhry',
+        description: 'Order Payment',
+        order_id: razorpayOrder.order.id,
+        handler: async function (response) {
+          try {
+            // Verify payment with complete data
+            const verifyResponse = await service.post('/api/payment/verify', {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              payment_data: {
+                amount: response.amount || razorpayOrder.order.amount,
+                currency: response.currency || razorpayOrder.order.currency,
+                method: response.method,
+                bank: response.bank,
+                wallet: response.wallet,
+                vpa: response.vpa,
+                email: response.email,
+                contact: response.contact,
+                fee: response.fee,
+                tax: response.tax
+              }
+            });
+
+            // Create order with complete Razorpay data
+            const orderData = {
+              userId: user._id,
+              addressId: addressId,
+              items: cartItems.map(item => ({
+                itemId: item._id,
+                quantity: item.quantity,
+                price: item.price
+              })),
+              totalAmount: totalAmount,
+              distance: distance,
+              deliveryFee: deliveryFee,
+              razorpayData: verifyResponse.paymentRecord
+            };
+
+            await service.post('/api/orders', orderData);
+            alert('Payment successful! Order placed.');
+            clearCart();
+            
+            navigate('/orders');
+          } catch (error) {
+            alert('Payment verification failed. Please contact support.');
+            console.error('Payment verification error:', error);
+          }
+        },
+        prefill: {
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          contact: formData.phone
+        },
+        theme: {
+          color: '#d80a4e'
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (error) {
+      alert('Failed to initiate payment. Please try again.');
+      console.error('Payment initiation failed:', error);
+    }
   };
 
   const isOrderDisabled = () => {
@@ -187,12 +308,7 @@ const Checkout = () => {
     return hasEmptyFields || isPincodeInvalid;
   };
 
-  const getButtonText = () => {
-    if (pincodeError) {
-      return 'Please Enter valid pincode';
-    }
-    return 'Place order';
-  };
+
 
   return (
     <div className="min-h-screen bg-white">
@@ -463,7 +579,7 @@ const Checkout = () => {
                     : 'bg-[#d80a4e] text-white hover:bg-[#b8083e]'
                 }`}
               >
-                {getButtonText()}
+                {pincodeError ? 'Please Enter valid pincode' : 'Pay Now'}
               </button>
             </div>
           </div>
