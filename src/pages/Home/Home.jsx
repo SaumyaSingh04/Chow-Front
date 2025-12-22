@@ -14,6 +14,7 @@ const Home = () => {
   const [subcategories, setSubcategories] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [showVideo, setShowVideo] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -158,7 +159,7 @@ const Home = () => {
 
     {/* ================= Dynamic Category Sections ================= */}
 {categories.map((category) => {
-  const categoryItems = items
+  let categoryItems = items
     .filter(item => {
       const itemCategories = Array.isArray(item.categories)
         ? item.categories
@@ -166,8 +167,25 @@ const Home = () => {
       return itemCategories.some(cat =>
         (typeof cat === 'object' ? cat._id : cat) === category._id
       );
-    })
-    .slice(0, 8);
+    });
+
+  // Filter by subcategory if one is selected
+  if (selectedSubcategory) {
+    const filteredBySubcategory = categoryItems.filter(item => {
+      const itemSubcategories = Array.isArray(item.subcategories) ? item.subcategories : [];
+      return itemSubcategories.some(subcat => {
+        const subcatId = typeof subcat === 'object' ? subcat._id : subcat;
+        return subcatId === selectedSubcategory;
+      });
+    });
+    
+    // Only apply subcategory filter if there are matching products
+    if (filteredBySubcategory.length > 0) {
+      categoryItems = filteredBySubcategory;
+    }
+  }
+
+  categoryItems = categoryItems.slice(0, 8);
 
   const categorySubcategories = subcategories.filter(
     sub => {
@@ -194,16 +212,19 @@ const Home = () => {
           {categorySubcategories.length > 0 && (
             <div className="flex flex-wrap gap-2 sm:gap-3">
               {categorySubcategories.map((subcategory) => (
-                <Link
+                <button
                   key={subcategory._id}
-                  to={`/shop?subcategory=${subcategory._id}`}
-                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border 
-                             text-xs sm:text-sm md:text-base text-gray-700 font-medium
-                             hover:border-[#d80a4e] hover:text-[#d80a4e] 
-                             transition whitespace-nowrap"
+                  onClick={() => setSelectedSubcategory(selectedSubcategory === subcategory._id ? null : subcategory._id)}
+                  className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border 
+                             text-xs sm:text-sm md:text-base font-medium
+                             transition whitespace-nowrap ${
+                               selectedSubcategory === subcategory._id
+                                 ? 'border-[#d80a4e] text-[#d80a4e] bg-pink-50'
+                                 : 'text-gray-700 hover:border-[#d80a4e] hover:text-[#d80a4e]'
+                             }`}
                 >
                   {subcategory.name}
-                </Link>
+                </button>
               ))}
             </div>
           )}

@@ -85,10 +85,17 @@ const Products = () => {
       
       // Add text fields
       Object.keys(formData).forEach(key => {
-        if (key !== 'images' && key !== 'video' && key !== 'subcategories' && formData[key]) {
+        if (key !== 'images' && key !== 'video' && key !== 'subcategories' && key !== 'categories' && formData[key]) {
           submitData.append(key, formData[key]);
         }
       });
+      
+      // Add categories array properly
+      if (formData.categories && formData.categories.length > 0) {
+        formData.categories.forEach(catId => {
+          submitData.append('categories', catId);
+        });
+      }
       
       // Add subcategories array properly
       if (formData.subcategories && formData.subcategories.length > 0) {
