@@ -6,37 +6,65 @@ import ProductCard from '../../components/ProductCard.jsx';
 
 const Specials = () => {
   const { fetchCategories, getFeaturedItems, getItemsByCategory, fetchItems, categories, loading } = useApi();
-  const [specialProducts, setSpecialProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [activeCategory, setActiveCategory] = useState('all');
+  const [sortBy, setSortBy] = useState('name');
+  const [priceRange, setPriceRange] = useState([0, 10000]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const loadData = async () => {
       await fetchCategories();
-      let featured = await getFeaturedItems('popular');
-      if (!featured || featured.length === 0) {
-        const allItems = await fetchItems();
-        featured = allItems.filter(item => item.isPopular);
-      }
-      setSpecialProducts(featured);
+      const allItems = await fetchItems();
+      setAllProducts(allItems);
+      setFilteredProducts(allItems);
     };
     loadData();
   }, []);
 
-  const handleCategoryFilter = async (catId) => {
-    setActiveCategory(catId);
-    if (catId === 'all') {
-      let featured = await getFeaturedItems('popular');
-      if (!featured || featured.length === 0) {
-        const allItems = await fetchItems();
-        featured = allItems.filter(item => item.isPopular);
-      }
-      setSpecialProducts(featured);
-    } else {
-      const categoryItems = await getItemsByCategory(catId);
-      const popularItems = categoryItems.filter(item => item.isPopular);
-      setSpecialProducts(popularItems);
+  useEffect(() => {
+    let filtered = [...allProducts];
+
+    // Category filter
+    if (activeCategory !== 'all') {
+      filtered = filtered.filter(item => {
+        const itemCategories = Array.isArray(item.categories) ? item.categories : [item.category];
+        return itemCategories.some(cat => 
+          (typeof cat === 'object' ? cat._id : cat) === activeCategory
+        );
+      });
     }
-  };
+
+    // Price range filter
+    filtered = filtered.filter(item => {
+      const price = item.discountPrice || item.price;
+      return price >= priceRange[0] && price <= priceRange[1];
+    });
+
+    // Search filter
+    if (searchQuery) {
+      filtered = filtered.filter(item =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.shortDesc?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      const priceA = a.discountPrice || a.price;
+      const priceB = b.discountPrice || b.price;
+      
+      switch (sortBy) {
+        case 'price-low': return priceA - priceB;
+        case 'price-high': return priceB - priceA;
+        case 'name': return a.name.localeCompare(b.name);
+        default: return 0;
+      }
+    });
+
+    setFilteredProducts(filtered);
+  }, [allProducts, activeCategory, sortBy, priceRange, searchQuery]);
 
   if (loading) {
     return (
@@ -50,58 +78,144 @@ const Specials = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50">
       <Breadcrumb currentPage="Specials" />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8 overflow-x-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
+ 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           
-          {/* Categories Sidebar */}
+          {/* Sticky Filters Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg border shadow-sm">
-              <div className="bg-[#d80a4e] text-white p-3 sm:p-4">
-                <h3 className="font-bold text-sm sm:text-base">Categories</h3>
-              </div>
-              <div className="p-3 sm:p-4">
-                <ul className="space-y-2">
-                  <li 
-                    onClick={() => handleCategoryFilter('all')}
-                    className={`p-2 rounded cursor-pointer text-sm sm:text-base ${
-                      activeCategory === 'all' 
-                        ? 'text-[#d80a4e] bg-pink-50' 
-                        : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    All Specials
-                  </li>
-                  {categories.map((category) => (
+            <div className="sticky top-4 space-y-4">
+              
+              {/* Categories Filter */}
+              <div className="bg-white rounded-lg border shadow-sm">
+                <div className="bg-[#d80a4e] text-white p-3 rounded-t-lg">
+                  <h3 className="font-bold">Categories</h3>
+                </div>
+                <div className="p-3 max-h-64 overflow-y-auto">
+                  <ul className="space-y-1">
                     <li 
-                      key={category._id}
-                      onClick={() => handleCategoryFilter(category._id)}
-                      className={`p-2 rounded cursor-pointer text-sm sm:text-base ${
-                        activeCategory === category._id 
+                      onClick={() => setActiveCategory('all')}
+                      className={`p-2 rounded cursor-pointer text-sm ${
+                        activeCategory === 'all' 
                           ? 'text-[#d80a4e] bg-pink-50' 
                           : 'text-gray-700 hover:bg-gray-50'
                       }`}
                     >
-                      {category.name}
+                      All Products
                     </li>
-                  ))}
-                </ul>
+                    {categories.map((category) => (
+                      <li 
+                        key={category._id}
+                        onClick={() => setActiveCategory(category._id)}
+                        className={`p-2 rounded cursor-pointer text-sm ${
+                          activeCategory === category._id 
+                            ? 'text-[#d80a4e] bg-pink-50' 
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {category.name}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Sort By & Price Range Combined */}
+              <div className="bg-white rounded-lg border shadow-sm p-4">
+                <div className="space-y-4">
+                  {/* Sort By */}
+                  <div>
+                    <h3 className="font-bold text-[#d80a4e] mb-3">Sort By</h3>
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#d80a4e]"
+                    >
+                      <option value="name">Name</option>
+                      <option value="price-low">Price: Low to High</option>
+                      <option value="price-high">Price: High to Low</option>
+                    </select>
+                  </div>
+
+                  {/* Price Range */}
+                  <div>
+                    <h3 className="font-bold text-[#d80a4e] mb-3">Price Range</h3>
+                    <div className="space-y-3">
+                      <div className="flex gap-2">
+                        <input
+                          type="number"
+                          placeholder="Min"
+                          value={priceRange[0]}
+                          onChange={(e) => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
+                          className="w-full px-2 py-1 border rounded text-sm"
+                        />
+                        <input
+                          type="number"
+                          placeholder="Max"
+                          value={priceRange[1]}
+                          onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 10000])}
+                          className="w-full px-2 py-1 border rounded text-sm"
+                        />
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="10000"
+                        step="100"
+                        value={priceRange[1]}
+                        onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
+                        className="w-full"
+                      />
+                      <div className="text-sm text-gray-600">
+                        ₹{priceRange[0]} - ₹{priceRange[1]}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
           
-          {/* Products Grid */}
+          {/* Scrollable Products Grid */}
           <div className="lg:col-span-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {specialProducts.length > 0 ? specialProducts.map((product) => (
-                <ProductCard key={product._id} product={product} showSpecialTag={true} />
-              )) : (
-                <div className="col-span-full text-center py-12">
-                  <p className="text-gray-500">No special products available.</p>
+            <div className="bg-white rounded-lg border shadow-sm p-4 mb-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-gray-900">Products </h2>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="text"
+                    placeholder="Search products..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-64 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#d80a4e]"
+                  />
+                  <button
+                    onClick={() => {
+                      setActiveCategory('all');
+                      setSortBy('name');
+                      setPriceRange([0, 10000]);
+                      setSearchQuery('');
+                    }}
+                    className="text-sm text-[#d80a4e] hover:underline whitespace-nowrap"
+                  >
+                    Clear Filters
+                  </button>
                 </div>
-              )}
+              </div>
+            </div>
+            
+            <div className="max-h-screen overflow-y-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-8">
+                {filteredProducts.length > 0 ? filteredProducts.map((product) => (
+                  <ProductCard key={product._id} product={product} />
+                )) : (
+                  <div className="col-span-full text-center py-12">
+                    <p className="text-gray-500">No products found matching your filters.</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
