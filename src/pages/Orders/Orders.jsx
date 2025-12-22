@@ -147,15 +147,42 @@ const Orders = () => {
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Subtotal:</span>
-                          <span>₹{(order.totalAmount / 1.05).toFixed(2)}</span>
+                          <span>₹{((order.totalAmount - (order.deliveryFee || 0)) / 1.05).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">GST (5%):</span>
-                          <span>₹{(order.totalAmount - (order.totalAmount / 1.05)).toFixed(2)}</span>
+                          <span>₹{(((order.totalAmount - (order.deliveryFee || 0)) / 1.05) * 0.05).toFixed(2)}</span>
                         </div>
+                        {order.distance && order.distance > 0 && (
+                          <>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Distance:</span>
+                              <span className="text-blue-600 font-medium">{order.distance} km</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Delivery Fee:</span>
+                              <span>₹{(order.deliveryFee || 0).toFixed(2)}</span>
+                            </div>
+                          </>
+                        )}
                         <div className="flex justify-between font-bold text-lg border-t pt-2">
                           <span>Total Amount:</span>
                           <span className="text-[#d80a4e]">₹{order.totalAmount?.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-600 mt-1">
+                          <span>Payment Status:</span>
+                          <span className={`font-medium ${
+                            order.paymentStatus === 'paid' ? 'text-green-600' :
+                            order.paymentStatus === 'failed' ? 'text-red-600' :
+                            'text-yellow-600'
+                          }`}>
+                            <i className={`fas ${
+                              order.paymentStatus === 'paid' ? 'fa-check-circle' :
+                              order.paymentStatus === 'failed' ? 'fa-times-circle' :
+                              'fa-clock'
+                            } mr-1`}></i>
+                            {order.paymentStatus?.charAt(0).toUpperCase() + order.paymentStatus?.slice(1)}
+                          </span>
                         </div>
                       </div>
                     </div>
