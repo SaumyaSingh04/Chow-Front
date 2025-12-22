@@ -139,6 +139,9 @@ const ProductDetail = () => {
                   />
                 ) : product.video ? (
                   <video 
+                    autoPlay
+                    muted
+                    loop
                     controls 
                     className="w-full h-full object-cover"
                     poster={product.images?.[0]}
@@ -220,8 +223,8 @@ const ProductDetail = () => {
               )}
             </div>
 
-            {/* Stock Status */}
-            <div className="flex items-center space-x-2">
+            {/* Stock Status - HIDDEN */}
+            {/* <div className="flex items-center space-x-2">
               <span className="font-medium text-gray-700">Stock:</span>
               {product.stockQty > 0 ? (
                 <span className="text-green-600 font-medium">
@@ -230,7 +233,7 @@ const ProductDetail = () => {
               ) : (
                 <span className="text-red-600 font-medium">Out of Stock</span>
               )}
-            </div>
+            </div> */}
 
             {/* Short Description */}
             {product.shortDesc && (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useApi } from '../../context/ApiContext.jsx';
 import Breadcrumb from '../../components/Breadcrumb.jsx';
@@ -12,9 +12,66 @@ const Shop = () => {
   const [activeSubcategory, setActiveSubcategory] = useState(null);
   const [subcategories, setSubcategories] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   const categoryId = searchParams.get('category');
   const subcategoryId = searchParams.get('subcategory');
   const urlSearchQuery = searchParams.get('search');
+
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    debounce(async (query) => {
+      if (query.trim()) {
+        setIsSearching(true);
+        try {
+          const results = await searchItems(query);
+          if (results && results.length > 0) {
+            setFilteredItems(results);
+          } else {
+            const allItems = items.length > 0 ? items : await fetchItems();
+            const localResults = allItems.filter(item => 
+              item.name.toLowerCase().includes(query.toLowerCase())
+            );
+            setFilteredItems(localResults);
+          }
+        } catch (error) {
+          const allItems = items.length > 0 ? items : await fetchItems();
+          const localResults = allItems.filter(item => 
+            item.name.toLowerCase().includes(query.toLowerCase())
+          );
+          setFilteredItems(localResults);
+        } finally {
+          setIsSearching(false);
+        }
+        setActiveCategory('search');
+      } else {
+        setIsSearching(false);
+        const allItems = items.length > 0 ? items : await fetchItems();
+        setFilteredItems(allItems);
+        setActiveCategory('all');
+      }
+    }, 300),
+    [searchItems, items, fetchItems]
+  );
+
+  // Debounce utility function
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    debouncedSearch(query);
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -165,69 +222,19 @@ const Shop = () => {
             <input
               type="text"
               value={searchQuery}
-              onChange={async (e) => {
-                const value = e.target.value;
-                setSearchQuery(value);
-                if (!value.trim()) {
-                  const allItems = items.length > 0 ? items : await fetchItems();
-                  setFilteredItems(allItems);
-                  setActiveCategory('all');
-                }
-              }}
-              onKeyPress={async (e) => {
-                if (e.key === 'Enter' && searchQuery.trim()) {
-                  try {
-                    const results = await searchItems(searchQuery);
-                    if (results && results.length > 0) {
-                      setFilteredItems(results);
-                    } else {
-                      const allItems = items.length > 0 ? items : await fetchItems();
-                      const localResults = allItems.filter(item => 
-                        item.name.toLowerCase().includes(searchQuery.toLowerCase())
-                      );
-                      setFilteredItems(localResults);
-                    }
-                  } catch (error) {
-                    const allItems = items.length > 0 ? items : await fetchItems();
-                    const localResults = allItems.filter(item => 
-                      item.name.toLowerCase().includes(searchQuery.toLowerCase())
-                    );
-                    setFilteredItems(localResults);
-                  }
-                  setActiveCategory('search');
-                }
-              }}
+              onChange={handleSearchChange}
               placeholder="Search products..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d80a4e]"  
+              className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d80a4e]"
             />
-            <button
-              onClick={async () => {
-                if (searchQuery.trim()) {
-                  try {
-                    const results = await searchItems(searchQuery);
-                    if (results && results.length > 0) {
-                      setFilteredItems(results);
-                    } else {
-                      const allItems = items.length > 0 ? items : await fetchItems();
-                      const localResults = allItems.filter(item => 
-                        item.name.toLowerCase().includes(searchQuery.toLowerCase())
-                      );
-                      setFilteredItems(localResults);
-                    }
-                  } catch (error) {
-                    const allItems = items.length > 0 ? items : await fetchItems();
-                    const localResults = allItems.filter(item => 
-                      item.name.toLowerCase().includes(searchQuery.toLowerCase())
-                    );
-                    setFilteredItems(localResults);
-                  }
-                  setActiveCategory('search');
-                }
-              }}
-              className="absolute right-2 top-2 text-gray-400 hover:text-[#d80a4e]"
-            >
-              <i className="fas fa-search"></i>
-            </button>
+            {isSearching ? (
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#d80a4e]"></div>
+              </div>
+            ) : (
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                <i className="fas fa-search"></i>
+              </div>
+            )}
           </div>
         </div>
 

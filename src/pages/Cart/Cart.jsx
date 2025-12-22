@@ -7,6 +7,11 @@ const Cart = () => {
   const { cartItems, updateQuantity, removeFromCart, getCartTotal } = useCart();
   const navigate = useNavigate();
   
+  const subtotal = getCartTotal();
+  const taxRate = 0.05; // 5% tax
+  const taxAmount = subtotal * taxRate;
+  const total = subtotal + taxAmount;
+  
   const handleCheckout = () => {
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -75,7 +80,7 @@ const Cart = () => {
                         />
                         <div className="flex-1">
                           <h3 className="font-medium text-gray-800 mb-1">{item.name}</h3>
-                          <p className="text-sm text-gray-600 mb-2">INR {item.price}</p>
+                          <p className="text-sm text-gray-600 mb-2">₹{item.price}</p>
                           <div className="flex items-center justify-between">
                             <div className="flex border rounded">
                               <button
@@ -93,7 +98,7 @@ const Cart = () => {
                               </button>
                             </div>
                             <div className="text-right">
-                              <p className="font-medium">INR {(item.price * item.quantity).toFixed(2)}</p>
+                              <p className="font-medium">₹{(item.price * item.quantity).toFixed(2)}</p>
                               <button
                                 onClick={() => removeFromCart(item._id)}
                                 className="text-red-500 hover:text-red-700 text-sm mt-1"
@@ -123,7 +128,7 @@ const Cart = () => {
                       </div>
 
                       {/* UNIT PRICE */}
-                      <div>INR {item.price}</div>
+                      <div>₹{item.price}</div>
 
                       {/* QUANTITY */}
                       <div className="col-span-2 flex justify-center">
@@ -152,7 +157,7 @@ const Cart = () => {
 
                       {/* TOTAL */}
                       <div>
-                        INR {(item.price * item.quantity).toFixed(2)}
+                        ₹{(item.price * item.quantity).toFixed(2)}
                       </div>
 
                       {/* REMOVE */}
@@ -180,21 +185,21 @@ const Cart = () => {
                 <div className="flex justify-between border-b pb-2">
                   <span>Subtotal</span>
                   <span>
-                    INR {getCartTotal().toFixed(2)}
+                    ₹ {getCartTotal().toFixed(2)}
                   </span>
                 </div>
 
                 <div className="flex justify-between border-b pb-2">
-                  <span>Tax (9%)</span>
+                  <span>Tax (5%)</span>
                   <span>
-                    INR {(getCartTotal() * 0.09).toFixed(2)}
+                    ₹ {taxAmount.toFixed(2)}
                   </span>
                 </div>
 
                 <div className="flex justify-between font-semibold">
                   <span>Total</span>
                   <span>
-                    INR {(getCartTotal() * 1.09).toFixed(2)}
+                    ₹ {total.toFixed(2)}
                   </span>
                 </div>
               </div>
