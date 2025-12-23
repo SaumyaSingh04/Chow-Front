@@ -85,12 +85,23 @@ const Specials = () => {
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
           
           {/* Mobile Filters Toggle */}
-          <div className="lg:hidden">
+          <div className="lg:hidden mb-4">
             <button 
-              onClick={() => document.getElementById('filters').classList.toggle('hidden')}
-              className="w-full bg-[#d80a4e] text-white px-4 py-3 rounded-lg font-medium mb-4"
+              onClick={() => {
+                const filters = document.getElementById('filters');
+                const isHidden = filters.classList.contains('hidden');
+                if (isHidden) {
+                  filters.classList.remove('hidden');
+                  document.getElementById('filter-btn-text').textContent = 'Hide Filters';
+                } else {
+                  filters.classList.add('hidden');
+                  document.getElementById('filter-btn-text').textContent = 'Show Filters';
+                }
+              }}
+              className="w-full bg-[#d80a4e] text-white px-4 py-3 rounded-lg font-medium flex items-center justify-center gap-2"
             >
-              Show Filters
+              <i className="fas fa-filter"></i>
+              <span id="filter-btn-text">Show Filters</span>
             </button>
           </div>
           
