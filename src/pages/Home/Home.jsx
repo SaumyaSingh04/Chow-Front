@@ -71,14 +71,22 @@ const Home = () => {
             {subcategories.slice(0, 5).map((subcat, i) => {
               const icons = [<FaStar />, <FaGift />, <FaBox />, <FaSmile />, <FaFire />];
               return (
-                <Link 
+                <button 
                   key={subcat._id} 
-                  to={`/shop?subcategory=${subcat._id}`}
-                  className="flex items-center gap-2 text-base py-2 px-2 hover:bg-pink-50 hover:text-[#d80a4e] transition-colors cursor-pointer rounded"
+                  onClick={() => {
+                    setSelectedSubcategory(subcat._id);
+                    setTimeout(() => {
+                      const categorySection = document.getElementById(`category-${categories[0]?._id}`);
+                      if (categorySection) {
+                        categorySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                    }, 300);
+                  }}
+                  className="flex items-center gap-2 text-base py-2 px-2 hover:bg-pink-50 hover:text-[#d80a4e] transition-colors cursor-pointer rounded w-full text-left"
                 >
                   <span className="text-[#d80a4e] text-base">{icons[i] || <FaFolder />}</span>
                   {subcat.name}
-                </Link>
+                </button>
               );
             })}
             
@@ -200,7 +208,7 @@ const Home = () => {
   if (categoryItems.length === 0) return null;
 
   return (
-    <section key={category._id} className="bg-white py-4 sm:py-6">
+    <section key={category._id} className="bg-white py-4 sm:py-6" id={`category-${category._id}`}>
       <div className="max-w-[1400px] mx-auto px-3 sm:px-4 md:px-6">
 
         {/* Category Title and Subcategories */}
