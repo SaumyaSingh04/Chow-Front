@@ -18,7 +18,6 @@ import Account from './pages/Account/Account';
 import Profile from './pages/Profile/Profile';
 import Cart from './pages/Cart/Cart';
 import Checkout from './pages/Checkout/Checkout';
-import Payment from './pages/Payment/Payment';
 import Orders from './pages/Orders/Orders';
 import Admin from './pages/Admin/Admin';
 import ProductDetail from './pages/ProductDetail/ProductDetail';
@@ -54,7 +53,6 @@ const AppContent = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
-          <Route path="/payment" element={<Payment />} />
           <Route path="/orders" element={<Orders />} />
 
           {/* Admin Route */}

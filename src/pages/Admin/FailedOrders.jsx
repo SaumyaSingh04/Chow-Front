@@ -14,7 +14,7 @@ const FailedOrders = () => {
     try {
       setLoading(true);
       const data = await getFailedOrders();
-      setFailedOrders(data.orders || []);
+      setFailedOrders(data || []);
     } catch (error) {
       console.error('Error loading failed orders:', error);
     } finally {
@@ -60,8 +60,13 @@ const FailedOrders = () => {
                   <span className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</span>
                 </div>
                 <div className="text-sm text-gray-700 mb-2">
-                  <div>Customer: {order.customerId?.name || 'N/A'}</div>
+                  <div>Customer: {order.userId?.name || 'N/A'}</div>
                   <div>Amount: ₹{order.totalAmount}</div>
+                  <div>Status: {order.status}</div>
+                  <div>Payment: {order.paymentStatus}</div>
+                  {order.razorpayData?.[0]?.errorDescription && (
+                    <div className="text-red-600">Error: {order.razorpayData[0].errorDescription}</div>
+                  )}
                 </div>
                 <button
                   onClick={() => handleRetryOrder(order._id)}
@@ -81,6 +86,8 @@ const FailedOrders = () => {
                   <th className="px-3 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold">Order ID</th>
                   <th className="px-3 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold">Customer</th>
                   <th className="px-3 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold">Amount</th>
+                  <th className="px-3 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold">Status</th>
+                  <th className="px-3 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold">Error</th>
                   <th className="px-3 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold">Date</th>
                   <th className="px-3 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold">Action</th>
                 </tr>
@@ -92,10 +99,16 @@ const FailedOrders = () => {
                       #{order._id.slice(-6)}
                     </td>
                     <td className="px-3 sm:px-6 py-4 text-xs sm:text-sm text-gray-700">
-                      {order.customerId?.name || 'N/A'}
+                      {order.userId?.name || 'N/A'}
                     </td>
                     <td className="px-3 sm:px-6 py-4 text-xs sm:text-sm text-gray-700">
                       ₹{order.totalAmount}
+                    </td>
+                    <td className="px-3 sm:px-6 py-4 text-xs sm:text-sm">
+                      <span className="text-red-600 font-medium">{order.status}/{order.paymentStatus}</span>
+                    </td>
+                    <td className="px-3 sm:px-6 py-4 text-xs sm:text-sm text-red-600 max-w-xs truncate">
+                      {order.razorpayData?.[0]?.errorDescription || 'Unknown error'}
                     </td>
                     <td className="px-3 sm:px-6 py-4 text-xs sm:text-sm text-gray-700">
                       {new Date(order.createdAt).toLocaleDateString()}

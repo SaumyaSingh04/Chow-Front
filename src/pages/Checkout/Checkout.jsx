@@ -293,8 +293,72 @@ const Checkout = () => {
       };
 
       const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', async function (response) {
+        try {
+          // Create failed order with error details
+          const failedOrderData = {
+            userId: user._id,
+            addressId: addressId,
+            items: cartItems.map(item => ({
+              itemId: item._id,
+              quantity: item.quantity,
+              price: item.price
+            })),
+            totalAmount: totalAmount,
+            distance: distance,
+            deliveryFee: deliveryFee,
+            status: 'failed',
+            paymentStatus: 'failed',
+            razorpayData: [{
+              orderId: razorpayOrder.order.id,
+              status: 'failed',
+              amount: razorpayOrder.order.amount,
+              currency: razorpayOrder.order.currency,
+              errorCode: response.error.code,
+              errorDescription: response.error.description,
+              errorSource: response.error.source,
+              errorStep: response.error.step,
+              errorReason: response.error.reason
+            }]
+          };
+          
+          await service.post('/api/orders', failedOrderData);
+          alert(`Payment failed: ${response.error.description}`);
+        } catch (error) {
+          console.error('Failed to create failed order:', error);
+          alert('Payment failed and could not save order details.');
+        }
+      });
       rzp.open();
     } catch (error) {
+      // Create failed order for checkout errors
+      try {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const failedOrderData = {
+          userId: user._id,
+          items: cartItems.map(item => ({
+            itemId: item._id,
+            quantity: item.quantity,
+            price: item.price
+          })),
+          totalAmount: getCartTotal() * 1.05 + deliveryFee,
+          distance: distance,
+          deliveryFee: deliveryFee,
+          status: 'failed',
+          paymentStatus: 'failed',
+          razorpayData: [{
+            status: 'failed',
+            errorDescription: error.message || 'Checkout process failed',
+            errorSource: 'checkout',
+            errorStep: 'initialization'
+          }]
+        };
+        
+        await service.post('/api/orders', failedOrderData);
+      } catch (orderError) {
+        console.error('Failed to create failed order:', orderError);
+      }
+      
       alert('Failed to initiate payment. Please try again.');
       console.error('Payment initiation failed:', error);
     }

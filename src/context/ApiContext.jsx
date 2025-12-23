@@ -567,15 +567,6 @@ export const ApiProvider = ({ children }) => {
       }
     },
     
-    getFailedOrders: async () => {
-      try {
-        return await apiService.get('/api/dashboard/failed-orders');
-      } catch (error) {
-        console.error('Error fetching failed orders:', error);
-        return null;
-      }
-    },
-    
     getAdminDashboard: async () => {
       try {
         return await apiService.get('/admin');
@@ -597,6 +588,16 @@ export const ApiProvider = ({ children }) => {
         return data.orders || data;
       } catch (error) {
         console.error('Error fetching all orders:', error);
+        return [];
+      }
+    },
+    
+    getFailedOrders: async () => {
+      try {
+        const data = await apiService.get('/api/orders/failed');
+        return data.orders || data;
+      } catch (error) {
+        console.error('Error fetching failed orders:', error);
         return [];
       }
     },
