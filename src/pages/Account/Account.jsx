@@ -61,9 +61,22 @@ const Account = () => {
       } else {
         const response = await register(formData);
         if (response.success || response.message) {
-          setSuccess('Registration successful!');
-          setIsLogin(true);
-          setFormData({ name: '', email: '', phone: '', password: '' });
+          // Auto-login after successful registration
+          const loginResponse = await login({ email: formData.email, password: formData.password });
+          if (loginResponse.token) {
+            localStorage.setItem('token', loginResponse.token);
+            if (loginResponse.user) {
+              localStorage.setItem('user', JSON.stringify(loginResponse.user));
+              setUser(loginResponse.user);
+              transferGuestCartToUser(loginResponse.user.id || loginResponse.user._id);
+            }
+            setIsLoggedIn(true);
+            setSuccess('Registration and login successful!');
+          } else {
+            setSuccess('Registration successful! Please login.');
+            setIsLogin(true);
+            setFormData({ name: '', email: '', phone: '', password: '' });
+          }
         }
       }
     } catch (error) {
