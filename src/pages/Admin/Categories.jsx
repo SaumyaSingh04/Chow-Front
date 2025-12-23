@@ -58,6 +58,9 @@ const Categories = () => {
     if (window.confirm('Are you sure you want to delete this category?')) {
       try {
         await deleteCategory(id);
+        // Update local state immediately
+        const updatedCategories = categories.filter(cat => cat._id !== id);
+        // Force re-render by calling fetchCategories
         fetchCategories();
       } catch (error) {
         console.error('Error deleting category:', error);
@@ -225,12 +228,20 @@ const Categories = () => {
                     {category.description || 'No description'}
                   </td>
                   <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm">
-                    <button
-                      onClick={() => handleEdit(category)}
-                      className="bg-[#d80a4e] text-white px-2 md:px-4 py-1 md:py-2 rounded hover:bg-[#b8083e] text-xs font-medium"
-                    >
-                      Update / View
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEdit(category)}
+                        className="bg-[#d80a4e] text-white px-2 md:px-4 py-1 md:py-2 rounded hover:bg-[#b8083e] text-xs font-medium"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(category._id)}
+                        className="bg-red-500 text-white px-2 md:px-4 py-1 md:py-2 rounded hover:bg-red-600 text-xs font-medium"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

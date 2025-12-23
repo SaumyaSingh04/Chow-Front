@@ -70,6 +70,8 @@ const Subcategories = () => {
     if (window.confirm('Are you sure you want to delete this subcategory?')) {
       try {
         await deleteSubcategory(id);
+        // Update local state immediately
+        setSubcategories(prev => prev.filter(sub => sub._id !== id));
         loadData();
       } catch (error) {
         console.error('Error deleting subcategory:', error);
@@ -267,12 +269,20 @@ const Subcategories = () => {
                   <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-gray-700">{getCategoryNames(subcategory.categories || subcategory.category)}</td>
                   <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-gray-700">{subcategory.description || 'No description'}</td>
                   <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm">
-                    <button
-                      onClick={() => handleEdit(subcategory)}
-                      className="bg-[#d80a4e] text-white px-2 md:px-4 py-1 md:py-2 rounded hover:bg-[#b8083e] text-xs font-medium"
-                    >
-                      Update / View
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEdit(subcategory)}
+                        className="bg-[#d80a4e] text-white px-2 md:px-4 py-1 md:py-2 rounded hover:bg-[#b8083e] text-xs font-medium"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(subcategory._id)}
+                        className="bg-red-500 text-white px-2 md:px-4 py-1 md:py-2 rounded hover:bg-red-600 text-xs font-medium"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

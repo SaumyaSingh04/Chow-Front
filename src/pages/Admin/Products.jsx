@@ -197,6 +197,7 @@ const Products = () => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
         await deleteItem(id);
+        setFilteredItems(prev => prev.filter(item => item._id !== id));
         fetchItems();
       } catch (error) {
         console.error('Error deleting product:', error);
@@ -669,12 +670,20 @@ const Products = () => {
                     <td className="px-2 py-3 text-gray-700">₹{product.discountPrice || product.price}</td>
                     <td className="px-2 py-3 text-gray-700 text-center">{product.stockQty || 0}</td>
                     <td className="px-2 py-3">
-                      <button
-                        onClick={() => handleEdit(product)}
-                        className="bg-[#d80a4e] text-white px-3 py-1 rounded text-sm hover:bg-[#b8083e]"
-                      >
-                        Edit
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEdit(product)}
+                          className="bg-[#d80a4e] text-white px-3 py-1 rounded text-sm hover:bg-[#b8083e]"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(product._id)}
+                          className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
