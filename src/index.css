@@ -24,7 +24,7 @@ body {
 
 #root {
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 @keyframes fadeIn {
@@ -81,7 +81,7 @@ body {
 /* Smooth page loading */
 .App {
   transition: all 0.3s ease-in-out;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 /* Prevent flash of unstyled content */
@@ -92,7 +92,6 @@ body {
 /* Smooth route transitions */
 .route-container {
   animation: slideIn 0.3s ease-out;
-  height: 100%;
 }
 
 @keyframes slideIn {

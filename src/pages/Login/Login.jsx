@@ -63,7 +63,7 @@ const Login = () => {
   }, [loginSuccess, user, navigate]);
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="bg-gray-100 pb-8">
       <div className="bg-gray-100 py-8 relative">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center text-sm mb-4">

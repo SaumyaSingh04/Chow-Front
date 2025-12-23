@@ -34,12 +34,12 @@ const AppContent = () => {
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
-    <div className="App">
+    <div className="App min-h-screen flex flex-col">
       {/* Header only for non-admin */}
       {!isAdminRoute && <Header />}
 
-      {/* ✅ Conditional padding */}
-      <div className={isAdminRoute ? 'route-container' : 'route-container pt-[120px]'}>
+      {/* Main content area */}
+      <main className={`flex-1 ${isAdminRoute ? 'route-container' : 'route-container pt-[120px]'}`}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
@@ -65,7 +65,7 @@ const AppContent = () => {
             }
           />
         </Routes>
-      </div>
+      </main>
 
       {/* Footer only for non-admin */}
       {!isAdminRoute && <Footer />}

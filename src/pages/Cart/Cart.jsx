@@ -25,7 +25,7 @@ const Cart = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-white">
       <Breadcrumb currentPage="Product Cart" />
 
       {cartItems.length === 0 ? (

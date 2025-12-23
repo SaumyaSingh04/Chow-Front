@@ -90,7 +90,7 @@ const Orders = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="bg-gray-50 pb-8">
       <Breadcrumb currentPage="My Orders" />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2">

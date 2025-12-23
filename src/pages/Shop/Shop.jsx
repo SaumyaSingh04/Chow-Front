@@ -204,7 +204,7 @@ const Shop = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white relative z-0">
+    <div className="bg-white">
       <Breadcrumb currentPage="Shop Now" />
 
       {/* Main Content */}
@@ -309,8 +309,6 @@ const Shop = () => {
           )}
         </div>
       </div>
-
-
     </div>
   );
 };

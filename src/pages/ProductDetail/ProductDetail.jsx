@@ -60,7 +60,7 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-white pb-8">
       <Breadcrumb currentPage={product.name} />
       
       <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8">

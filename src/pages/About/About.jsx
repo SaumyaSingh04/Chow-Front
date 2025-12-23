@@ -6,7 +6,7 @@ import chocolateBarfi from "../../assets/Chocolate Fruits Barfi (1).jpg";
 
 const About = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="bg-gray-50">
       <Breadcrumb currentPage="About" />
       
       {/* Top Images */}

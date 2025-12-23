@@ -149,7 +149,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="bg-gray-100 pb-8">
       <Breadcrumb currentPage="Profile" />
       
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
