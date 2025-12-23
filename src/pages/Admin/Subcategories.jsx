@@ -120,9 +120,9 @@ const Subcategories = () => {
 
   if (showModal) {
     return (
-      <div className="bg-gray-50 min-h-screen">
+      <div className="h-full flex flex-col bg-gray-50">
         {/* Header */}
-        <div className="bg-white border-b px-3 sm:px-6 py-3 sm:py-4">
+        <div className="bg-white border-b px-3 sm:px-6 py-3 sm:py-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             <h1 className="text-lg sm:text-xl font-semibold text-gray-900 underline">
               {editingSubcategory ? 'Edit Subcategory' : 'Add Subcategory'}
@@ -141,7 +141,7 @@ const Subcategories = () => {
         </div>
 
         {/* Form Content */}
-        <div className="p-3 sm:p-6">
+        <div className="flex-1 overflow-auto p-3 sm:p-6">
           <div className="bg-white rounded-lg border p-3 sm:p-6">
             <div className="mb-4 sm:mb-6">
               <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Basic Information :</h3>
