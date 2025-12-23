@@ -117,9 +117,15 @@ const Products = () => {
       }
       
       if (editingProduct) {
-        await updateItem(editingProduct._id, submitData);
+        const updatedProduct = await updateItem(editingProduct._id, submitData);
+        // Update local state immediately
+        setFilteredItems(prev => prev.map(item => 
+          item._id === editingProduct._id ? updatedProduct : item
+        ));
       } else {
-        await addItem(submitData);
+        const newProduct = await addItem(submitData);
+        // Add new product to local state immediately
+        setFilteredItems(prev => [newProduct, ...prev]);
       }
       
       setShowModal(false);
@@ -203,6 +209,29 @@ const Products = () => {
         console.error('Error deleting product:', error);
       }
     }
+  };
+
+  // Helper function to get category names
+  const getCategoryNames = (productCategories) => {
+    if (!productCategories) return 'No categories';
+    
+    if (Array.isArray(productCategories)) {
+      return productCategories.map(cat => {
+        if (typeof cat === 'object' && cat?.name) {
+          return cat.name;
+        }
+        // Find category by ID
+        const category = categories.find(c => c._id === cat);
+        return category ? category.name : cat;
+      }).join(', ');
+    }
+    
+    // Handle single category
+    if (typeof productCategories === 'object' && productCategories?.name) {
+      return productCategories.name;
+    }
+    const category = categories.find(c => c._id === productCategories);
+    return category ? category.name : productCategories;
   };
 
   // Pagination functions
@@ -661,10 +690,7 @@ const Products = () => {
                       {product.name}
                     </td>
                     <td className="px-2 py-3 text-gray-700">
-                      {Array.isArray(product.categories) 
-                        ? product.categories.map(cat => typeof cat === 'object' ? cat.name : cat).join(', ')
-                        : typeof product.category === 'object' ? product.category?.name : product.category
-                      }
+                      {getCategoryNames(product.categories || product.category)}
                     </td>
                     <td className="px-2 py-3 text-gray-700">₹{product.price}</td>
                     <td className="px-2 py-3 text-gray-700">₹{product.discountPrice || product.price}</td>
