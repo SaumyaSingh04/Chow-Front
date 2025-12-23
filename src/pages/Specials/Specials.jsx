@@ -168,14 +168,14 @@ const Specials = () => {
                         <input
                           type="number"
                           placeholder="Min"
-                          value={priceRange[0]}
+                          value={priceRange[0] === 0 ? '' : priceRange[0]}
                           onChange={(e) => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
                           className="w-full px-2 py-1 border rounded text-xs sm:text-sm"
                         />
                         <input
                           type="number"
                           placeholder="Max"
-                          value={priceRange[1]}
+                          value={priceRange[1] === 10000 ? '' : priceRange[1]}
                           onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 10000])}
                           className="w-full px-2 py-1 border rounded text-xs sm:text-sm"
                         />
