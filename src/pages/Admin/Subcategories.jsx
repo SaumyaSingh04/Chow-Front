@@ -4,6 +4,8 @@ import { useApi } from '../../context/ApiContext.jsx';
 const Subcategories = () => {
   const { getAllSubcategories, addSubcategory, updateSubcategory, deleteSubcategory, fetchCategories, categories, loading } = useApi();
   const [subcategories, setSubcategories] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [editingSubcategory, setEditingSubcategory] = useState(null);
   const [formData, setFormData] = useState({
@@ -17,15 +19,15 @@ const Subcategories = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [currentPage]);
 
   const loadData = async () => {
     try {
       await fetchCategories();
-      const subcats = await getAllSubcategories();
-      console.log('Loaded subcategories:', subcats);
-      // Ensure we always set an array
-      setSubcategories(Array.isArray(subcats) ? subcats : subcats?.subcategories || []);
+      const response = await getAllSubcategories(currentPage, itemsPerPage);
+      setSubcategories(response.subcategories || []);
+      setTotalPages(response.pagination?.pages || 1);
+      setTotalItems(response.pagination?.total || 0);
     } catch (error) {
       console.error('Error loading subcategories data:', error);
       setSubcategories([]);
@@ -79,22 +81,7 @@ const Subcategories = () => {
     }
   };
 
-  // Pagination functions
-  const getTotalPages = () => Math.ceil((subcategories || []).length / itemsPerPage);
-  
-  const getCurrentPageItems = () => {
-    if (!Array.isArray(subcategories)) return [];
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return subcategories.slice(startIndex, endIndex);
-  };
-  
-  const getPageInfo = () => {
-    const length = (subcategories || []).length;
-    const startIndex = (currentPage - 1) * itemsPerPage + 1;
-    const endIndex = Math.min(currentPage * itemsPerPage, length);
-    return `${startIndex} – ${endIndex} of ${length}`;
-  };
+  const getCurrentPageItems = () => subcategories;
 
   const getCategoryNames = (categoriesRef) => {
     if (!categoriesRef) return 'No categories';
@@ -289,12 +276,14 @@ const Subcategories = () => {
             </tbody>
           </table>
         </div>
-        
-        {/* Pagination */}
+      </div>
+      
+      {/* Pagination */}
+      <div className="bg-white rounded-lg shadow mx-4 mb-4">
         <div className="bg-white px-3 md:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center text-xs md:text-sm text-gray-700 gap-2 sm:gap-0">
             <span>Items per page: {itemsPerPage}</span>
-            <span className="sm:ml-8">{getPageInfo()}</span>
+            <span className="sm:ml-8">{(currentPage - 1) * itemsPerPage + 1} – {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems}</span>
           </div>
           <div className="flex items-center justify-center sm:justify-end space-x-2">
             <button
@@ -305,11 +294,11 @@ const Subcategories = () => {
               ◀
             </button>
             <span className="text-xs md:text-sm text-gray-600">
-              {currentPage} / {getTotalPages()}
+              {currentPage} / {totalPages}
             </span>
             <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, getTotalPages()))}
-              disabled={currentPage === getTotalPages()}
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
               className="px-3 py-1 text-xs md:text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               ▶

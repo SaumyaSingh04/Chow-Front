@@ -372,12 +372,13 @@ export const ApiProvider = ({ children }) => {
     },
     
     // Subcategories CRUD
-    getAllSubcategories: async () => {
+    getAllSubcategories: async (page = 1, limit = 10) => {
       try {
-        return await apiService.get('/api/subcategories/all');
+        const data = await apiService.get(`/api/subcategories/all?page=${page}&limit=${limit}`);
+        return data;
       } catch (error) {
         console.error('Error fetching subcategories:', error);
-        return [];
+        return { subcategories: [], pagination: { page: 1, limit: 10, total: 0, pages: 0 } };
       }
     },
     
@@ -507,13 +508,13 @@ export const ApiProvider = ({ children }) => {
       }
     },
     
-    getTickets: async () => {
+    getTickets: async (page = 1, limit = 10) => {
       try {
-        const data = await apiService.get('/api/tickets');
-        return data.tickets || data;
+        const data = await apiService.get(`/api/tickets?page=${page}&limit=${limit}`);
+        return data;
       } catch (error) {
         console.error('Error fetching tickets:', error);
-        return [];
+        return { tickets: [], pagination: { page: 1, limit: 10, total: 0, pages: 0 } };
       }
     },
     
@@ -582,23 +583,23 @@ export const ApiProvider = ({ children }) => {
     },
     
     // Orders
-    getAllOrders: async () => {
+    getAllOrders: async (page = 1, limit = 10) => {
       try {
-        const data = await apiService.get('/api/orders');
-        return data.orders || data;
+        const data = await apiService.get(`/api/orders?page=${page}&limit=${limit}`);
+        return data;
       } catch (error) {
         console.error('Error fetching all orders:', error);
-        return [];
+        return { orders: [], pagination: { page: 1, limit: 10, total: 0, pages: 0 } };
       }
     },
     
-    getFailedOrders: async () => {
+    getFailedOrders: async (page = 1, limit = 10) => {
       try {
-        const data = await apiService.get('/api/orders/failed');
-        return data.orders || data;
+        const data = await apiService.get(`/api/orders/failed?page=${page}&limit=${limit}`);
+        return data;
       } catch (error) {
         console.error('Error fetching failed orders:', error);
-        return [];
+        return { orders: [], pagination: { page: 1, limit: 10, total: 0, pages: 0 } };
       }
     },
     

@@ -4,17 +4,23 @@ import { useApi } from '../../context/ApiContext.jsx';
 const FailedOrders = () => {
   const { getFailedOrders, updateOrderStatus } = useApi();
   const [failedOrders, setFailedOrders] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   useEffect(() => {
     loadFailedOrders();
-  }, []);
+  }, [currentPage]);
 
   const loadFailedOrders = async () => {
     try {
       setLoading(true);
-      const data = await getFailedOrders();
-      setFailedOrders(data || []);
+      const response = await getFailedOrders(currentPage, itemsPerPage);
+      setFailedOrders(response.orders || []);
+      setTotalPages(response.pagination?.pages || 1);
+      setTotalItems(response.pagination?.total || 0);
     } catch (error) {
       console.error('Error loading failed orders:', error);
     } finally {
@@ -128,6 +134,35 @@ const FailedOrders = () => {
           </div>
         </div>
       )}
+      
+      {/* Pagination */}
+      <div className="bg-white rounded-lg shadow mt-4">
+        <div className="bg-white px-3 md:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center text-xs md:text-sm text-gray-700 gap-2 sm:gap-0">
+            <span>Items per page: {itemsPerPage}</span>
+            <span className="sm:ml-8">{(currentPage - 1) * itemsPerPage + 1} – {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems}</span>
+          </div>
+          <div className="flex items-center justify-center sm:justify-end space-x-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 text-xs md:text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              ◀
+            </button>
+            <span className="text-xs md:text-sm text-gray-600">
+              {currentPage} / {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 text-xs md:text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              ▶
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

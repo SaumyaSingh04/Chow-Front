@@ -4,19 +4,25 @@ import { useApi } from '../../context/ApiContext.jsx';
 const Tickets = () => {
   const { getTickets, updateTicket, deleteTicket } = useApi();
   const [tickets, setTickets] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   useEffect(() => {
     fetchTickets();
-  }, []);
+  }, [currentPage]);
 
   const fetchTickets = async () => {
     try {
       setLoading(true);
-      const ticketsData = await getTickets();
-      setTickets(Array.isArray(ticketsData) ? ticketsData : ticketsData?.tickets || []);
+      const response = await getTickets(currentPage, itemsPerPage);
+      setTickets(response.tickets || []);
+      setTotalPages(response.pagination?.pages || 1);
+      setTotalItems(response.pagination?.total || 0);
     } catch (error) {
       console.error('Error fetching tickets:', error);
       setTickets([]);
@@ -76,7 +82,7 @@ const Tickets = () => {
       ) : (
         <>
           <div className="mb-2 text-sm text-gray-600">
-            Total Messages: {tickets.length}
+            Total Messages: {totalItems}
           </div>
           <div className="bg-white rounded-lg shadow">
           {/* Horizontal scroll wrapper */}
@@ -150,6 +156,35 @@ const Tickets = () => {
           </div>
         </>
       )}
+      
+      {/* Pagination */}
+      <div className="bg-white rounded-lg shadow mt-4">
+        <div className="bg-white px-3 md:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center text-xs md:text-sm text-gray-700 gap-2 sm:gap-0">
+            <span>Items per page: {itemsPerPage}</span>
+            <span className="sm:ml-8">{(currentPage - 1) * itemsPerPage + 1} – {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems}</span>
+          </div>
+          <div className="flex items-center justify-center sm:justify-end space-x-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 text-xs md:text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              ◀
+            </button>
+            <span className="text-xs md:text-sm text-gray-600">
+              {currentPage} / {totalItems > 0 ? Math.ceil(totalItems / itemsPerPage) : 1}
+            </span>
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(totalItems / itemsPerPage)))}
+              disabled={currentPage >= Math.ceil(totalItems / itemsPerPage)}
+              className="px-3 py-1 text-xs md:text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              ▶
+            </button>
+          </div>
+        </div>
+      </div>
       
       {/* Message Modal */}
       {showModal && selectedMessage && (
