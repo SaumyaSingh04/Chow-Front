@@ -251,8 +251,8 @@ const Subcategories = () => {
       </div>
 
       {/* Subcategories Table */}
-      <div className="bg-white rounded-lg shadow mx-4 mb-4 flex-1 min-h-0">
-        <div className="h-full overflow-auto">
+      <div className="bg-white rounded-lg shadow mx-4 mb-4 flex-1 overflow-hidden">
+        <div className="h-full overflow-auto pb-4">
           <table className="min-w-[700px] w-full">
             <thead className="bg-[#d80a4e] text-white sticky top-0 z-10">
               <tr>
@@ -291,7 +291,7 @@ const Subcategories = () => {
         </div>
         
         {/* Pagination */}
-        <div className="bg-white px-3 md:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sticky bottom-0">
+        <div className="bg-white px-3 md:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center text-xs md:text-sm text-gray-700 gap-2 sm:gap-0">
             <span>Items per page: {itemsPerPage}</span>
             <span className="sm:ml-8">{getPageInfo()}</span>
