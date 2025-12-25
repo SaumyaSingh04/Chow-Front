@@ -4,10 +4,16 @@ import { useNavigate } from 'react-router-dom';
 import { useApi } from '../../context/ApiContext.jsx';
 import Breadcrumb from '../../components/Breadcrumb.jsx';
 
+const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_o05Pgdf286j2Pl';
+const RAZORPAY_SCRIPT_URL = 'https://checkout.razorpay.com/v1/checkout.js';
+const GST_RATE = 0.05;
+const REQUIRED_FIELDS = ['addressType', 'firstName', 'lastName', 'address', 'city', 'state', 'postcode', 'email', 'phone'];
+
 const Checkout = () => {
   const { cartItems, getCartTotal, clearCart } = useCart();
   const { getUserAddresses, service } = useApi();
   const navigate = useNavigate();
+  
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState('');
   const [isAddressSaved, setIsAddressSaved] = useState(false);
@@ -28,22 +34,13 @@ const Checkout = () => {
     orderNotes: ''
   });
 
-  const validatePincode = useCallback((pincode) => {
-    return /^[1-9][0-9]{5}$/.test(pincode);
-  }, []);
+  const validatePincode = useCallback((pincode) => /^[1-9][0-9]{5}$/.test(pincode), []);
 
   const calculateDeliveryFee = useCallback(async (pincode) => {
-    if (!pincode) {
+    if (!pincode || pincode.length !== 6) {
       setDistance(0);
       setDeliveryFee(0);
-      setPincodeError('');
-      return;
-    }
-
-    if (pincode.length !== 6) {
-      setDistance(0);
-      setDeliveryFee(0);
-      setPincodeError('Pincode must be 6 digits');
+      setPincodeError(pincode && pincode.length !== 6 ? 'Pincode must be 6 digits' : '');
       return;
     }
 
@@ -57,7 +54,6 @@ const Checkout = () => {
     try {
       const data = await service.post('/api/calculate-distance', { pincode });
       
-      // Check if API returned error response
       if (!data || data.error || data.success === false) {
         setDistance(0);
         setDeliveryFee(0);
@@ -76,6 +72,85 @@ const Checkout = () => {
     }
   }, [service, validatePincode]);
 
+  const getUserData = useCallback(() => {
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    if (!token || !user._id) {
+      navigate('/account');
+      return null;
+    }
+    
+    return { token, user };
+  }, [navigate]);
+
+  const loadRazorpayScript = useCallback(async () => {
+    if (window.Razorpay) return;
+    
+    const script = document.createElement('script');
+    script.src = RAZORPAY_SCRIPT_URL;
+    script.async = true;
+    document.body.appendChild(script);
+    await new Promise(resolve => script.onload = resolve);
+  }, []);
+
+  const handlePaymentFailure = useCallback(async (dbOrderId, orderId, errorReason, showAlert = true) => {
+    try {
+      await service.post('/api/payment/failure', {
+        dbOrderId,
+        razorpay_order_id: orderId,
+        error_reason: errorReason
+      });
+      
+      if (showAlert) {
+        alert(errorReason.includes('cancelled') 
+          ? 'Payment was cancelled. You can try placing the order again.'
+          : `Payment failed: ${errorReason}`);
+      }
+    } catch (error) {
+      console.error('Failed to handle payment failure:', error);
+      if (showAlert) {
+        alert('Payment failed and could not save order details.');
+      }
+    }
+  }, [service]);
+
+  const getOrCreateAddress = useCallback(async (userId) => {
+    const userAddresses = await getUserAddresses(userId);
+    const addresses = userAddresses.addresses || userAddresses.address || [];
+    
+    const existingAddress = addresses.find(addr => 
+      addr.firstName === formData.firstName &&
+      addr.lastName === formData.lastName &&
+      addr.street === formData.address &&
+      addr.city === formData.city &&
+      addr.state === formData.state &&
+      addr.postcode === formData.postcode &&
+      addr.phone === formData.phone
+    );
+    
+    if (existingAddress) {
+      return existingAddress._id;
+    }
+    
+    const addressData = {
+      addressType: formData.addressType,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      street: formData.address,
+      apartment: formData.apartment || '',
+      city: formData.city,
+      state: formData.state,
+      postcode: formData.postcode,
+      email: formData.email,
+      phone: formData.phone,
+      orderNotes: formData.orderNotes || ''
+    };
+    
+    const response = await service.post(`/api/users/${userId}/addresses`, addressData);
+    return response.address?._id || response.addressId || response._id;
+  }, [formData, getUserAddresses, service]);
+
   useEffect(() => {
     if (formData.postcode) {
       calculateDeliveryFee(formData.postcode);
@@ -83,29 +158,22 @@ const Checkout = () => {
   }, [formData.postcode, calculateDeliveryFee]);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    
-    if (!token || !user._id) {
-      navigate('/account');
-      return;
-    }
+    const userData = getUserData();
+    if (!userData) return;
     
     const fetchSavedAddresses = async () => {
-      if (user._id) {
-        try {
-          const response = await getUserAddresses(user._id);
-          const addresses = response.addresses || response.address || user.address || [];
-          setSavedAddresses(addresses);
-        } catch (error) {
-          console.error('Error fetching addresses:', error);
-          setSavedAddresses(user.address || []);
-        }
+      try {
+        const response = await getUserAddresses(userData.user._id);
+        const addresses = response.addresses || response.address || userData.user.address || [];
+        setSavedAddresses(addresses);
+      } catch (error) {
+        console.error('Error fetching addresses:', error);
+        setSavedAddresses(userData.user.address || []);
       }
     };
     
     fetchSavedAddresses();
-  }, [navigate, getUserAddresses]);
+  }, [getUserAddresses, getUserData]);
 
   const handleAddressSelect = (e) => {
     const addressId = e.target.value;
@@ -158,79 +226,44 @@ const Checkout = () => {
   };
 
   const handlePlaceOrder = async () => {
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const userData = getUserData();
+    if (!userData) return;
     
-    if (!token || !user._id) {
-      navigate('/account');
-      return;
-    }
-    
-    const requiredFields = ['addressType', 'firstName', 'lastName', 'address', 'city', 'state', 'postcode', 'email', 'phone'];
-    const missingFields = requiredFields.filter(field => !formData[field]?.trim());
-    
+    const missingFields = REQUIRED_FIELDS.filter(field => !formData[field]?.trim());
     if (missingFields.length > 0) {
       alert('Please fill all required fields');
       return;
     }
 
     try {
-      // Check if address already exists
-      const userAddresses = await getUserAddresses(user._id);
-      const addresses = userAddresses.addresses || userAddresses.address || [];
+      const addressId = await getOrCreateAddress(userData.user._id);
+      const totalAmount = getCartTotal() * (1 + GST_RATE) + deliveryFee;
       
-      const existingAddress = addresses.find(addr => 
-        addr.firstName === formData.firstName &&
-        addr.lastName === formData.lastName &&
-        addr.street === formData.address &&
-        addr.city === formData.city &&
-        addr.state === formData.state &&
-        addr.postcode === formData.postcode &&
-        addr.phone === formData.phone
-      );
+      const orderData = {
+        userId: userData.user._id,
+        addressId,
+        items: cartItems.map(item => ({
+          itemId: item._id,
+          quantity: item.quantity,
+          price: item.discountPrice
+        })),
+        totalAmount,
+        distance,
+        deliveryFee
+      };
       
-      let addressId;
-      
-      if (existingAddress) {
-        addressId = existingAddress._id;
-      } else {
-        const addressData = {
-          addressType: formData.addressType,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          street: formData.address,
-          apartment: formData.apartment || '',
-          city: formData.city,
-          state: formData.state,
-          postcode: formData.postcode,
-          email: formData.email,
-          phone: formData.phone,
-          orderNotes: formData.orderNotes || ''
-        };
-        
-        const newAddressResponse = await service.post(`/api/users/${user._id}/addresses`, addressData);
-        addressId = newAddressResponse.address?._id || newAddressResponse.addressId || newAddressResponse._id;
-      }
-      
-      const totalAmount = getCartTotal() * 1.05 + deliveryFee;
-      
-      // Create Razorpay order
       const razorpayOrder = await service.post('/api/payment/create-order', {
         amount: totalAmount,
-        currency: 'INR'
+        currency: 'INR',
+        orderData
       });
 
-      // Load Razorpay script if not already loaded
-      if (!window.Razorpay) {
-        const script = document.createElement('script');
-        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        script.async = true;
-        document.body.appendChild(script);
-        await new Promise(resolve => script.onload = resolve);
-      }
+      await loadRazorpayScript();
+
+      let paymentCompleted = false;
 
       const options = {
-        key: 'rzp_test_o05Pgdf286j2Pl',
+        key: RAZORPAY_KEY,
         amount: razorpayOrder.order.amount,
         currency: razorpayOrder.order.currency,
         name: 'Chowdhry',
@@ -238,11 +271,12 @@ const Checkout = () => {
         order_id: razorpayOrder.order.id,
         handler: async function (response) {
           try {
-            // Verify payment with complete data
+            paymentCompleted = true;
             const verifyResponse = await service.post('/api/payment/verify', {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
+              dbOrderId: razorpayOrder.dbOrderId,
               payment_data: {
                 amount: response.amount || razorpayOrder.order.amount,
                 currency: response.currency || razorpayOrder.order.currency,
@@ -257,26 +291,13 @@ const Checkout = () => {
               }
             });
 
-            // Create order with complete Razorpay data
-            const orderData = {
-              userId: user._id,
-              addressId: addressId,
-              items: cartItems.map(item => ({
-                itemId: item._id,
-                quantity: item.quantity,
-                price: item.discountPrice
-              })),
-              totalAmount: totalAmount,
-              distance: distance,
-              deliveryFee: deliveryFee,
-              razorpayData: verifyResponse.paymentRecord
-            };
-
-            await service.post('/api/orders', orderData);
-            alert('Payment successful! Order placed.');
-            clearCart();
-            
-            navigate('/orders');
+            if (verifyResponse.success) {
+              alert('Payment successful! Order placed.');
+              clearCart();
+              navigate('/orders');
+            } else {
+              alert('Payment verification failed. Please contact support.');
+            }
           } catch (error) {
             alert('Payment verification failed. Please contact support.');
             console.error('Payment verification error:', error);
@@ -293,86 +314,52 @@ const Checkout = () => {
       };
 
       const rzp = new window.Razorpay(options);
+      
       rzp.on('payment.failed', async function (response) {
-        try {
-          // Create failed order with error details
-          const failedOrderData = {
-            userId: user._id,
-            addressId: addressId,
-            items: cartItems.map(item => ({
-              itemId: item._id,
-              quantity: item.quantity,
-              price: item.discountPrice
-            })),
-            totalAmount: totalAmount,
-            distance: distance,
-            deliveryFee: deliveryFee,
-            status: 'failed',
-            paymentStatus: 'failed',
-            razorpayData: [{
-              orderId: razorpayOrder.order.id,
-              status: 'failed',
-              amount: razorpayOrder.order.amount,
-              currency: razorpayOrder.order.currency,
-              errorCode: response.error.code,
-              errorDescription: response.error.description,
-              errorSource: response.error.source,
-              errorStep: response.error.step,
-              errorReason: response.error.reason
-            }]
-          };
-          
-          await service.post('/api/orders', failedOrderData);
-          alert(`Payment failed: ${response.error.description}`);
-        } catch (error) {
-          console.error('Failed to create failed order:', error);
-          alert('Payment failed and could not save order details.');
-        }
+        paymentCompleted = true;
+        await handlePaymentFailure(
+          razorpayOrder.dbOrderId,
+          razorpayOrder.order.id,
+          `${response.error.code}: ${response.error.description}`
+        );
       });
+      
+      rzp.on('payment.cancel', async function () {
+        paymentCompleted = true;
+        await handlePaymentFailure(
+          razorpayOrder.dbOrderId,
+          razorpayOrder.order.id,
+          'Payment cancelled by user'
+        );
+      });
+      
+      // Backup cancel detection
+      const originalClose = rzp.close;
+      rzp.close = function() {
+        if (!paymentCompleted) {
+          setTimeout(() => {
+            handlePaymentFailure(
+              razorpayOrder.dbOrderId,
+              razorpayOrder.order.id,
+              'Payment cancelled by user',
+              false
+            );
+          }, 100);
+        }
+        originalClose.call(this);
+      };
+      
       rzp.open();
     } catch (error) {
-      // Create failed order for checkout errors
-      try {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        const failedOrderData = {
-          userId: user._id,
-          items: cartItems.map(item => ({
-            itemId: item._id,
-            quantity: item.quantity,
-            price: item.discountPrice
-          })),
-          totalAmount: getCartTotal() * 1.05 + deliveryFee,
-          distance: distance,
-          deliveryFee: deliveryFee,
-          status: 'failed',
-          paymentStatus: 'failed',
-          razorpayData: [{
-            status: 'failed',
-            errorDescription: error.message || 'Checkout process failed',
-            errorSource: 'checkout',
-            errorStep: 'initialization'
-          }]
-        };
-        
-        await service.post('/api/orders', failedOrderData);
-      } catch (orderError) {
-        console.error('Failed to create failed order:', orderError);
-      }
-      
-      alert('Failed to initiate payment. Please try again.');
       console.error('Payment initiation failed:', error);
     }
   };
 
   const isOrderDisabled = () => {
-    const requiredFields = ['addressType', 'firstName', 'lastName', 'address', 'city', 'state', 'postcode', 'email', 'phone'];
-    const hasEmptyFields = requiredFields.some(field => !formData[field]?.trim());
+    const hasEmptyFields = REQUIRED_FIELDS.some(field => !formData[field]?.trim());
     const isPincodeInvalid = !formData.postcode || !validatePincode(formData.postcode) || deliveryFee === 0;
-    
     return hasEmptyFields || isPincodeInvalid;
   };
-
-
 
   return (
     <div className="bg-white pb-8">

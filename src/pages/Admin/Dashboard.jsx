@@ -22,17 +22,13 @@ const Dashboard = () => {
       const data = await getDashboardStats();
       console.log('Dashboard API response:', data);
       
-      // Get failed orders from dedicated endpoint
-      const failedOrdersData = await getFailedOrders();
-      console.log('Failed orders response:', failedOrdersData);
-      
       if (data && Object.keys(data).length > 0) {
         setStats({
           newOrders: data.newOrders || 0,
           totalCustomers: data.totalCustomers || 0,
           ticketsResolved: data.ticketsResolved || 0,
           revenueToday: data.revenueToday || 0,
-          failedOrders: failedOrdersData?.count || failedOrdersData?.failedOrders || 0
+          failedOrders: data.failedOrders || 0
         });
       } else {
         // Fallback: Calculate from existing data

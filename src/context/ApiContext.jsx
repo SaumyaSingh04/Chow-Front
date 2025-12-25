@@ -680,6 +680,17 @@ export const ApiProvider = ({ children }) => {
       }
     },
     
+
+    cleanFailedOrders: async () => {
+      try {
+        const response = await apiService.post('/api/payment/clean-failed');
+        return response;
+      } catch (error) {
+        console.error('Error cleaning failed orders:', error);
+        throw error;
+      }
+    },
+    
     createOrder: async (orderData) => {
       try {
         console.log('API: Creating order with data:', orderData);
