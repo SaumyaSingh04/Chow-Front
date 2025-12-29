@@ -89,11 +89,19 @@ const Home = () => {
                   onClick={() => {
                     setSelectedSubcategory(subcat._id);
                     setTimeout(() => {
-                      const categorySection = document.getElementById(`category-${categories[0]?._id}`);
-                      if (categorySection) {
-                        categorySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      // Find the category that contains this subcategory
+                      const targetCategory = categories.find(cat => 
+                        subcat.categories?.some(subcatCat => 
+                          (typeof subcatCat === 'object' ? subcatCat._id : subcatCat) === cat._id
+                        )
+                      );
+                      if (targetCategory) {
+                        const categorySection = document.getElementById(`category-${targetCategory._id}`);
+                        if (categorySection) {
+                          categorySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
                       }
-                    }, 300);
+                    }, 100);
                   }}
                   className="flex items-center gap-2 text-base py-2 px-2 hover:bg-pink-50 hover:text-[#d80a4e] transition-colors cursor-pointer rounded w-full text-left"
                 >
