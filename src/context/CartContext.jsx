@@ -62,6 +62,8 @@ export const CartProvider = ({ children }) => {
         setCartItems([]);
       }
     } else {
+      // Clear cart when user logs out
+      setCartItems([]);
       // For guest users, load from generic cart key
       try {
         const savedCart = localStorage.getItem('guest_cart');
@@ -181,6 +183,19 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  const handleLogout = () => {
+    // Clear current user's cart from localStorage
+    if (currentUserId) {
+      localStorage.removeItem(`cart_${currentUserId}`);
+    }
+    // Clear guest cart as well
+    localStorage.removeItem('guest_cart');
+    // Clear cart items from state
+    setCartItems([]);
+    // Reset current user
+    setCurrentUserId(null);
+  };
+
   const transferGuestCartToUser = (userId) => {
     try {
       const guestCart = localStorage.getItem('guest_cart');
@@ -235,6 +250,7 @@ export const CartProvider = ({ children }) => {
     updateQuantity,
     clearCart,
     clearUserCart,
+    handleLogout,
     transferGuestCartToUser,
     getCartTotal,
     getCartItemsCount

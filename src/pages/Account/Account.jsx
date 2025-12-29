@@ -7,7 +7,7 @@ import amavatBarfi from '../../assets/Amavat Barfi (1).jpg';
 
 const Account = () => {
   const { register, login } = useApi();
-  const { transferGuestCartToUser } = useCart();
+  const { transferGuestCartToUser, handleLogout: clearCartOnLogout } = useCart();
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(false);
   const [user, setUser] = useState(null);
@@ -96,6 +96,8 @@ const Account = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    // Clear cart data on logout
+    clearCartOnLogout();
     setUser(null);
     setIsLoggedIn(false);
     setSuccess('Logged out successfully!');
