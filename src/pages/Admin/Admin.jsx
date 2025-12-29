@@ -72,7 +72,10 @@ const Admin = () => {
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                setActiveTab(tab.id);
+                setSidebarOpen(false);
+              }}
               className={`w-full flex items-center px-4 sm:px-6 py-3 text-left hover:bg-red-300 text-sm sm:text-base ${
                 activeTab === tab.id
                   ? 'bg-red-500 text-white border-r-4 border-red-600'
