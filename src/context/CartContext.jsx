@@ -119,19 +119,47 @@ export const CartProvider = ({ children }) => {
     });
   };
 
-  const updateQuantity = (productId, quantity) => {
+  const updateQuantity = async (productId, quantity, maxStock = null) => {
     if (quantity <= 0) {
       removeFromCart(productId);
       return;
     }
     
-    setCartItems(prevItems => {
-      const item = prevItems.find(item => item._id === productId);
-      if (item) {
-        showNotification(`${item.name} quantity updated!`);
+    const item = cartItems.find(item => item._id === productId);
+    if (!item) return;
+    
+    let stockLimit = maxStock || item.stockQty || item.stock || item.quantity_available || item.quantityAvailable || item.availableQuantity;
+    
+    // If no stock info in cart, fetch from API
+    if (stockLimit === null || stockLimit === undefined) {
+      try {
+        console.log('Fetching stock for product:', productId);
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/items/get/${productId}`);
+        if (response.ok) {
+          const productData = await response.json();
+          console.log('All product fields:', Object.keys(productData));
+          console.log('Full product data:', productData);
+          stockLimit = productData.stockQty || productData.stock || productData.quantity_available || productData.quantityAvailable || productData.availableQuantity || productData.quantity || productData.stockQuantity;
+          console.log('Stock limit found:', stockLimit);
+        }
+      } catch (error) {
+        console.error('Error fetching stock:', error);
       }
-      return prevItems.map(item =>
-        item._id === productId ? { ...item, quantity } : item
+    }
+    
+    if (stockLimit !== null && stockLimit !== undefined && quantity > stockLimit) {
+      setTimeout(() => {
+        showNotification(`Only ${stockLimit} items available in stock!`, 'error');
+      }, 0);
+      return;
+    }
+    
+    setCartItems(prevItems => {
+      setTimeout(() => {
+        showNotification(`${item.name} quantity updated!`);
+      }, 0);
+      return prevItems.map(cartItem =>
+        cartItem._id === productId ? { ...cartItem, quantity } : cartItem
       );
     });
   };
