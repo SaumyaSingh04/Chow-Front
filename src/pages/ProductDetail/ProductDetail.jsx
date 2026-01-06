@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useApi } from '../../context/ApiContext.jsx';
-import { useCart } from '../../context/CartContext.jsx';
+import { useApi } from '../../contexts/index.jsx';
+import { useCart } from '../../contexts/index.jsx';
 import Breadcrumb from '../../components/Breadcrumb.jsx';
 
 const ProductDetail = () => {

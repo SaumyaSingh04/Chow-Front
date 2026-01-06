@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useApi } from '../../context/ApiContext.jsx';
+import { useApi } from '../../contexts/index.jsx';
 
 const FailedOrders = () => {
   const { getFailedOrders, cleanFailedOrders } = useApi();
@@ -90,6 +90,7 @@ const FailedOrders = () => {
                   <th className="px-2 py-3 text-left text-sm font-semibold uppercase min-w-[80px]">Subtotal</th>
                   <th className="px-2 py-3 text-left text-sm font-semibold uppercase min-w-[80px]">Tax (5%)</th>
                   <th className="px-2 py-3 text-left text-sm font-semibold uppercase min-w-[80px]">Delivery</th>
+                  <th className="px-2 py-3 text-left text-sm font-semibold uppercase min-w-[60px]">Distance</th>
                   <th className="px-2 py-3 text-left text-sm font-semibold uppercase min-w-[80px]">Total</th>
                   <th className="px-2 py-3 text-left text-sm font-semibold uppercase min-w-[100px]">Status</th>
                   <th className="px-2 py-3 text-left text-sm font-semibold uppercase min-w-[200px]">Error</th>
@@ -114,21 +115,30 @@ const FailedOrders = () => {
                       </div>
                     </td>
                     <td className="px-2 py-2 text-sm text-gray-700">
-                      <div className="max-w-[300px] truncate" title={order.itemsString}>
+                      <div className="max-w-[300px] truncate" title={order.items}>
                         {order.itemsString || order.items?.map(item => `${item.itemId?.name || 'Item'} (${item.quantity})`).join(', ') || 'N/A'}
                       </div>
                     </td>
                     <td className="px-2 py-2 text-sm text-gray-700">
-                      ₹{((order.totalAmount / 100 - (order.deliveryCharge || 0)) / 1.05).toFixed(2)}
+                      ₹{(() => {
+                        const subtotal = order.items?.reduce((sum, item) => sum + (item.price * item.quantity), 0) || 0;
+                        return subtotal.toFixed(2);
+                      })()}
                     </td>
                     <td className="px-2 py-2 text-sm text-gray-700">
-                      ₹{(((order.totalAmount / 100 - (order.deliveryCharge || 0)) / 1.05) * 0.05).toFixed(2)}
+                      ₹{(() => {
+                        const subtotal = order.items?.reduce((sum, item) => sum + (item.price * item.quantity), 0) || 0;
+                        return (subtotal * 0.05).toFixed(2);
+                      })()}
                     </td>
                     <td className="px-2 py-2 text-sm text-gray-700">
-                      ₹{(order.deliveryCharge || 0).toFixed(2)}
+                      ₹{(order.shipping?.total || 0).toFixed(2)}
+                    </td>
+                    <td className="px-2 py-2 text-sm text-gray-700">
+                      {order.distance || 0} km
                     </td>
                     <td className="px-2 py-2 text-sm text-gray-700 font-semibold">
-                      ₹{(order.totalAmount / 100).toFixed(2)}
+                      ₹{(order.totalAmount || 0).toFixed(2)}
                     </td>
                     <td className="px-2 py-2 text-sm">
                       <span className="px-2 py-1 rounded-full text-white text-xs font-medium bg-red-600">
@@ -225,9 +235,15 @@ const FailedOrders = () => {
                     const formatValue = (val) => {
                       if (typeof val === 'object' && val !== null) {
                         if (Array.isArray(val)) {
-                          return `${val.length} items`;
+                          if (key === 'items') {
+                            return val.map(item => `${item.itemId?.name || 'Item'} (Qty: ${item.quantity})`).join(', ');
+                          }
+                          return val.length > 0 ? `${val.length} entries` : 'Empty';
                         }
-                        return '[Object]';
+                        if (key === 'shipping') {
+                          return `Provider: ${val.provider || 'N/A'}, Total: ₹${val.total || 0}, Charged: ${val.charged ? 'Yes' : 'No'}`;
+                        }
+                        return JSON.stringify(val, null, 2);
                       }
                       if (key.includes('At') || key.includes('date') || key.includes('Date')) {
                         try {
@@ -244,7 +260,7 @@ const FailedOrders = () => {
                         }
                       }
                       if ((key.includes('amount') || key.includes('Amount') || key.includes('price') || key.includes('Price') || key.includes('fee') || key.includes('Fee')) && typeof val === 'number') {
-                        return `₹${(val / 100).toFixed(2)}`;
+                        return `₹${val.toFixed(2)}`;
                       }
                       return String(val);
                     };

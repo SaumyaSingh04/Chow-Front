@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ShoppingCart, Users, CheckCircle, DollarSign, Package, FolderOpen, Layers, XCircle } from "lucide-react";
-import { useApi } from "../../context/ApiContext.jsx";
+import { useApi } from "../../contexts/index.jsx";
 
 const Dashboard = () => {
   const { getDashboardStats, getFailedOrders, fetchItems, fetchCategories, getAllSubcategories, items, categories, loading, dashboardRefreshTrigger } = useApi();

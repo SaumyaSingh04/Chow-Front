@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useCart } from '../../context/CartContext';
+import { useCart } from '../../contexts/index.jsx';
 import { useNavigate } from 'react-router-dom';
-import { useApi } from '../../context/ApiContext.jsx';
+import { useApi } from '../../contexts/index.jsx';
 import Breadcrumb from '../../components/Breadcrumb.jsx';
 
 const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID;
@@ -22,7 +22,7 @@ const REQUIRED_FIELDS = [
 
 const Checkout = () => {
   const { cartItems, getCartTotal, clearCart } = useCart();
-  const { getUserAddresses, service } = useApi();
+  const { getUserAddresses, service, checkPincode, calculateShippingRate } = useApi();
   const navigate = useNavigate();
 
   const [savedAddresses, setSavedAddresses] = useState([]);
@@ -30,8 +30,7 @@ const Checkout = () => {
   const [isAddressSaved, setIsAddressSaved] = useState(false);
   const [isAddressSelected, setIsAddressSelected] = useState(false);
 
-  const [distance, setDistance] = useState(0);
-  const [deliveryFee, setDeliveryFee] = useState(0);
+  const [deliveryInfo, setDeliveryInfo] = useState(null);
   const [pincodeError, setPincodeError] = useState('');
 
   const [formData, setFormData] = useState({
@@ -81,42 +80,51 @@ const Checkout = () => {
 
   /* -------------------- distance + fee -------------------- */
 
-  const calculateDeliveryFee = useCallback(
+  const checkDeliveryOptions = useCallback(
     async (pincode) => {
       if (!pincode || pincode.length !== 6 || !validatePincode(pincode)) {
-        setDistance(0);
-        setDeliveryFee(0);
+        setDeliveryInfo(null);
         setPincodeError('Invalid pincode');
         return;
       }
 
       try {
-        const res = await service.post('/api/calculate-distance', { pincode });
+        // Calculate total weight from cart items
+        const totalWeight = cartItems.reduce((sum, item) => {
+          return sum + (item.weight || 500) * item.quantity;
+        }, 0);
 
-        if (!res?.success) {
-          setDistance(0);
-          setDeliveryFee(0);
-          setPincodeError('Pincode not serviceable');
+        // Check delivery options using the new API
+        const response = await service.get(`/api/delivery/check/${pincode}?weight=${totalWeight}`);
+        
+        if (!response.success || !response.serviceable) {
+          setDeliveryInfo(null);
+          setPincodeError(response.message || 'Delivery not available to this pincode');
           return;
         }
 
-        setDistance(res.distance);
-        setDeliveryFee(res.fee);
+        setDeliveryInfo({
+          provider: response.provider,
+          providerDisplay: response.providerDisplay,
+          charge: response.charge,
+          eta: response.eta,
+          distance: response.distance,
+          breakdown: response.breakdown
+        });
         setPincodeError('');
-      } catch {
-        setDistance(0);
-        setDeliveryFee(0);
-        setPincodeError('Pincode not serviceable');
+      } catch (error) {
+        setDeliveryInfo(null);
+        setPincodeError('Failed to check delivery options');
       }
     },
-    [service, validatePincode]
+    [service, cartItems, validatePincode]
   );
 
   useEffect(() => {
     if (formData.postcode) {
-      calculateDeliveryFee(formData.postcode);
+      checkDeliveryOptions(formData.postcode);
     }
-  }, [formData.postcode, calculateDeliveryFee]);
+  }, [formData.postcode, checkDeliveryOptions]);
 
   /* ---------------------- addresses ----------------------- */
 
@@ -196,8 +204,8 @@ const Checkout = () => {
       return;
     }
 
-    if (!distance || deliveryFee <= 0) {
-      alert('Invalid delivery location');
+    if (!deliveryInfo || deliveryInfo.charge <= 0) {
+      alert('Invalid delivery location or shipping rate not available');
       return;
     }
 
@@ -205,19 +213,20 @@ const Checkout = () => {
 
     const subtotal = getCartTotal();
     const gst = subtotal * GST_RATE;
-    const totalAmount = subtotal + gst + deliveryFee;
+    const totalAmount = subtotal + gst + deliveryInfo.charge;
 
     const razorpayRes = await service.post('/api/payment/create-order', {
       orderData: {
         userId: userData.user._id,
         addressId,
+        deliveryPincode: formData.postcode,
         items: cartItems.map((i) => ({
           itemId: i._id,
           quantity: i.quantity,
-          price: i.discountPrice
+          price: i.discountPrice,
+          weight: i.weight || 500
         })),
-        distance,
-        deliveryFee
+        paymentMode: 'PREPAID'
       }
     });
 
@@ -283,7 +292,8 @@ const Checkout = () => {
     return (
       REQUIRED_FIELDS.some((f) => !formData[f]?.trim()) ||
       !!pincodeError ||
-      deliveryFee <= 0
+      !deliveryInfo ||
+      deliveryInfo.charge <= 0
     );
   };
 
@@ -291,6 +301,7 @@ const Checkout = () => {
 
   const subtotal = getCartTotal();
   const gst = subtotal * GST_RATE;
+  const deliveryFee = deliveryInfo?.charge || 0;
   const total = subtotal + gst + deliveryFee;
 
   return (
@@ -361,8 +372,7 @@ const Checkout = () => {
                       });
                       setSelectedAddressId('');
                       setIsAddressSelected(false);
-                      setDistance(0);
-                      setDeliveryFee(0);
+                      setDeliveryInfo(null);
                       setPincodeError('');
                     }}
                     className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 whitespace-nowrap"
@@ -545,10 +555,18 @@ const Checkout = () => {
                   <span className="font-medium">₹{gst.toFixed(2)}</span>
                 </div>
                 
-                {distance > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Delivery ({distance.toFixed(1)} km)</span>
-                    <span className="font-medium">₹{deliveryFee.toFixed(2)}</span>
+                {deliveryInfo && (
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Delivery</span>
+                      <span className="font-medium">₹{deliveryInfo.charge.toFixed(2)}</span>
+                    </div>
+                    <div className="text-sm text-gray-500 space-y-1">
+                      <div className="font-medium text-gray-700">{deliveryInfo.providerDisplay}</div>
+                      <div>ETA: {deliveryInfo.eta}</div>
+                      <div>Distance: {deliveryInfo.distance} km</div>
+                      
+                    </div>
                   </div>
                 )}
                 

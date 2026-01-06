@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useApi } from '../../context/ApiContext.jsx';
+import { useApi } from '../../contexts/index.jsx';
 
 const Products = () => {
   const { fetchItems, addItem, updateItem, deleteItem, fetchCategories, getAllSubcategories, searchItems, items, categories, loading } = useApi();
@@ -23,6 +23,7 @@ const Products = () => {
     isBestSeller: false,
     isOnSale: false,
     isPopular: false,
+    weight: 100,
     status: 'active'
   });
   const [selectedImages, setSelectedImages] = useState([]);
@@ -116,16 +117,19 @@ const Products = () => {
         submitData.append('video', selectedVideo);
       }
       
-      if (editingProduct) {
+      if (editingProduct && editingProduct._id) {
+        console.log('Updating product with ID:', editingProduct._id);
         const updatedProduct = await updateItem(editingProduct._id, submitData);
-        // Update local state immediately
+        // Ensure we have the complete updated product data
+        const completeUpdatedProduct = updatedProduct.item || updatedProduct;
         setFilteredItems(prev => prev.map(item => 
-          item._id === editingProduct._id ? updatedProduct : item
+          item._id === editingProduct._id ? completeUpdatedProduct : item
         ));
       } else {
         const newProduct = await addItem(submitData);
-        // Add new product to local state immediately
-        setFilteredItems(prev => [newProduct, ...prev]);
+        // Ensure we have the complete new product data
+        const completeNewProduct = newProduct.item || newProduct;
+        setFilteredItems(prev => [completeNewProduct, ...prev]);
       }
       
       setShowModal(false);
@@ -144,6 +148,12 @@ const Products = () => {
   const handleEdit = (product) => {
     try {
       console.log('Editing product:', product);
+      console.log('Product ID:', product._id);
+      if (!product._id) {
+        console.error('Product ID is missing!');
+        alert('Error: Product ID is missing. Cannot edit product.');
+        return;
+      }
       setEditingProduct(product);
       setFormData({
         name: product.name || '',
@@ -169,6 +179,7 @@ const Products = () => {
         isBestSeller: product.isBestSeller || false,
         isOnSale: product.isOnSale || false,
         isPopular: product.isPopular || false,
+        weight: product.weight || 100,
         status: product.status || 'active'
       });
       
@@ -454,6 +465,22 @@ const Products = () => {
                   />
                 </div>
 
+                {/* Weight Field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Weight (grams) <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="100"
+                    min="1"
+                    value={formData.weight}
+                    onChange={(e) => setFormData({...formData, weight: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
                 {/* Short Desc Field */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -673,13 +700,14 @@ const Products = () => {
                   <th className="px-2 py-3 text-left font-semibold uppercase" style={{width: '15%', minWidth: '70px'}}>Price</th>
                   <th className="px-2 py-3 text-left font-semibold uppercase" style={{width: '15%', minWidth: '70px'}}>Discount</th>
                   <th className="px-2 py-3 text-left font-semibold uppercase" style={{width: '10%', minWidth: '50px'}}>Stock</th>
+                  <th className="px-2 py-3 text-left font-semibold uppercase" style={{width: '10%', minWidth: '60px'}}>Weight</th>
                   <th className="px-2 py-3 text-left font-semibold uppercase" style={{width: '15%', minWidth: '80px'}}>Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {getCurrentPageItems().length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="px-4 py-8 text-center text-gray-500">
+                    <td colSpan="7" className="px-4 py-8 text-center text-gray-500">
                       {searchQuery ? `No products found matching "${searchQuery}"` : 'No products available'}
                     </td>
                   </tr>
@@ -695,6 +723,7 @@ const Products = () => {
                     <td className="px-2 py-3 text-gray-700">₹{product.price}</td>
                     <td className="px-2 py-3 text-gray-700">₹{product.discountPrice || product.price}</td>
                     <td className="px-2 py-3 text-gray-700 text-center">{product.stockQty || 0}</td>
+                    <td className="px-2 py-3 text-gray-700 text-center">{product.weight || 100}g</td>
                     <td className="px-2 py-3">
                       <div className="flex gap-2">
                         <button

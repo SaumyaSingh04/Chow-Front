@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useCart } from "../../context/CartContext";
+import { useCart } from "../../contexts/index.jsx";
 import Breadcrumb from "../../components/Breadcrumb.jsx";
 
 const Cart = () => {
@@ -134,9 +134,7 @@ const Cart = () => {
                       <div className="col-span-2 flex justify-center">
                         <div className="flex border">
                           <button
-                            onClick={() =>
-                              updateQuantity(item._id, item.quantity - 1)
-                            }
+                            onClick={() => updateQuantity(item._id, item.quantity - 1)}
                             className="px-3 border-r hover:bg-gray-100"
                           >
                             -
@@ -145,9 +143,7 @@ const Cart = () => {
                             {item.quantity}
                           </span>
                           <button
-                            onClick={() =>
-                              updateQuantity(item._id, item.quantity + 1)
-                            }
+                            onClick={() => updateQuantity(item._id, item.quantity + 1)}
                             className="px-3 border-l hover:bg-gray-100"
                           >
                             +

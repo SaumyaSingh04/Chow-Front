@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Dashboard from './Dashboard.jsx';
 import Products from './Products.jsx';
 import Categories from './Categories.jsx';
@@ -10,8 +11,16 @@ import SweetDeal from './SweetDeal.jsx';
 import logo from '../../assets/logo.png';
 
 const Admin = () => {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Set active tab based on URL
+  useEffect(() => {
+    if (location.pathname === '/admin/orders') {
+      setActiveTab('orders');
+    }
+  }, [location.pathname]);
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: '🏠' },
@@ -72,7 +81,10 @@ const Admin = () => {
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                setActiveTab(tab.id);
+                setSidebarOpen(false);
+              }}
               className={`w-full flex items-center px-4 sm:px-6 py-3 text-left hover:bg-red-300 text-sm sm:text-base ${
                 activeTab === tab.id
                   ? 'bg-red-500 text-white border-r-4 border-red-600'

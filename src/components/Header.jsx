@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { ShoppingCart, User, Search, Menu, X } from "lucide-react";
-import { useCart } from '../context/CartContext.jsx';
+import { useCart } from '../contexts/index.jsx';
 import logo from '../assets/logo.png';
 
 const Header = () => {

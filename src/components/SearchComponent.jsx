@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useApi } from '../context/ApiContext.jsx';
+import { useApi } from '../contexts/index.jsx';
 
 const SearchComponent = ({ onResults }) => {
   const { search, searchItems, searchCustomers, searchOrders } = useApi();

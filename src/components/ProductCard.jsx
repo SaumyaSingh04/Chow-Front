@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useCart } from '../context/CartContext.jsx';
+import { useCart } from '../contexts/index.jsx';
 
 const ProductCard = ({ product, showSpecialTag = false }) => {
   const { addToCart } = useCart();
@@ -35,9 +35,14 @@ const ProductCard = ({ product, showSpecialTag = false }) => {
               {product.name}
             </h4>
           </Link>
-          <span className="block text-lg font-semibold text-black mb-1">
-            ₹{product.discountPrice}
-          </span>
+          <div className="flex justify-between items-center">
+            <span className="text-lg font-semibold text-black">
+              ₹{product.discountPrice}
+            </span>
+            <span className="text-sm text-gray-500">
+              {product.weight}g
+            </span>
+          </div>
         </div>
 
         {/* Hover Content */}
