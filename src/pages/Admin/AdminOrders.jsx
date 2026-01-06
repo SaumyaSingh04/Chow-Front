@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useApi } from '../../context/ApiContext.jsx';
+import { useApi } from '../../contexts/index.jsx';
 
 const AdminOrders = () => {
   const { getAllOrders, updateOrderStatus, updatePaymentStatus, createShipment, trackOrder } = useApi();

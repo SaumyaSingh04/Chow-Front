@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useCart } from '../../context/CartContext';
+import { useCart } from '../../contexts/index.jsx';
 import { useNavigate } from 'react-router-dom';
-import { useApi } from '../../context/ApiContext.jsx';
+import { useApi } from '../../contexts/index.jsx';
 import Breadcrumb from '../../components/Breadcrumb.jsx';
 
 const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID;

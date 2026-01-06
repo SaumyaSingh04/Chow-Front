@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useApi } from '../../context/ApiContext';
-import { useNotification } from '../../context/NotificationContext';
+import { useApi } from '../../contexts/index.jsx';
+import { useNotification } from '../../contexts/index.jsx';
 
 const SweetDeal = () => {
   const { baseUrl } = useApi();

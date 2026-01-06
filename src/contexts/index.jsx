@@ -1,10 +1,47 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// ============================================================================
+// NOTIFICATION CONTEXT
+// ============================================================================
+const NotificationContext = createContext();
 
+export const useNotification = () => {
+  const context = useContext(NotificationContext);
+  if (!context) {
+    throw new Error('useNotification must be used within NotificationProvider');
+  }
+  return context;
+};
+
+export const NotificationProvider = ({ children }) => {
+  const [notification, setNotification] = useState(null);
+
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  return (
+    <NotificationContext.Provider value={{ showNotification }}>
+      {children}
+      {notification && (
+        <div className={`fixed top-20 right-4 z-[110] px-4 py-3 rounded-lg shadow-lg ${
+          notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+        }`}>
+          {notification.message}
+        </div>
+      )}
+    </NotificationContext.Provider>
+  );
+};
+
+// ============================================================================
+// API CONTEXT
+// ============================================================================
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const ApiContext = createContext();
 
-const useApi = () => {
+export const useApi = () => {
   const context = useContext(ApiContext);
   if (!context) {
     throw new Error('useApi must be used within ApiProvider');
@@ -16,7 +53,6 @@ class ApiService {
   async request(endpoint, options = {}) {
     const url = `${BASE_URL}${endpoint}`;
     const token = localStorage.getItem('token');
-    
     const isFormData = options.body instanceof FormData;
     
     const config = {
@@ -49,41 +85,16 @@ class ApiService {
     }
   }
 
-  get(endpoint) {
-    return this.request(endpoint);
-  }
-
-  post(endpoint, data) {
-    return this.request(endpoint, {
-      method: 'POST',
-      body: data instanceof FormData ? data : JSON.stringify(data),
-    });
-  }
-
-  put(endpoint, data) {
-    return this.request(endpoint, {
-      method: 'PUT',
-      body: data instanceof FormData ? data : JSON.stringify(data),
-    });
-  }
-
-  patch(endpoint, data) {
-    return this.request(endpoint, {
-      method: 'PATCH',
-      body: data instanceof FormData ? data : JSON.stringify(data),
-    });
-  }
-
-  delete(endpoint) {
-    return this.request(endpoint, {
-      method: 'DELETE',
-    });
-  }
+  get(endpoint) { return this.request(endpoint); }
+  post(endpoint, data) { return this.request(endpoint, { method: 'POST', body: data instanceof FormData ? data : JSON.stringify(data) }); }
+  put(endpoint, data) { return this.request(endpoint, { method: 'PUT', body: data instanceof FormData ? data : JSON.stringify(data) }); }
+  patch(endpoint, data) { return this.request(endpoint, { method: 'PATCH', body: data instanceof FormData ? data : JSON.stringify(data) }); }
+  delete(endpoint) { return this.request(endpoint, { method: 'DELETE' }); }
 }
 
 const apiService = new ApiService();
 
-const ApiProvider = ({ children }) => {
+export const ApiProvider = ({ children }) => {
   const [categories, setCategories] = useState([]);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -92,12 +103,7 @@ const ApiProvider = ({ children }) => {
   const api = {
     baseUrl: BASE_URL,
     service: apiService,
-    
-    // State
-    categories,
-    items,
-    loading,
-    dashboardRefreshTrigger,
+    categories, items, loading, dashboardRefreshTrigger,
     
     // Categories
     fetchCategories: async () => {
@@ -113,7 +119,6 @@ const ApiProvider = ({ children }) => {
         setLoading(false);
       }
     },
-    
     getCategoryById: async (id) => {
       try {
         return await apiService.get(`/api/categories/get/${id}`);
@@ -136,7 +141,6 @@ const ApiProvider = ({ children }) => {
         setLoading(false);
       }
     },
-    
     getItemById: async (id) => {
       try {
         return await apiService.get(`/api/items/get/${id}`);
@@ -144,7 +148,6 @@ const ApiProvider = ({ children }) => {
         return null;
       }
     },
-    
     getItemsByCategory: async (categoryId) => {
       try {
         const data = await apiService.get(`/api/items/category/${categoryId}`);
@@ -153,7 +156,6 @@ const ApiProvider = ({ children }) => {
         return [];
       }
     },
-    
     getItemsBySubcategory: async (subcategoryId) => {
       try {
         const allItems = await apiService.get('/api/items/all');
@@ -183,7 +185,6 @@ const ApiProvider = ({ children }) => {
         return [];
       }
     },
-    
     getFeaturedItems: async (type = 'bestseller') => {
       try {
         const data = await apiService.get(`/api/items/featured/${type}`);
@@ -202,7 +203,6 @@ const ApiProvider = ({ children }) => {
         return [];
       }
     },
-    
     getSubcategoriesByCategory: async (categoryId) => {
       try {
         const data = await apiService.get(`/api/subcategories/category/${categoryId}`);
@@ -220,7 +220,6 @@ const ApiProvider = ({ children }) => {
         throw error;
       }
     },
-    
     login: async (credentials) => {
       try {
         return await apiService.post('/api/auth/login', credentials);
@@ -228,7 +227,6 @@ const ApiProvider = ({ children }) => {
         throw error;
       }
     },
-    
     getCurrentUser: async () => {
       try {
         return await apiService.get('/api/auth/me');
@@ -236,7 +234,6 @@ const ApiProvider = ({ children }) => {
         throw error;
       }
     },
-    
     getProfile: async (id) => {
       try {
         return await apiService.get(`/api/auth/profile/${id}`);
@@ -244,7 +241,6 @@ const ApiProvider = ({ children }) => {
         throw error;
       }
     },
-    
     updateProfile: async (id, profileData) => {
       try {
         const response = await apiService.put(`/api/auth/profile/${id}`, profileData);
@@ -263,7 +259,6 @@ const ApiProvider = ({ children }) => {
         return { addresses: [] };
       }
     },
-    
     addUserAddress: async (userId, addressData) => {
       try {
         const response = await apiService.post(`/api/users/${userId}/addresses`, addressData);
@@ -272,7 +267,6 @@ const ApiProvider = ({ children }) => {
         throw error;
       }
     },
-    
     updateUserAddress: async (userId, addressId, addressData) => {
       try {
         const response = await apiService.put(`/api/users/${userId}/addresses/${addressId}`, addressData);
@@ -281,7 +275,6 @@ const ApiProvider = ({ children }) => {
         throw error;
       }
     },
-    
     deleteUserAddress: async (userId, addressId) => {
       try {
         const response = await apiService.delete(`/api/users/${userId}/addresses/${addressId}`);
@@ -299,7 +292,6 @@ const ApiProvider = ({ children }) => {
         throw error;
       }
     },
-    
     updateCategory: async (id, categoryData) => {
       try {
         const response = await apiService.put(`/api/categories/update/${id}`, categoryData);
@@ -308,7 +300,6 @@ const ApiProvider = ({ children }) => {
         throw error;
       }
     },
-    
     deleteCategory: async (id) => {
       try {
         return await apiService.delete(`/api/categories/delete/${id}`);
@@ -316,7 +307,6 @@ const ApiProvider = ({ children }) => {
         throw error;
       }
     },
-    
     getAllCategories: async () => {
       try {
         return await apiService.get('/api/categories/all');
@@ -334,7 +324,6 @@ const ApiProvider = ({ children }) => {
         return { subcategories: [], pagination: { page: 1, limit: 10, total: 0, pages: 0 } };
       }
     },
-    
     getSubcategoryById: async (id) => {
       try {
         return await apiService.get(`/api/subcategories/get/${id}`);
@@ -342,7 +331,6 @@ const ApiProvider = ({ children }) => {
         return null;
       }
     },
-    
     addSubcategory: async (subcategoryData) => {
       try {
         return await apiService.post('/api/subcategories/add', subcategoryData);
@@ -350,7 +338,6 @@ const ApiProvider = ({ children }) => {
         throw error;
       }
     },
-    
     updateSubcategory: async (id, subcategoryData) => {
       try {
         return await apiService.put(`/api/subcategories/update/${id}`, subcategoryData);
@@ -358,7 +345,6 @@ const ApiProvider = ({ children }) => {
         throw error;
       }
     },
-    
     deleteSubcategory: async (id) => {
       try {
         return await apiService.delete(`/api/subcategories/delete/${id}`);
@@ -375,9 +361,6 @@ const ApiProvider = ({ children }) => {
         return [];
       }
     },
-    
-
-    
     addItem: async (itemData) => {
       try {
         return await apiService.post('/api/items/add', itemData);
@@ -385,7 +368,6 @@ const ApiProvider = ({ children }) => {
         throw error;
       }
     },
-    
     updateItem: async (id, itemData) => {
       try {
         return await apiService.put(`/api/items/update/${id}`, itemData);
@@ -393,7 +375,6 @@ const ApiProvider = ({ children }) => {
         throw error;
       }
     },
-    
     deleteItem: async (id) => {
       try {
         return await apiService.delete(`/api/items/delete/${id}`);
@@ -411,7 +392,6 @@ const ApiProvider = ({ children }) => {
         return [];
       }
     },
-    
     searchItems: async (query) => {
       try {
         const data = await apiService.get(`/api/search/items?q=${encodeURIComponent(query)}`);
@@ -420,7 +400,6 @@ const ApiProvider = ({ children }) => {
         return [];
       }
     },
-    
     searchCustomers: async (query) => {
       try {
         const data = await apiService.get(`/api/search/customers?q=${encodeURIComponent(query)}`);
@@ -429,7 +408,6 @@ const ApiProvider = ({ children }) => {
         return [];
       }
     },
-    
     searchOrders: async (query) => {
       try {
         const data = await apiService.get(`/api/search/orders?q=${encodeURIComponent(query)}`);
@@ -447,7 +425,6 @@ const ApiProvider = ({ children }) => {
         throw error;
       }
     },
-    
     getTickets: async (page = 1, limit = 10) => {
       try {
         const data = await apiService.get(`/api/tickets?page=${page}&limit=${limit}`);
@@ -456,7 +433,6 @@ const ApiProvider = ({ children }) => {
         return { tickets: [], pagination: { page: 1, limit: 10, total: 0, pages: 0 } };
       }
     },
-    
     getTicketById: async (id) => {
       try {
         return await apiService.get(`/api/tickets/${id}`);
@@ -464,7 +440,6 @@ const ApiProvider = ({ children }) => {
         return null;
       }
     },
-    
     updateTicket: async (id, ticketData) => {
       try {
         return await apiService.put(`/api/tickets/${id}`, ticketData);
@@ -472,7 +447,6 @@ const ApiProvider = ({ children }) => {
         throw error;
       }
     },
-    
     deleteTicket: async (id) => {
       try {
         return await apiService.delete(`/api/tickets/${id}`);
@@ -490,7 +464,6 @@ const ApiProvider = ({ children }) => {
         const response = await apiService.get('/api/dashboard/stats');
         return response;
       } catch (error) {
-        // If token is invalid, clear localStorage and redirect to login
         if (error.message === 'Invalid token') {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
@@ -499,7 +472,6 @@ const ApiProvider = ({ children }) => {
         return null;
       }
     },
-    
     getAdminDashboard: async () => {
       try {
         return await apiService.get('/admin');
@@ -507,8 +479,6 @@ const ApiProvider = ({ children }) => {
         return null;
       }
     },
-    
-    // Check if user is admin
     isAdmin: (user) => {
       return user && user.role === 'admin';
     },
@@ -522,7 +492,6 @@ const ApiProvider = ({ children }) => {
         return { orders: [], pagination: { page: 1, limit: 10, total: 0, pages: 0 } };
       }
     },
-    
     getFailedOrders: async (page = 1, limit = 10) => {
       try {
         const data = await apiService.get(`/api/orders/failed?page=${page}&limit=${limit}`);
@@ -531,7 +500,6 @@ const ApiProvider = ({ children }) => {
         return { orders: [], pagination: { page: 1, limit: 10, total: 0, pages: 0 } };
       }
     },
-    
     updateOrderStatus: async (orderId, status) => {
       try {
         const response = await apiService.patch(`/api/orders/${orderId}/status`, { status });
@@ -540,11 +508,9 @@ const ApiProvider = ({ children }) => {
         throw error;
       }
     },
-    
     updatePaymentStatus: async (orderId, paymentStatus) => {
       try {
         const response = await apiService.patch(`/api/orders/${orderId}/payment-status`, { paymentStatus });
-        // Trigger dashboard refresh when payment is marked as paid
         if (paymentStatus === 'paid') {
           setDashboardRefreshTrigger(prev => prev + 1);
         }
@@ -553,11 +519,9 @@ const ApiProvider = ({ children }) => {
         throw error;
       }
     },
-    
     refreshDashboard: () => {
       setDashboardRefreshTrigger(prev => prev + 1);
     },
-    
     updateItemStock: async (itemId, quantity) => {
       try {
         const response = await apiService.put(`/api/items/update-stock/${itemId}`, { quantity });
@@ -566,22 +530,16 @@ const ApiProvider = ({ children }) => {
         throw error;
       }
     },
-    
     getMyOrders: async (userId) => {
       try {
-        
-        // Try specific user endpoint first
         try {
           const data = await apiService.get(`/api/orders/my/${userId}`);
           const orders = data.orders || data;
           return orders;
         } catch (specificError) {
-          
-          // Fallback: Get all orders and filter by userId
           const allOrdersData = await apiService.get('/api/orders');
           const allOrders = allOrdersData.orders || allOrdersData;
           
-          // Filter orders by userId
           const userOrders = Array.isArray(allOrders) 
             ? allOrders.filter(order => 
                 (order.userId === userId) || 
@@ -595,8 +553,6 @@ const ApiProvider = ({ children }) => {
         return [];
       }
     },
-    
-
     cleanFailedOrders: async () => {
       try {
         const response = await apiService.post('/api/payment/clean-failed');
@@ -605,11 +561,8 @@ const ApiProvider = ({ children }) => {
         throw error;
       }
     },
-    
     createOrder: async (orderData) => {
       try {
-        
-        // Validate required fields before sending
         if (!orderData.userId) {
           throw new Error('User ID is required');
         }
@@ -645,7 +598,6 @@ const ApiProvider = ({ children }) => {
         return [];
       }
     },
-    
     getActiveSweetDeal: async () => {
       try {
         const data = await apiService.get('/api/sweet-deals/active');
@@ -664,7 +616,6 @@ const ApiProvider = ({ children }) => {
         return { success: false, serviceable: false, message: 'Pincode check failed' };
       }
     },
-
     calculateShippingRate: async (deliveryPincode, weight, paymentMode = 'PREPAID') => {
       try {
         const data = await apiService.post('/api/delhivery/calculate-rate', {
@@ -677,7 +628,6 @@ const ApiProvider = ({ children }) => {
         return { success: false, rate: 0, message: 'Rate calculation failed' };
       }
     },
-
     trackOrder: async (orderId) => {
       try {
         const data = await apiService.get(`/api/delhivery/track-order/${orderId}`);
@@ -686,7 +636,6 @@ const ApiProvider = ({ children }) => {
         return { success: false, message: 'Order tracking failed' };
       }
     },
-
     trackShipment: async (waybill) => {
       try {
         const data = await apiService.get(`/api/delhivery/track/${waybill}`);
@@ -695,7 +644,6 @@ const ApiProvider = ({ children }) => {
         return { success: false, message: 'Shipment tracking failed' };
       }
     },
-
     createShipment: async (orderId) => {
       try {
         const data = await apiService.post('/api/delhivery/create-shipment', { orderId });
@@ -713,4 +661,252 @@ const ApiProvider = ({ children }) => {
   );
 };
 
-export { ApiContext, useApi, ApiProvider };
+// ============================================================================
+// CART CONTEXT
+// ============================================================================
+const CartContext = createContext();
+
+export const useCart = () => {
+  const context = useContext(CartContext);
+  if (!context) {
+    throw new Error('useCart must be used within CartProvider');
+  }
+  return context;
+};
+
+export const CartProvider = ({ children }) => {
+  const { showNotification } = useNotification();
+  const [cartItems, setCartItems] = useState([]);
+  const [currentUserId, setCurrentUserId] = useState(null);
+
+  useEffect(() => {
+    const checkUserStatus = () => {
+      const token = localStorage.getItem('token');
+      const user = localStorage.getItem('user');
+      if (token && user) {
+        try {
+          const userData = JSON.parse(user);
+          const userId = userData.id || userData._id;
+          if (userId !== currentUserId) {
+            setCurrentUserId(userId);
+          }
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+          if (currentUserId !== null) {
+            setCurrentUserId(null);
+          }
+        }
+      } else {
+        if (currentUserId !== null) {
+          setCurrentUserId(null);
+        }
+      }
+    };
+    
+    checkUserStatus();
+    window.addEventListener('storage', checkUserStatus);
+    
+    return () => {
+      window.removeEventListener('storage', checkUserStatus);
+    };
+  }, [currentUserId]);
+
+  useEffect(() => {
+    if (currentUserId) {
+      try {
+        const savedCart = localStorage.getItem(`cart_${currentUserId}`);
+        setCartItems(savedCart ? JSON.parse(savedCart) : []);
+      } catch (error) {
+        console.error('Error loading cart from localStorage:', error);
+        setCartItems([]);
+      }
+    } else {
+      setCartItems([]);
+      try {
+        const savedCart = localStorage.getItem('guest_cart');
+        setCartItems(savedCart ? JSON.parse(savedCart) : []);
+      } catch (error) {
+        console.error('Error loading guest cart from localStorage:', error);
+        setCartItems([]);
+      }
+    }
+  }, [currentUserId]);
+
+  useEffect(() => {
+    if (currentUserId) {
+      try {
+        localStorage.setItem(`cart_${currentUserId}`, JSON.stringify(cartItems));
+      } catch (error) {
+        console.error('Error saving cart to localStorage:', error);
+      }
+    } else {
+      try {
+        localStorage.setItem('guest_cart', JSON.stringify(cartItems));
+      } catch (error) {
+        console.error('Error saving guest cart to localStorage:', error);
+      }
+    }
+  }, [cartItems, currentUserId]);
+
+  const addToCart = (product, quantity = 1) => {
+    setCartItems(prevItems => {
+      const existingItem = prevItems.find(item => item._id === product._id);
+      
+      if (existingItem) {
+        showNotification(`${product.name} quantity updated in cart!`);
+        return prevItems.map(item =>
+          item._id === product._id
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        );
+      } else {
+        showNotification(`${product.name} added to cart!`);
+        return [...prevItems, { ...product, quantity }];
+      }
+    });
+  };
+
+  const removeFromCart = (productId) => {
+    setCartItems(prevItems => {
+      const item = prevItems.find(item => item._id === productId);
+      if (item) {
+        showNotification(`${item.name} removed from cart!`);
+      }
+      return prevItems.filter(item => item._id !== productId);
+    });
+  };
+
+  const updateQuantity = async (productId, quantity, maxStock = null) => {
+    if (quantity <= 0) {
+      removeFromCart(productId);
+      return;
+    }
+    
+    const item = cartItems.find(item => item._id === productId);
+    if (!item) return;
+    
+    let stockLimit = maxStock || item.stockQty || item.stock || item.quantity_available || item.quantityAvailable || item.availableQuantity;
+    
+    if (stockLimit === null || stockLimit === undefined) {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/items/get/${productId}`);
+        if (response.ok) {
+          const productData = await response.json();
+          stockLimit = productData.stockQty || productData.stock || productData.quantity_available || productData.quantityAvailable || productData.availableQuantity || productData.quantity || productData.stockQuantity;
+        }
+      } catch (error) {
+        console.error('Error fetching stock:', error);
+      }
+    }
+    
+    if (stockLimit !== null && stockLimit !== undefined && quantity > stockLimit) {
+      setTimeout(() => {
+        showNotification(`Only ${stockLimit} items available in stock!`, 'error');
+      }, 0);
+      return;
+    }
+    
+    setCartItems(prevItems => {
+      setTimeout(() => {
+        showNotification(`${item.name} quantity updated!`);
+      }, 0);
+      return prevItems.map(cartItem =>
+        cartItem._id === productId ? { ...cartItem, quantity } : cartItem
+      );
+    });
+  };
+
+  const clearCart = () => {
+    setCartItems([]);
+    if (currentUserId) {
+      localStorage.removeItem(`cart_${currentUserId}`);
+    } else {
+      localStorage.removeItem('guest_cart');
+    }
+    showNotification('Cart cleared!');
+  };
+
+  const clearUserCart = () => {
+    if (currentUserId) {
+      localStorage.removeItem(`cart_${currentUserId}`);
+      setCartItems([]);
+    }
+  };
+
+  const handleLogout = () => {
+    if (currentUserId) {
+      localStorage.removeItem(`cart_${currentUserId}`);
+    }
+    localStorage.removeItem('guest_cart');
+    setCartItems([]);
+    setCurrentUserId(null);
+  };
+
+  const transferGuestCartToUser = (userId) => {
+    try {
+      const guestCart = localStorage.getItem('guest_cart');
+      if (guestCart && userId) {
+        const guestItems = JSON.parse(guestCart);
+        if (guestItems.length > 0) {
+          const existingUserCart = localStorage.getItem(`cart_${userId}`);
+          if (existingUserCart) {
+            const existingItems = JSON.parse(existingUserCart);
+            const mergedItems = [...existingItems];
+            
+            guestItems.forEach(guestItem => {
+              const existingIndex = mergedItems.findIndex(item => item._id === guestItem._id);
+              if (existingIndex >= 0) {
+                mergedItems[existingIndex].quantity += guestItem.quantity;
+              } else {
+                mergedItems.push(guestItem);
+              }
+            });
+            
+            localStorage.setItem(`cart_${userId}`, JSON.stringify(mergedItems));
+            setCartItems(mergedItems);
+          } else {
+            localStorage.setItem(`cart_${userId}`, guestCart);
+            setCartItems(guestItems);
+          }
+          
+          localStorage.removeItem('guest_cart');
+          setCurrentUserId(userId);
+        }
+      }
+    } catch (error) {
+      console.error('Error transferring guest cart:', error);
+    }
+  };
+
+  const getCartTotal = () => {
+    return cartItems.reduce((total, item) => total + (item.discountPrice * item.quantity), 0);
+  };
+
+  const getCartItemsCount = () => {
+    return cartItems.reduce((total, item) => total + item.quantity, 0);
+  };
+
+  const value = {
+    cartItems,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    clearUserCart,
+    handleLogout,
+    transferGuestCartToUser,
+    getCartTotal,
+    getCartItemsCount
+  };
+
+  return (
+    <CartContext.Provider value={value}>
+      {children}
+    </CartContext.Provider>
+  );
+};
+
+// ============================================================================
+// EXPORTS
+// ============================================================================
+export { NotificationContext, ApiContext, CartContext };

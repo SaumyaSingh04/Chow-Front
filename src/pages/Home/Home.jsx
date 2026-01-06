@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useApi } from "../../context/ApiContext";
+import { useApi } from "../../contexts/index.jsx";
 import { FaTruck, FaShieldAlt, FaCreditCard, FaHeadset, FaGift, FaBox, FaStar, FaSmile, FaFire, FaTags, FaCrown, FaMagic, FaFolder } from "react-icons/fa";
 import ProductCard from "../../components/ProductCard.jsx";
 import ban1 from "../../assets/ban1.jpg";

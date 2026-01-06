@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useCart } from "../../context/CartContext";
+import { useCart } from "../../contexts/index.jsx";
 import Breadcrumb from "../../components/Breadcrumb.jsx";
 
 const Cart = () => {
