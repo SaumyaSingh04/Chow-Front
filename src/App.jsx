@@ -18,6 +18,7 @@ import Cart from './pages/Cart/Cart';
 import Checkout from './pages/Checkout/Checkout';
 import Orders from './pages/Orders/Orders';
 import Admin from './pages/Admin/Admin';
+import OrderDetails from './pages/Admin/OrderDetails';
 import ProductDetail from './pages/ProductDetail/ProductDetail';
 
 const AppContent = () => {
@@ -53,12 +54,28 @@ const AppContent = () => {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/orders" element={<Orders />} />
 
-          {/* Admin Route */}
+          {/* Admin Routes */}
           <Route
             path="/admin"
             element={
               <ProtectedRoute requireAdmin={true}>
                 <Admin />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/orders"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/order/:orderId"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <OrderDetails />
               </ProtectedRoute>
             }
           />

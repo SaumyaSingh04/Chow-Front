@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Dashboard from './Dashboard.jsx';
 import Products from './Products.jsx';
 import Categories from './Categories.jsx';
@@ -10,8 +11,16 @@ import SweetDeal from './SweetDeal.jsx';
 import logo from '../../assets/logo.png';
 
 const Admin = () => {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Set active tab based on URL
+  useEffect(() => {
+    if (location.pathname === '/admin/orders') {
+      setActiveTab('orders');
+    }
+  }, [location.pathname]);
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: '🏠' },

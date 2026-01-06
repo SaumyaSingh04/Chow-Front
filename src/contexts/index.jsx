@@ -651,6 +651,14 @@ export const ApiProvider = ({ children }) => {
       } catch (error) {
         return { success: false, message: 'Shipment creation failed' };
       }
+    },
+    updateDeliveryStatus: async (orderId, deliveryStatus) => {
+      try {
+        const response = await apiService.patch(`/api/orders/${orderId}/delivery-status`, { deliveryStatus });
+        return response;
+      } catch (error) {
+        throw error;
+      }
     }
   };
 

@@ -117,16 +117,19 @@ const Products = () => {
         submitData.append('video', selectedVideo);
       }
       
-      if (editingProduct) {
+      if (editingProduct && editingProduct._id) {
+        console.log('Updating product with ID:', editingProduct._id);
         const updatedProduct = await updateItem(editingProduct._id, submitData);
-        // Update local state immediately
+        // Ensure we have the complete updated product data
+        const completeUpdatedProduct = updatedProduct.item || updatedProduct;
         setFilteredItems(prev => prev.map(item => 
-          item._id === editingProduct._id ? updatedProduct : item
+          item._id === editingProduct._id ? completeUpdatedProduct : item
         ));
       } else {
         const newProduct = await addItem(submitData);
-        // Add new product to local state immediately
-        setFilteredItems(prev => [newProduct, ...prev]);
+        // Ensure we have the complete new product data
+        const completeNewProduct = newProduct.item || newProduct;
+        setFilteredItems(prev => [completeNewProduct, ...prev]);
       }
       
       setShowModal(false);
@@ -145,6 +148,12 @@ const Products = () => {
   const handleEdit = (product) => {
     try {
       console.log('Editing product:', product);
+      console.log('Product ID:', product._id);
+      if (!product._id) {
+        console.error('Product ID is missing!');
+        alert('Error: Product ID is missing. Cannot edit product.');
+        return;
+      }
       setEditingProduct(product);
       setFormData({
         name: product.name || '',
