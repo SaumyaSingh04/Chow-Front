@@ -6,6 +6,7 @@ const AdminOrders = () => {
   const { getAllOrders, updateOrderStatus, updatePaymentStatus, createShipment, trackOrder, updateDeliveryStatus, service } = useApi();
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
+  const [filteredOrders, setFilteredOrders] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -16,18 +17,44 @@ const AdminOrders = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [trackingData, setTrackingData] = useState({});
+  
+  // Filter states
+  const [filters, setFilters] = useState({
+    deliveryProvider: 'all', // all, delhivery, self
+    orderStatus: 'all', // all, pending, confirmed, shipped, delivered, cancelled
+    paymentStatus: 'all', // all, pending, paid, failed
+    deliveryStatus: 'all', // all, PENDING, SHIPMENT_CREATED, IN_TRANSIT, DELIVERED, RTO
+    dateRange: 'all', // all, today, week, month
+    searchTerm: ''
+  });
+  const [showFilters, setShowFilters] = useState(false);
+  const [stats, setStats] = useState({
+    total: 0,
+    delhivery: 0,
+    self: 0,
+    pending: 0,
+    confirmed: 0,
+    shipped: 0,
+    delivered: 0
+  });
 
   useEffect(() => {
     fetchOrders();
   }, [currentPage]);
 
+  useEffect(() => {
+    applyFilters();
+  }, [orders, filters]);
+
   const fetchOrders = async () => {
     try {
       setLoading(true);
       const response = await getAllOrders(currentPage, itemsPerPage);
-      setOrders(response.orders || []);
+      const ordersData = response.orders || [];
+      setOrders(ordersData);
       setTotalPages(response.pagination?.pages || 1);
       setTotalItems(response.pagination?.total || 0);
+      calculateStats(ordersData);
     } catch (error) {
       console.error('Error fetching orders:', error);
       alert('Error fetching orders. Please check your connection.');
@@ -35,6 +62,105 @@ const AdminOrders = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const calculateStats = (ordersData) => {
+    const stats = {
+      total: ordersData.length,
+      delhivery: ordersData.filter(o => o.deliveryProvider === 'DELHIVERY' || o.shipping?.provider === 'DELHIVERY').length,
+      self: ordersData.filter(o => o.deliveryProvider === 'SELF' || o.shipping?.provider === 'SELF').length,
+      pending: ordersData.filter(o => o.orderStatus === 'pending').length,
+      confirmed: ordersData.filter(o => o.orderStatus === 'confirmed').length,
+      shipped: ordersData.filter(o => o.orderStatus === 'shipped').length,
+      delivered: ordersData.filter(o => o.orderStatus === 'delivered').length
+    };
+    setStats(stats);
+  };
+
+  const applyFilters = () => {
+    let filtered = [...orders];
+
+    // Delivery Provider Filter
+    if (filters.deliveryProvider !== 'all') {
+      filtered = filtered.filter(order => {
+        const provider = order.deliveryProvider || order.shipping?.provider;
+        // Handle both old lowercase and new UPPERCASE values
+        if (filters.deliveryProvider === 'delhivery') {
+          return provider === 'DELHIVERY' || provider === 'delhivery';
+        }
+        if (filters.deliveryProvider === 'self') {
+          return provider === 'SELF' || provider === 'self';
+        }
+        return provider === filters.deliveryProvider;
+      });
+    }
+
+    // Order Status Filter
+    if (filters.orderStatus !== 'all') {
+      filtered = filtered.filter(order => order.orderStatus === filters.orderStatus);
+    }
+
+    // Payment Status Filter
+    if (filters.paymentStatus !== 'all') {
+      filtered = filtered.filter(order => order.paymentStatus === filters.paymentStatus);
+    }
+
+    // Delivery Status Filter
+    if (filters.deliveryStatus !== 'all') {
+      filtered = filtered.filter(order => order.deliveryStatus === filters.deliveryStatus);
+    }
+
+    // Date Range Filter
+    if (filters.dateRange !== 'all') {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      
+      filtered = filtered.filter(order => {
+        const orderDate = new Date(order.orderDate);
+        
+        switch (filters.dateRange) {
+          case 'today':
+            return orderDate >= today;
+          case 'week':
+            const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+            return orderDate >= weekAgo;
+          case 'month':
+            const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+            return orderDate >= monthAgo;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Search Filter
+    if (filters.searchTerm) {
+      const searchLower = filters.searchTerm.toLowerCase();
+      filtered = filtered.filter(order => 
+        order.orderId?.toLowerCase().includes(searchLower) ||
+        order.customerName?.toLowerCase().includes(searchLower) ||
+        order.customerEmail?.toLowerCase().includes(searchLower) ||
+        order.customerPhone?.includes(searchLower) ||
+        order.waybill?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    setFilteredOrders(filtered);
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      deliveryProvider: 'all',
+      orderStatus: 'all',
+      paymentStatus: 'all',
+      deliveryStatus: 'all',
+      dateRange: 'all',
+      searchTerm: ''
+    });
+  };
+
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
   };
 
   const handlePaymentUpdate = async (orderId, paymentStatus) => {
@@ -118,7 +244,7 @@ const AdminOrders = () => {
       setOrders(prevOrders => 
         prevOrders.map(order => 
           order.orderId === orderId 
-            ? { ...order, deliveryStatus, orderStatus: deliveryStatus === 'DELIVERED' ? 'delivered' : deliveryStatus === 'IN_TRANSIT' ? 'shipped' : order.orderStatus }
+            ? { ...order, deliveryStatus, orderStatus: deliveryStatus === 'DELIVERED' ? 'delivered' : deliveryStatus === 'OUT_FOR_DELIVERY' ? 'shipped' : order.orderStatus }
             : order
         )
       );
@@ -130,6 +256,19 @@ const AdminOrders = () => {
       alert(`Error updating delivery status: ${error.message || 'Unknown error occurred'}`);
     } finally {
       setUpdatingOrder(null);
+    }
+  };
+
+  const handleTrackOrder = async (orderId) => {
+    try {
+      const result = await trackOrder(orderId);
+      if (result.success) {
+        setTrackingData(prev => ({ ...prev, [orderId]: result }));
+        alert(`Tracking updated for order ${orderId}`);
+      }
+    } catch (error) {
+      console.error('Error tracking order:', error);
+      alert(`Error tracking order: ${error.message}`);
     }
   };
 
@@ -145,6 +284,16 @@ const AdminOrders = () => {
     }
   };
 
+  const getProviderBadge = (order) => {
+    const provider = order.deliveryProvider || order.shipping?.provider;
+    if (provider === 'DELHIVERY' || provider === 'delhivery') {
+      return <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">🚚 Delhivery</span>;
+    } else if (provider === 'SELF' || provider === 'self') {
+      return <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">🏠 Local</span>;
+    }
+    return <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full font-medium">❓ Unknown</span>;
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -155,29 +304,179 @@ const AdminOrders = () => {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 px-4 pt-4">
-        <h2 className="text-xl md:text-2xl font-bold text-gray-900">Orders Management</h2>
-        <div className="flex gap-2">
-          <button
-            onClick={fetchOrders}
-            className="bg-[#d80a4e] text-white px-4 py-2 rounded hover:bg-[#b8083e]"
-          >
-            Refresh
-          </button>
+      {/* Compact Header */}
+      <div className="bg-white rounded-lg shadow mx-4 mt-4 mb-4">
+        <div className="p-3">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-lg font-bold text-gray-900">Orders Management</h2>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`px-3 py-1 rounded text-sm ${
+                  showFilters ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'
+                }`}
+              >
+                🔍 Filters
+              </button>
+              <button
+                onClick={fetchOrders}
+                className="bg-[#d80a4e] text-white px-3 py-1 rounded text-sm"
+              >
+                🔄 Refresh
+              </button>
+            </div>
+          </div>
+          
+          {/* Compact Stats */}
+          <div className="grid grid-cols-7 gap-2">
+            <div className="bg-gray-50 p-2 rounded text-center">
+              <div className="text-lg font-bold text-gray-800">{stats.total}</div>
+              <div className="text-xs text-gray-600">Total</div>
+            </div>
+            <div className="bg-blue-50 p-2 rounded text-center">
+              <div className="text-lg font-bold text-blue-600">{stats.delhivery}</div>
+              <div className="text-xs text-blue-600">🚚 Del</div>
+            </div>
+            <div className="bg-green-50 p-2 rounded text-center">
+              <div className="text-lg font-bold text-green-600">{stats.self}</div>
+              <div className="text-xs text-green-600">🏠 Local</div>
+            </div>
+            <div className="bg-yellow-50 p-2 rounded text-center">
+              <div className="text-lg font-bold text-yellow-600">{stats.pending}</div>
+              <div className="text-xs text-yellow-600">Pending</div>
+            </div>
+            <div className="bg-blue-50 p-2 rounded text-center">
+              <div className="text-lg font-bold text-blue-600">{stats.confirmed}</div>
+              <div className="text-xs text-blue-600">Confirmed</div>
+            </div>
+            <div className="bg-purple-50 p-2 rounded text-center">
+              <div className="text-lg font-bold text-purple-600">{stats.shipped}</div>
+              <div className="text-xs text-purple-600">Shipped</div>
+            </div>
+            <div className="bg-green-50 p-2 rounded text-center">
+              <div className="text-lg font-bold text-green-600">{stats.delivered}</div>
+              <div className="text-xs text-green-600">Delivered</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {orders.length === 0 ? (
+      {/* Filters Panel */}
+      {showFilters && (
+        <div className="bg-white rounded-lg shadow mx-4 mb-4">
+          <div className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+              {/* Search */}
+              <div className="xl:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                <input
+                  type="text"
+                  placeholder="Order ID, Customer, Phone, Waybill..."
+                  value={filters.searchTerm}
+                  onChange={(e) => handleFilterChange('searchTerm', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              
+              {/* Delivery Provider */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Provider</label>
+                <select
+                  value={filters.deliveryProvider}
+                  onChange={(e) => handleFilterChange('deliveryProvider', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="all">All Providers</option>
+                  <option value="delhivery">🚚 Delhivery</option>
+                  <option value="self">🏠 Local Delivery</option>
+                </select>
+              </div>
+              
+              {/* Order Status */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Order Status</label>
+                <select
+                  value={filters.orderStatus}
+                  onChange={(e) => handleFilterChange('orderStatus', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="all">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="shipped">Shipped</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+              
+              {/* Payment Status */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Status</label>
+                <select
+                  value={filters.paymentStatus}
+                  onChange={(e) => handleFilterChange('paymentStatus', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="all">All Payments</option>
+                  <option value="pending">Pending</option>
+                  <option value="paid">Paid</option>
+                  <option value="failed">Failed</option>
+                </select>
+              </div>
+              
+              {/* Date Range */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+                <select
+                  value={filters.dateRange}
+                  onChange={(e) => handleFilterChange('dateRange', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="all">All Time</option>
+                  <option value="today">Today</option>
+                  <option value="week">Last 7 Days</option>
+                  <option value="month">Last 30 Days</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className="flex justify-between items-center mt-4 pt-4 border-t">
+              <div className="text-sm text-gray-600">
+                Showing {filteredOrders.length} of {orders.length} orders
+              </div>
+              <button
+                onClick={resetFilters}
+                className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 font-medium"
+              >
+                Reset Filters
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {filteredOrders.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-500">No orders found</p>
+          <p className="text-gray-500">
+            {orders.length === 0 ? 'No orders found' : 'No orders match the current filters'}
+          </p>
+          {orders.length > 0 && (
+            <button
+              onClick={resetFilters}
+              className="mt-2 text-blue-500 hover:text-blue-700 text-sm"
+            >
+              Clear filters to see all orders
+            </button>
+          )}
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow mx-4 mb-4 flex-1 min-h-0">
           <div className="h-full overflow-auto">
-            <table className="min-w-[1800px] w-full">
+            <table className="min-w-[2000px] w-full">
               <thead className="bg-[#d80a4e] text-white sticky top-0 z-10">
                 <tr>
                   <th className="px-2 py-3 text-left text-sm font-semibold uppercase min-w-[100px]">Order ID</th>
+                  <th className="px-2 py-3 text-left text-sm font-semibold uppercase min-w-[120px]">Provider</th>
                   <th className="px-2 py-3 text-left text-sm font-semibold uppercase min-w-[150px]">Customer</th>
                   <th className="px-2 py-3 text-left text-sm font-semibold uppercase min-w-[200px]">Address</th>
                   <th className="px-2 py-3 text-left text-sm font-semibold uppercase min-w-[300px]">Items</th>
@@ -191,199 +490,233 @@ const AdminOrders = () => {
                   <th className="px-2 py-3 text-left text-sm font-semibold uppercase min-w-[60px]">Distance</th>
                   <th className="px-2 py-3 text-left text-sm font-semibold uppercase min-w-[80px]">Weight</th>
                   <th className="px-2 py-3 text-left text-sm font-semibold uppercase min-w-[100px]">Delivery Status</th>
-                  <th className="px-2 py-3 text-left text-sm font-semibold uppercase min-w-[100px]">Payment Mode</th>
+                  <th className="px-2 py-3 text-left text-sm font-semibold uppercase min-w-[100px]">Waybill</th>
                   <th className="px-2 py-3 text-left text-sm font-semibold uppercase min-w-[150px]">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {orders.map((order, index) => (
-                  <tr key={order.orderId} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50`}>
-                    <td className="px-2 py-2 text-sm font-medium text-gray-900">
-                      #{order.orderId?.slice(-8)}
-                    </td>
-                    <td className="px-2 py-2 text-sm text-gray-700">
-                      <div className="font-medium">{order.customerName}</div>
-                      <div className="text-xs text-gray-500">{order.customerEmail}</div>
-                      <div className="text-xs text-gray-500">{order.customerPhone}</div>
-                    </td>
-                    <td className="px-2 py-2 text-sm text-gray-700">
-                      <div className="max-w-[200px] truncate" title={order.deliveryAddress}>
-                        {order.deliveryAddress || 'N/A'}
-                      </div>
-                    </td>
-                    <td className="px-2 py-2 text-sm text-gray-700">
-                      <div className="max-w-[300px] truncate" title={order.itemsString}>
-                        {order.itemsString}
-                      </div>
-                    </td>
-                    <td className="px-2 py-2 text-sm text-gray-700">
-                      ₹{(() => {
-                        const subtotal = order.items?.reduce((sum, item) => sum + (item.price * item.quantity), 0) || 0;
-                        return subtotal.toFixed(2);
-                      })()}
-                    </td>
-                    <td className="px-2 py-2 text-sm text-gray-700">
-                      ₹{(() => {
-                        const subtotal = order.items?.reduce((sum, item) => sum + (item.price * item.quantity), 0) || 0;
-                        return (subtotal * 0.05).toFixed(2);
-                      })()}
-                    </td>
-                    <td className="px-2 py-2 text-sm text-gray-700">
-                      ₹{(order.shipping?.total || 0).toFixed(2)}
-                    </td>
-                    <td className="px-2 py-2 text-sm text-gray-700 font-semibold">
-                      ₹{(order.totalAmount || 0).toFixed(2)}
-                    </td>
-                    <td className="px-2 py-2 text-sm">
-                      <span className={`px-2 py-1 rounded-full text-white text-xs font-medium ${getStatusColor(order.orderStatus)}`}>
-                        {order.orderStatus?.charAt(0).toUpperCase() + order.orderStatus?.slice(1)}
-                      </span>
-                    </td>
-                    <td className="px-2 py-2 text-sm">
-                      <span className={`px-2 py-1 rounded-full text-white text-xs font-medium ${
-                        order.paymentStatus === 'paid' ? 'bg-green-500' : 
-                        order.paymentStatus === 'failed' ? 'bg-red-500' : 'bg-yellow-500'
-                      }`}>
-                        {order.paymentStatus?.charAt(0).toUpperCase() + order.paymentStatus?.slice(1)}
-                      </span>
-                    </td>
-                    <td className="px-2 py-2 text-sm text-gray-700">
-                      {new Date(order.orderDate).toLocaleDateString()}
-                    </td>
-                    <td className="px-2 py-2 text-sm text-gray-700">
-                      {order.distance || 0} km
-                    </td>
-                    <td className="px-2 py-2 text-sm text-gray-700">
-                      {order.totalWeight || 0}g
-                    </td>
-                    <td className="px-2 py-2 text-sm">
-                      <span className={`px-2 py-1 rounded-full text-white text-xs font-medium ${
-                        order.deliveryStatus === 'DELIVERED' ? 'bg-green-500' :
-                        order.deliveryStatus === 'IN_TRANSIT' ? 'bg-blue-500' :
-                        order.deliveryStatus === 'SHIPMENT_CREATED' ? 'bg-purple-500' :
-                        order.deliveryStatus === 'PENDING' ? 'bg-yellow-500' :
-                        order.deliveryStatus === 'RTO' ? 'bg-red-500' : 'bg-gray-500'
-                      }`}>
-                        {order.deliveryStatus || 'N/A'}
-                      </span>
-                    </td>
-                    <td className="px-2 py-2 text-sm text-gray-700">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        order.paymentMode === 'PREPAID' ? 'bg-green-100 text-green-800' :
-                        order.paymentMode === 'COD' ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {order.paymentMode || 'N/A'}
-                      </span>
-                    </td>
-                    <td className="px-2 py-2 text-sm">
-                      <div className="flex flex-col gap-1">
-                        {order.paymentStatus === 'pending' && (
-                          <button
-                            onClick={() => handlePaymentUpdate(order.orderId, 'paid')}
-                            disabled={updatingOrder === order.orderId}
-                            className="bg-emerald-500 text-white px-2 py-1 rounded text-xs hover:bg-emerald-600 disabled:opacity-50"
-                          >
-                            {updatingOrder === order.orderId ? 'Updating...' : 'Mark Paid'}
-                          </button>
+                {filteredOrders.map((order, index) => {
+                  const provider = order.deliveryProvider || order.shipping?.provider;
+                  return (
+                    <tr key={order.orderId} className={`${
+                      index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                    } hover:bg-blue-50 ${
+                      (provider === 'DELHIVERY' || provider === 'delhivery') ? 'border-l-4 border-l-blue-400' : 'border-l-4 border-l-green-400'
+                    }`}>
+                      <td className="px-2 py-2 text-sm font-medium text-gray-900">
+                        #{order.orderId?.slice(-8)}
+                      </td>
+                      <td className="px-2 py-2 text-sm">
+                        {getProviderBadge(order)}
+                      </td>
+                      <td className="px-2 py-2 text-sm text-gray-700">
+                        <div className="font-medium">{order.customerName}</div>
+                        <div className="text-xs text-gray-500">{order.customerEmail}</div>
+                        <div className="text-xs text-gray-500">{order.customerPhone}</div>
+                      </td>
+                      <td className="px-2 py-2 text-sm text-gray-700">
+                        <div className="max-w-[200px] truncate" title={order.deliveryAddress}>
+                          {order.deliveryAddress || 'N/A'}
+                        </div>
+                      </td>
+                      <td className="px-2 py-2 text-sm text-gray-700">
+                        <div className="max-w-[300px] truncate" title={order.itemsString}>
+                          {order.itemsString}
+                        </div>
+                      </td>
+                      <td className="px-2 py-2 text-sm text-gray-700">
+                        ₹{(() => {
+                          const subtotal = order.items?.reduce((sum, item) => sum + (item.price * item.quantity), 0) || 0;
+                          return subtotal.toFixed(2);
+                        })()}
+                      </td>
+                      <td className="px-2 py-2 text-sm text-gray-700">
+                        ₹{(() => {
+                          const subtotal = order.items?.reduce((sum, item) => sum + (item.price * item.quantity), 0) || 0;
+                          return (subtotal * 0.05).toFixed(2);
+                        })()}
+                      </td>
+                      <td className="px-2 py-2 text-sm text-gray-700">
+                        ₹{(order.shipping?.total || 0).toFixed(2)}
+                      </td>
+                      <td className="px-2 py-2 text-sm text-gray-700 font-semibold">
+                        ₹{(order.totalAmount || 0).toFixed(2)}
+                      </td>
+                      <td className="px-2 py-2 text-sm">
+                        <span className={`px-2 py-1 rounded-full text-white text-xs font-medium ${getStatusColor(order.orderStatus)}`}>
+                          {order.orderStatus?.charAt(0).toUpperCase() + order.orderStatus?.slice(1)}
+                        </span>
+                      </td>
+                      <td className="px-2 py-2 text-sm">
+                        <span className={`px-2 py-1 rounded-full text-white text-xs font-medium ${
+                          order.paymentStatus === 'paid' ? 'bg-green-500' : 
+                          order.paymentStatus === 'failed' ? 'bg-red-500' : 'bg-yellow-500'
+                        }`}>
+                          {order.paymentStatus?.charAt(0).toUpperCase() + order.paymentStatus?.slice(1)}
+                        </span>
+                      </td>
+                      <td className="px-2 py-2 text-sm text-gray-700">
+                        {new Date(order.orderDate).toLocaleDateString()}
+                      </td>
+                      <td className="px-2 py-2 text-sm text-gray-700">
+                        {order.distance || 0} km
+                      </td>
+                      <td className="px-2 py-2 text-sm text-gray-700">
+                        {order.totalWeight || 0}g
+                      </td>
+                      <td className="px-2 py-2 text-sm">
+                        <span className={`px-2 py-1 rounded-full text-white text-xs font-medium ${
+                          order.deliveryStatus === 'DELIVERED' ? 'bg-green-500' :
+                          order.deliveryStatus === 'OUT_FOR_DELIVERY' ? 'bg-blue-500' :
+                          order.deliveryStatus === 'SHIPMENT_CREATED' ? 'bg-purple-500' :
+                          order.deliveryStatus === 'PENDING' ? 'bg-yellow-500' :
+                          order.deliveryStatus === 'RTO' ? 'bg-red-500' : 'bg-gray-500'
+                        }`}>
+                          {order.deliveryStatus || 'N/A'}
+                        </span>
+                      </td>
+                      <td className="px-2 py-2 text-sm text-gray-700">
+                        {order.waybill ? (
+                          <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded">
+                            {order.waybill}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 text-xs">No waybill</span>
                         )}
-                        {order.orderStatus === 'pending' && (
-                          <button
-                            onClick={() => handleStatusUpdate(order.orderId, 'confirmed')}
-                            disabled={updatingOrder === order.orderId}
-                            className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600 disabled:opacity-50"
-                          >
-                            {updatingOrder === order.orderId ? 'Updating...' : 'Confirm'}
-                          </button>
-                        )}
-                        
-                        {/* Self-delivery orders (GKP) - Manual shipment buttons */}
-                        {order.shipping?.provider === 'self' && order.orderStatus === 'confirmed' && order.paymentStatus === 'paid' && (
-                          <>
+                      </td>
+                      <td className="px-2 py-2 text-sm">
+                        <div className="flex flex-col gap-1">
+                          {/* Payment Actions */}
+                          {order.paymentStatus === 'pending' && (
                             <button
-                              onClick={() => handleDeliveryStatusUpdate(order.orderId, 'IN_TRANSIT')}
+                              onClick={() => handlePaymentUpdate(order.orderId, 'paid')}
+                              disabled={updatingOrder === order.orderId}
+                              className="bg-emerald-500 text-white px-2 py-1 rounded text-xs hover:bg-emerald-600 disabled:opacity-50"
+                            >
+                              {updatingOrder === order.orderId ? 'Updating...' : 'Mark Paid'}
+                            </button>
+                          )}
+                          
+                          {/* Order Status Actions */}
+                          {order.orderStatus === 'pending' && (
+                            <button
+                              onClick={() => handleStatusUpdate(order.orderId, 'confirmed')}
                               disabled={updatingOrder === order.orderId}
                               className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600 disabled:opacity-50"
                             >
-                              {updatingOrder === order.orderId ? 'Updating...' : 'Mark Shipped'}
+                              {updatingOrder === order.orderId ? 'Updating...' : 'Confirm'}
+                            </button>
+                          )}
+                          
+                          {/* Self-delivery (Local) Actions */}
+                          {(provider === 'SELF' || provider === 'self') && order.orderStatus === 'confirmed' && order.paymentStatus === 'paid' && (
+                            <>
+                              <div className="text-xs text-green-600 font-medium mb-1">🏠 Local Delivery</div>
+                              <button
+                                onClick={() => handleDeliveryStatusUpdate(order.orderId, 'OUT_FOR_DELIVERY')}
+                                disabled={updatingOrder === order.orderId}
+                                className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600 disabled:opacity-50"
+                              >
+                                {updatingOrder === order.orderId ? 'Updating...' : 'Mark Out for Delivery'}
+                              </button>
+                              <button
+                                onClick={() => handleDeliveryStatusUpdate(order.orderId, 'DELIVERED')}
+                                disabled={updatingOrder === order.orderId}
+                                className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600 disabled:opacity-50"
+                              >
+                                {updatingOrder === order.orderId ? 'Updating...' : 'Mark Delivered'}
+                              </button>
+                            </>
+                          )}
+                          
+                          {/* Self-delivery - Out for Delivery Actions */}
+                          {(provider === 'SELF' || provider === 'self') && order.deliveryStatus === 'OUT_FOR_DELIVERY' && (
+                            <>
+                              <div className="text-xs text-green-600 font-medium mb-1">🏠 Out for Delivery</div>
+                              <button
+                                onClick={() => handleDeliveryStatusUpdate(order.orderId, 'DELIVERED')}
+                                disabled={updatingOrder === order.orderId}
+                                className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600 disabled:opacity-50"
+                              >
+                                {updatingOrder === order.orderId ? 'Updating...' : 'Mark Delivered'}
+                              </button>
+                            </>
+                          )}
+                          
+                          {/* Delhivery Actions */}
+                          {(provider === 'DELHIVERY' || provider === 'delhivery') && order.orderStatus === 'confirmed' && order.paymentStatus === 'paid' && !order.waybill && (
+                            <>
+                              <div className="text-xs text-blue-600 font-medium mb-1">🚚 Delhivery</div>
+                              <div className="text-xs text-gray-500 italic bg-blue-50 px-2 py-1 rounded">
+                                Auto-shipment pending
+                              </div>
+                              <button
+                                onClick={() => handleCreateShipment(order.orderId)}
+                                disabled={updatingOrder === order.orderId}
+                                className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600 disabled:opacity-50"
+                              >
+                                {updatingOrder === order.orderId ? 'Creating...' : 'Force Create Shipment'}
+                              </button>
+                            </>
+                          )}
+                          
+                          {/* Delhivery Tracking */}
+                          {(provider === 'DELHIVERY' || provider === 'delhivery') && order.waybill && (
+                            <>
+                              <div className="text-xs text-blue-600 font-medium mb-1">🚚 Delhivery Active</div>
+                              <button
+                                onClick={() => handleTrackOrder(order.orderId)}
+                                className="bg-cyan-500 text-white px-2 py-1 rounded text-xs hover:bg-cyan-600"
+                              >
+                                Track Shipment
+                              </button>
+                            </>
+                          )}
+                          
+                          {/* Universal Actions */}
+                          <div className="border-t pt-1 mt-1">
+                            <button
+                              onClick={() => {
+                                setSelectedOrder(order);
+                                setShowPaymentModal(true);
+                              }}
+                              className="bg-purple-500 text-white px-2 py-1 rounded text-xs hover:bg-purple-600 mb-1 w-full"
+                            >
+                              Payment Details
                             </button>
                             <button
-                              onClick={() => handleDeliveryStatusUpdate(order.orderId, 'DELIVERED')}
-                              disabled={updatingOrder === order.orderId}
-                              className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600 disabled:opacity-50"
+                              onClick={() => {
+                                setSelectedOrder(order);
+                                setShowOrderModal(true);
+                              }}
+                              className="bg-indigo-500 text-white px-2 py-1 rounded text-xs hover:bg-indigo-600 mb-1 w-full"
                             >
-                              {updatingOrder === order.orderId ? 'Updating...' : 'Mark Delivered'}
+                              Order Details
                             </button>
-                          </>
-                        )}
-                        
-                        {/* Self-delivery orders - Additional status buttons */}
-                        {order.shipping?.provider === 'self' && order.deliveryStatus === 'IN_TRANSIT' && (
-                          <button
-                            onClick={() => handleDeliveryStatusUpdate(order.orderId, 'DELIVERED')}
-                            disabled={updatingOrder === order.orderId}
-                            className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600 disabled:opacity-50"
-                          >
-                            {updatingOrder === order.orderId ? 'Updating...' : 'Mark Delivered'}
-                          </button>
-                        )}
-                        
-                        {/* Delhivery orders - Auto-managed, no manual buttons */}
-                        {order.shipping?.provider === 'delhivery' && order.orderStatus === 'confirmed' && order.paymentStatus === 'paid' && !order.waybill && (
-                          <div className="text-xs text-gray-500 italic">
-                            Auto-shipment via Delhivery
+                            <button
+                              onClick={() => navigate(`/admin/order/${order.orderId}`)}
+                              className="bg-teal-500 text-white px-2 py-1 rounded text-xs hover:bg-teal-600 w-full"
+                            >
+                              Full Details
+                            </button>
                           </div>
-                        )}
-                        
-                        {/* Delhivery tracking */}
-                        {order.shipping?.provider === 'delhivery' && order.waybill && (
-                          <button
-                            onClick={() => handleTrackOrder(order.orderId)}
-                            className="bg-cyan-500 text-white px-2 py-1 rounded text-xs hover:bg-cyan-600"
-                          >
-                            Track Delhivery
-                          </button>
-                        )}
-                        
-                        <button
-                          onClick={() => {
-                            setSelectedOrder(order);
-                            setShowPaymentModal(true);
-                          }}
-                          className="bg-purple-500 text-white px-2 py-1 rounded text-xs hover:bg-purple-600"
-                        >
-                          Payment Details
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedOrder(order);
-                            setShowOrderModal(true);
-                          }}
-                          className="bg-indigo-500 text-white px-2 py-1 rounded text-xs hover:bg-indigo-600"
-                        >
-                          Order Details
-                        </button>
-                        <button
-                          onClick={() => navigate(`/admin/order/${order.orderId}`)}
-                          className="bg-teal-500 text-white px-2 py-1 rounded text-xs hover:bg-teal-600"
-                        >
-                          Full Details
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         </div>
       )}
-      
       {/* Pagination */}
       <div className="bg-white rounded-lg shadow mx-4 mb-4">
         <div className="bg-white px-3 md:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center text-xs md:text-sm text-gray-700 gap-2 sm:gap-0">
             <span>Items per page: {itemsPerPage}</span>
             <span className="sm:ml-8">{(currentPage - 1) * itemsPerPage + 1} – {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems}</span>
+            <span className="sm:ml-4 text-blue-600">Filtered: {filteredOrders.length}</span>
           </div>
           <div className="flex items-center justify-center sm:justify-end space-x-2">
             <button
@@ -587,7 +920,17 @@ const AdminOrders = () => {
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="text-indigo-700 font-medium">Provider</span>
-                      <span className="text-indigo-900 capitalize">{selectedOrder.shipping?.provider || selectedOrder.deliveryProvider || 'N/A'}</span>
+                      <div className="flex items-center gap-2">
+                        {(() => {
+                          const provider = selectedOrder.deliveryProvider || selectedOrder.shipping?.provider;
+                          if (provider === 'DELHIVERY' || provider === 'delhivery') {
+                            return <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">🚚 Delhivery</span>;
+                          } else if (provider === 'SELF' || provider === 'self') {
+                            return <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">🏠 Local</span>;
+                          }
+                          return <span className="text-indigo-900 capitalize">{provider || 'N/A'}</span>;
+                        })()} 
+                      </div>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-indigo-700 font-medium">Status</span>
@@ -615,6 +958,11 @@ const AdminOrders = () => {
                       <div>
                         <span className="text-indigo-700 font-medium block">Waybill</span>
                         <span className="text-indigo-900 font-mono text-xs bg-white px-2 py-1 rounded">{selectedOrder.waybill}</span>
+                      </div>
+                    )}
+                    {!selectedOrder.waybill && (selectedOrder.deliveryProvider === 'SELF' || selectedOrder.deliveryProvider === 'self' || selectedOrder.shipping?.provider === 'SELF' || selectedOrder.shipping?.provider === 'self') && (
+                      <div className="bg-green-50 p-2 rounded border border-green-200">
+                        <span className="text-green-700 text-xs font-medium">🏠 Local delivery - No waybill required</span>
                       </div>
                     )}
                   </div>
